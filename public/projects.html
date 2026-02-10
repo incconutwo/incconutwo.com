@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Update CSP to allow source maps from CDNs -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net;">
+  
+  <!-- SEO Meta Tags -->
+  <title>My Projects — incconu_two</title>
+  <meta name="description" content="Browser extensions and web projects by incconu_two. Featuring X/Twitter Country Flags & Blocker, Aurora for ChatGPT/Grok/Gemini, and more.">
+  <meta name="author" content="incconu_two">
+  <meta name="keywords" content="incconu_two, browser extensions, Chrome extensions, Twitter flags, Aurora, ChatGPT, Gemini">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Projects — incconu_two">
+  <meta property="og:description" content="Browser extensions and web projects I've built and shipped.">
+  <meta property="og:type" content="website">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/pages/projects.css">
+  
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body class="page-projects">
+
+  <!-- Back to Home Link -->
+  <a href="./" class="back-link">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    <span>Home</span>
+  </a>
+
+  <!-- Custom Cursor -->
+  <div class="custom-cursor" id="custom-cursor"></div>
+
+  <main class="main-content">
+    
+    <!-- Projects Section -->
+    <section class="projects-section">
+      
+      <!-- Section Header -->
+      <header class="projects-header">
+        <h1 class="projects-title">
+          <span>MY</span>
+          <span class="text-accent">PROJECTS</span>
+        </h1>
+        <p class="projects-subtitle">Things I built and shipped.</p>
+      </header>
+
+      <!-- Projects Grid (populated by JS) -->
+      <div class="projects-grid" id="projectsGrid">
+        <!-- Cards rendered dynamically -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Scripts -->
+  <!-- GSAP (already used on main site) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
+  <!-- Projects Page Script -->
+  <script src="js/pages/projects.js"></script>
+  
+  <!-- Minimal cursor script (reused pattern) -->
+  <script>
+    (function() {
+      const cursor = document.getElementById('custom-cursor');
+      if (!cursor) return;
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        cursor.style.display = 'none';
+        return;
+      }
+      document.body.classList.add('custom-cursor-active');
+      let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+      document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+      function animate() {
+        cursorX += (mouseX - cursorX) * 0.15;
+        cursorY += (mouseY - cursorY) * 0.15;
+        cursor.style.left = cursorX + 'px';
+        cursor.style.top = cursorY + 'px';
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      // Event delegation for hover effects (works for dynamic elements)
+      document.addEventListener('mouseover', (e) => {
+        if (e.target.closest('a, button, .project-card, .project-btn')) {
+          cursor.classList.add('hovering');
+        }
+      });
+
+      document.addEventListener('mouseout', (e) => {
+        if (e.target.closest('a, button, .project-card, .project-btn')) {
+          cursor.classList.remove('hovering');
+        }
+      });
+    })();
+  </script>
+  
+</body>
+</html>

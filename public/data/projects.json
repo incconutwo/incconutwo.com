@@ -1,0 +1,90 @@
+[
+  {
+    "id": "twitter-flags",
+    "featured": true,
+    "title": "X/Twitter Country Flags & Blocker",
+    "shortDescription": "\"This is my biggest project yet, with about 900 weekly users and 250 daily.",
+    "longDescription": "Extension description: This extension adds a country flag emoji next to usernames on your timeline, letting you instantly see the account's location context. It also features a powerful \"Block by Country\" mode to automatically hide tweets from specific regions.\"",
+    "links": [
+      {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla", "kind": "chrome"},
+      {"label": "GitHub", "url": "https://github.com/incconutwo/twitter-account-location-in-username", "kind": "github"}
+    ],
+    "stats": {"weeklyUsers": 900, "dailyUsers": 250},
+    "image": "assets/images/projects/twitter-flags.webp"
+  },
+  {
+    "id": "personal-website",
+    "featured": false,
+    "title": "This website (＾∀＾)",
+    "shortDescription": "This website (＾∀＾)",
+    "longDescription": "This website (＾∀＾)",
+    "links": [
+      {"label": "Link", "url": "https://temp.com", "kind": "external"}
+    ],
+    "stats": null,
+    "image": null
+  },
+  {
+    "id": "ai-overview-disabler",
+    "featured": false,
+    "title": "Google AI Overview Disabler",
+    "shortDescription": "\"A smaller, unsuccessful project, but they say a winner is just a loser that tried one more time (*^ω^).",
+    "longDescription": "Project description: Automatically switches to Google Web results to disable AI Overview.\"",
+    "stamp": "FAILED",
+    "links": [
+      {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/google-ai-overview-disabl/oomhgmbdfkjilamcidkljlhcjogjbkeb", "kind": "chrome"},
+      {"label": "GitHub", "url": "https://github.com/incconutwo/Google-AI-Overview-Disabler", "kind": "github"}
+    ],
+    "stats": null,
+    "image": "assets/images/projects/ai-disabler.webp"
+  },
+  {
+    "id": "math-explorer",
+    "featured": false,
+    "title": "My Math Explorer",
+    "shortDescription": "A math website I made for school for a geometry lesson, where you can choose between different geometric shapes to view in 3D, while demonstrating some theoretical relations in 3D for the student to see.",
+    "longDescription": "A math website I made for school for a geometry lesson, where you can choose between different geometric shapes to view in 3D, while demonstrating some theoretical relations in 3D for the student to see.",
+    "links": [
+      {"label": "GitHub", "url": "https://github.com/incconutwo/my-math-explorer", "kind": "github"},
+      {"label": "Live Demo", "url": "https://incconutwomathproject.netlify.app", "kind": "external"}
+    ],
+    "stats": null,
+    "image": "assets/images/projects/math-explorer.webp"
+  },
+  {
+    "id": "aurora-chatgpt",
+    "featured": false,
+    "title": "Aurora for ChatGPT",
+    "shortDescription": "The project Aurora for ChatGPT, launched in 2025, provides an ambient blurred background under the ChatGPT UI, enabling users to personalize their experience with visual enhancements while maintaining functionality.",
+    "longDescription": "The project Aurora for ChatGPT, launched in 2025, provides an ambient blurred background under the ChatGPT UI, enabling users to personalize their experience with visual enhancements while maintaining functionality.",
+    "links": [
+      {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-ChatGPT", "kind": "github"}
+    ],
+    "stats": null,
+    "image": "assets/images/projects/aurora-chatgpt.webp"
+  },
+  {
+    "id": "aurora-grok",
+    "featured": false,
+    "title": "Aurora for Grok",
+    "shortDescription": "Similarly to Aurora for ChatGPT, Aurora for Grok, released in November 2025, extends these features to the Grok AI website, allowing selection among different aurora visuals or custom uploads, and is available as a Firefox extension.",
+    "longDescription": "Similarly to Aurora for ChatGPT, Aurora for Grok, released in November 2025, extends these features to the Grok AI website, allowing selection among different aurora visuals or custom uploads, and is available as a Firefox extension.",
+    "links": [
+      {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-Grok", "kind": "github"}
+    ],
+    "stats": null,
+    "image": "assets/images/projects/aurora-grok.webp"
+  },
+  {
+    "id": "aurora-gemini",
+    "featured": false,
+    "title": "Aurora for Gemini",
+    "shortDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release. It features glassmorphism-style backgrounds designed to wrap the Gemini interface in soft, glassy aurora effects, maintaining a calm and visually engaging chat environment.",
+    "longDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release. It features glassmorphism-style backgrounds designed to wrap the Gemini interface in soft, glassy aurora effects, maintaining a calm and visually engaging chat environment.",
+    "links": [
+      {"label": "Patreon", "url": "https://www.patreon.com/14488985/join", "kind": "external"}
+    ],
+    "stats": null,
+    "image": "assets/images/projects/aurora-gemini.webp"
+  }
+]

@@ -1,0 +1,133 @@
+/* ============================================
+   LAYOUT SYSTEM
+   Grid, Flexbox, and Positioning
+   ============================================ */
+
+/* Base body setup */
+body {
+  background-color: var(--color-bg-primary);
+  overflow-x: hidden;
+}
+
+/* Main Content Container */
+.main-content {
+  position: relative;
+  z-index: var(--z-content);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content wrapper with max-width */
+.content-wrapper {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  padding: 0 var(--content-padding);
+}
+
+/* -------- LANDING PAGE LAYOUT -------- */
+
+/* Hero Section - Full viewport split */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--space-16) var(--content-padding);
+}
+
+.hero-container {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: var(--split-left) var(--split-right);
+  gap: var(--split-gap);
+  align-items: center;
+}
+
+/* Left side - Text content */
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.hero-headline {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-bio {
+  max-width: 520px;
+}
+
+/* Right side - Profile image */
+.hero-profile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Scroll scrubber (bottom-right) */
+.scroll-scrubber {
+  position: fixed;
+  right: var(--space-8);
+  bottom: var(--space-8);
+  width: min(420px, 40vw);
+  z-index: var(--z-overlay);
+}
+
+.scroll-scrubber .scrubber {
+  opacity: 1;
+}
+
+/* -------- RESPONSIVE LAYOUT -------- */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .hero-content {
+    order: 2;
+    align-items: center;
+  }
+  
+  .hero-profile {
+    order: 1;
+    margin-bottom: var(--space-8);
+  }
+  
+  .hero-bio {
+    margin: 0 auto;
+  }
+  
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .hero {
+    padding: var(--space-8) var(--content-padding);
+  }
+  
+  :root {
+    --content-padding: 1.5rem;
+  }
+}
+
+/* -------- UTILITY CLASSES -------- */
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.gap-4 { gap: var(--space-4); }
+.gap-8 { gap: var(--space-8); }
+.text-center { text-align: center; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }

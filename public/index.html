@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Update CSP to allow source maps from CDNs -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net;">
+  
+  <!-- SEO Meta Tags -->
+  <title>incconu_two — Personal Website</title>
+  <meta name="description" content="Personal page for incconu_two (@tnemoroccan) — 16-year-old from Morocco. Tech enthusiast, music lover, and creator of Aurora browser extensions.">
+  <meta name="author" content="incconu_two">
+  <meta name="keywords" content="incconu_two, tnemoroccan, Morocco, developer, tech, Aurora extensions">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="incconu_two — Personal Website">
+  <meta property="og:description" content="Personal page for everything I do online and offline.">
+  <meta property="og:type" content="website">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+  
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body class="page-landing">
+
+  <!-- Curtain Preloader -->
+  <div id="preloader">
+    <div class="loader-text">INITIALIZING SYSTEM...</div>
+  </div>
+
+  <!-- WebGL Background Canvas -->
+  <div id="webgl-background"></div>
+  
+  <!-- Custom Cursor -->
+  <div id="custom-cursor" class="custom-cursor"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <div class="hero-container">
+        
+        <!-- Left Side: Text Content -->
+        <div class="hero-content">
+          
+          <!-- Headline -->
+          <div class="hero-headline">
+            <h1 class="headline-reveal">
+              <div class="line-mask">
+                <span class="reveal-item headline-accent">Hello everyone,</span>
+              </div>
+              <div class="line-mask">
+                <span class="reveal-item headline-white" id="scramble-1">I am</span>
+              </div>
+              <div class="line-mask">
+                <span class="reveal-item headline-white" id="scramble-2">incconu_two</span>
+              </div>
+            </h1>
+          </div>
+          
+          <!-- Bio Paragraph -->
+          <p class="hero-bio text-body">
+            (or @tnemoroccan). I am 16 years old, living in Morocco, and in my first year of baccalaureate. I have one brother and one sister. I've been online since late 2024 and am quite active in real life, doing a lot of different sports and activities. I'm your typical "tech guy" at school, and I love music—all of it. New week, new music style, and this is my personal page for everything I do online and offline :-&gt;
+          </p>
+          
+        </div>
+
+        
+        <!-- Right Side: Profile Image -->
+        <div class="hero-profile">
+          <div class="profile-effect-container">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-labelledby="profile-title">
+              <title id="profile-title">Profile Picture with Blob Effect</title>
+              <defs>
+                <clipPath id="pe-blob-clip">
+                  <path d="M43.1,-68.5C56.2,-58.6,67.5,-47.3,72.3,-33.9C77.2,-20.5,75.5,-4.9,74.2,11.3C72.9,27.6,71.9,44.5,63.8,57.2C55.7,69.8,40.6,78.2,25.5,79.2C10.4,80.1,-4.7,73.6,-20.9,69.6C-37.1,65.5,-54.5,63.9,-66,54.8C-77.5,45.8,-83.2,29.3,-85.7,12.3C-88.3,-4.8,-87.7,-22.3,-79.6,-34.8C-71.5,-47.3,-55.8,-54.9,-41.3,-64.2C-26.7,-73.6,-13.4,-84.7,0.8,-86C15,-87.2,29.9,-78.5,43.1,-68.5Z"
+                        transform="translate(100 100)" />
+                </clipPath>
+                <path id="pe-text-path"
+                      d="M43.1,-68.5C56.2,-58.6,67.5,-47.3,72.3,-33.9C77.2,-20.5,75.5,-4.9,74.2,11.3C72.9,27.6,71.9,44.5,63.8,57.2C55.7,69.8,40.6,78.2,25.5,79.2C10.4,80.1,-4.7,73.6,-20.9,69.6C-37.1,65.5,-54.5,63.9,-66,54.8C-77.5,45.8,-83.2,29.3,-85.7,12.3C-88.3,-4.8,-87.7,-22.3,-79.6,-34.8C-71.5,-47.3,-55.8,-54.9,-41.3,-64.2C-26.7,-73.6,-13.4,-84.7,0.8,-86C15,-87.2,29.9,-78.5,43.1,-68.5Z"
+                      transform="translate(100 100)" />
+              </defs>
+
+              <image href="assets/images/profile.jpg"
+                     width="200" height="200"
+                     preserveAspectRatio="xMidYMid slice"
+                     clip-path="url(#pe-blob-clip)" />
+
+              <text class="text-content">
+                <textPath href="#pe-text-path" startOffset="0%">
+                  ❤ MADE WITH LOVE ❤ MADE WITH LOVE ❤ MADE WITH LOVE ❤ MADE WITH LOVE
+                  <animate attributeName="startOffset" from="0%" to="100%" dur="15s" repeatCount="indefinite" />
+                </textPath>
+                <textPath href="#pe-text-path" startOffset="100%">
+                  ❤ MADE WITH LOVE ❤ MADE WITH LOVE ❤ MADE WITH LOVE ❤ MADE WITH LOVE
+                  <animate attributeName="startOffset" from="-100%" to="0%" dur="15s" repeatCount="indefinite" />
+                </textPath>
+              </text>
+            </svg>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+    
+    <!-- Cinematic About Me Section -->
+    <section class="second-page" id="second-page">
+      <div class="content-container">
+        
+        <!-- Section Title (Scroll Triggered) -->
+        <div class="section-header">
+          <h2 class="cinematic-title">Some Info <br><span class="text-accent">About Me</span></h2>
+        </div>
+
+        <!-- Story Grid -->
+        <div class="story-grid">
+          
+          <!-- Card 1: Languages -->
+          <div class="story-card glass-card" data-speed="0.9">
+            <h3 class="card-title">Languages</h3>
+            <ul class="info-list">
+              <li><span class="label">Speak</span> <span class="value">
+                <span class="fi fi-us" title="English"></span> 
+                <span class="fi fi-fr" title="French"></span> 
+                <span class="fi fi-sa" title="Arabic"></span> 
+                <span class="fi fi-ma" title="Moroccan dialect"></span>
+              </span></li>
+              <li><span class="label">≈Learning</span> <span class="value"><span class="fi fi-cn"></span></span></li>
+              <li><span class="label">Want to learn</span> <span class="value"><span class="fi fi-ru"></span></span></li>
+            </ul>
+          </div>
+
+          <!-- Card 2: Identity -->
+          <div class="story-card glass-card" data-speed="1.1">
+            <h3 class="card-title">Identity</h3>
+            <ul class="info-list">
+              <li><span class="label">Name/Last Name</span> <span class="value"><span class="fi fi-ma"></span></span></li>
+              <li><span class="label">I'm</span> <span class="value"><span class="fi fi-ma"></span></span></li>
+              <li><span class="label">Inner Voice</span> <span class="value"><span class="fi fi-ma"></span> (<span class="fi fi-us"></span> when focusing)</span></li>
+            </ul>
+          </div>
+
+          <!-- Card 3: Media Consumption -->
+          <div class="story-card glass-card" data-speed="1.0">
+            <h3 class="card-title">Media</h3>
+            <ul class="info-list">
+              <li><span class="label">Phone language</span> <span class="value"><span class="fi fi-us"></span></span></li>
+              <li><span class="label">Music</span> <span class="value"><span class="fi fi-us"></span> <span class="fi fi-fr"></span> <span class="fi fi-ma"></span></span></li>
+              <li><span class="label">Books</span> <span class="value"><span class="fi fi-fr"></span></span></li>
+              <li><span class="label">Movies/Series</span> <span class="value"><span class="fi fi-us"></span> <span class="fi fi-fr"></span></span></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Cinematic Activities Section -->
+    <section class="activities-page" id="activities-page">
+      <div class="content-container">
+        
+        <!-- Section Title -->
+        <div class="section-header">
+          <h2 class="cinematic-title">My <br><span class="text-accent">Activities</span></h2>
+        </div>
+
+        <!-- Activities Grid -->
+        <div class="activities-grid">
+          <!-- Physical -->
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">🏋️‍♂️</span>
+            <span class="activity-name">Gym</span>
+          </div>
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">🏃</span>
+            <span class="activity-name">Walk / Running</span>
+          </div>
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">🏊‍♂️</span>
+            <span class="activity-name">Swimming</span>
+            <span class="activity-detail">4 years of learning</span>
+          </div>
+
+          <!-- Tech & Creation -->
+          <div class="activity-chip wide" data-tilt>
+            <span class="activity-icon">💻</span>
+            <span class="activity-name">Web + Extension Coding</span>
+            <span class="activity-detail">Chrome / Firefox</span>
+          </div>
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">🎬</span>
+            <span class="activity-name">Video / Audio Editing</span>
+          </div>
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">📱</span>
+            <span class="activity-name">Social Media Influencing</span>
+          </div>
+
+          <!-- Strategy & Finance -->
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">📈</span>
+            <span class="activity-name">Crypto / Day Trading</span>
+          </div>
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">💹</span>
+            <span class="activity-name">Long-term Investment</span>
+          </div>
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">♟️</span>
+            <span class="activity-name">Chess</span>
+            <span class="activity-detail">2-3 years of learning</span>
+          </div>
+
+          <!-- Culture -->
+          <div class="activity-chip" data-tilt>
+            <span class="activity-icon">📚</span>
+            <span class="activity-name">Reading Books</span>
+            <span class="activity-detail">Cherub top 1</span>
+          </div>
+          
+          <!-- Music with Spotify Widget -->
+          <div class="activity-chip music-card wide" id="spotify-card" data-tilt>
+            <!-- Default Content -->
+            <div class="chip-content">
+              <span class="activity-icon">🎧</span>
+              <span class="activity-name">Listening to Music</span>
+            </div>
+            
+            <!-- Dynamic Widget -->
+            <div class="spotify-widget">
+              <!-- Offline / Loading State -->
+              <div class="spotify-state" id="spotify-offline">
+                <div class="spotify-icon-container">
+                  <span class="spotify-brand-icon"></span>
+                </div>
+                <span class="spotify-status-text">Not Playing</span>
+              </div>
+
+              <!-- Live Playing State -->
+              <a href="#" target="_blank" class="spotify-state" id="spotify-live">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Album Art" class="spotify-art" id="spotify-art">
+                <div class="spotify-info">
+                  <div class="spotify-header">
+                    <span class="spotify-track" id="spotify-track">Track Name</span>
+                    <div class="spotify-equalizer">
+                      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                    </div>
+                  </div>
+                  <span class="spotify-artist" id="spotify-artist">Artist Name</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Favorite Hobby Block -->
+        <div class="hobby-block glass-card" data-tilt>
+          <h3 class="card-title">Favorite Hobby</h3>
+          <p class="hobby-text">Talking to people, walking, and gaming.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Third Page: Tech Arsenal -->
+    <section class="third-page" id="third-page">
+      <div class="content-container">
+        <div class="tech-arsenal">
+          <h3 class="cinematic-title subsection-title">The cool things <br><span class="text-accent">I Own</span></h3>
+          <p class="tech-text-content">
+            My Samsung S24+, my Galaxy Buds 3 Pro, my Galaxy Watch 7, my i5 6th gen 8GB RAM mini PC, a shit ton of Chinese gadgets, and some Legos.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Connect / Profiles Section -->
+    <section class="connect-section" id="connect-section">
+      <div class="content-container">
+        
+        <header class="section-header">
+          <h2 class="cinematic-title">Public <br><span class="text-accent">profile:</span></h2>
+        </header>
+
+        <div class="social-ledger-container">
+          
+          <!-- PUBLIC: Kinetic List -->
+          <div class="social-ledger">
+            
+            <!-- Item 1: X / Twitter -->
+            <a href="https://x.com/tnemoroccan" target="_blank" class="ledger-item" data-color="#1DA1F2">
+              <span class="ledger-index">01</span>
+              <span class="ledger-name">X / Twitter</span>
+              <span class="ledger-status">@tnemoroccan</span>
+              <div class="ledger-bg"></div>
+            </a>
+
+            <!-- Item 2: GitHub -->
+            <a href="https://github.com/incconutwo" target="_blank" class="ledger-item" data-color="#333">
+              <span class="ledger-index">02</span>
+              <span class="ledger-name">Github</span>
+              <span class="ledger-status">Open Source</span>
+              <div class="ledger-bg"></div>
+            </a>
+
+            <!-- Item 3: Discord -->
+            <a href="https://discord.gg/rfgv22wp" target="_blank" class="ledger-item" data-color="#5865F2">
+              <span class="ledger-index">03</span>
+              <span class="ledger-name">Discord</span>
+              <span class="ledger-status">Community</span>
+              <div class="ledger-bg"></div>
+            </a>
+
+            <!-- Item 4: Steam -->
+            <a href="https://steamcommunity.com/profiles/76561199196991119/" target="_blank" class="ledger-item" data-color="#171a21">
+              <span class="ledger-index">04</span>
+              <span class="ledger-name">Steam</span>
+              <span class="ledger-status">Gaming</span>
+              <div class="ledger-bg"></div>
+            </a>
+
+            <!-- Item 5: Ko-fi -->
+            <a href="https://ko-fi.com/incconutwo" target="_blank" class="ledger-item" data-color="#FF5E5B">
+              <span class="ledger-index">05</span>
+              <span class="ledger-name">Ko-fi</span>
+              <span class="ledger-status">Support Me</span>
+              <div class="ledger-bg"></div>
+            </a>
+
+            <!-- Group the "Niche" profiles in a smaller row below the main list -->
+            <div class="ledger-mini-row">
+                <a href="https://www.reddit.com/u/Ok_Refrigerator9802" class="mini-link">Reddit</a> /
+                <a href="https://open.spotify.com/user/31dx5n6efa3x4dd3l36nuuwmg62q" class="mini-link">Spotify</a> /
+                <a href="https://t.me/Incconu_two" class="mini-link">Telegram</a> /
+                <a href="https://app.binance.com/uni-qr/cpro/tnemoroccan" class="mini-link">Binance</a>
+            </div>
+
+          </div>
+
+          <!-- PRIVATE: The Glitch Vault -->
+          <div class="private-vault-container">
+            <div class="vault-scanner"></div>
+            <div class="vault-header">PRIVATE PROFILE</div>
+            <div class="vault-lock" id="private-trigger">
+              <div class="vault-text-mask">
+                <span class="vault-text-original">ACCESS THE PROFILES</span>
+                <span class="vault-text-glitch">ACCESS DENIED</span>
+              </div>
+              <div class="lock-icon">🔒</div>
+            </div>
+            <p class="vault-message" id="vault-msg">It's called private for a reason 🤨</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section (Merged) -->
+    <section class="projects-section" id="projects-section">
+      <div class="content-container">
+        <header class="projects-header">
+          <h2 class="cinematic-title">My <br><span class="text-accent">Projects</span></h2>
+          <p class="projects-subtitle">Things I built and shipped.</p>
+        </header>
+
+        <!-- Projects Grid (populated by JS) -->
+        <div class="projects-grid" id="projectsGrid">
+          <!-- Cards rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Inspiration / Philosophy Section -->
+    <section class="inspiration-section">
+      <div class="content-container">
+        
+        <div class="inspiration-wrapper">
+          <!-- The Label -->
+          <div class="inspiration-label">
+            <span class="bracket">[</span> The saying that inspires me <span class="bracket">]</span>
+          </div>
+
+          <!-- The Classic Quote (The "Standard" Logic) -->
+          <div class="quote-block classic-quote">
+            <div class="quote-mark">“</div>
+            <h2 class="quote-text">
+              You only live once, but if you do it right, once is enough.
+            </h2>
+          </div>
+
+          <!-- The Connector Visual -->
+          <div class="inspiration-connector">
+            <div class="connector-line"></div>
+            <div class="connector-node"></div>
+          </div>
+
+          <!-- The Personal Version (The "Patch") -->
+          <div class="quote-block personal-quote">
+            <div class="personal-tag">Personal version:</div>
+            <div class="quote-mask">
+              <h2 class="quote-text text-gradient">
+                "You live only once, so make sure you try everything."
+              </h2>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    
+    <div class="scroll-scrubber">
+      <div class="scrubber" id="pageScrubber"></div>
+    </div>
+    
+  </main>
+
+  <!-- Scripts -->
+  <!-- Lenis for Premium Smooth Scrolling -->
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+
+  <!-- GSAP for smooth animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Anime.js Dependency -->
+  <script src="https://cdn.jsdelivr.net/npm/animejs@4.0.0/lib/anime.iife.min.js"></script>
+  
+  <!-- Three.js Dependency -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <!-- WebGL Liquid Gradient Background -->
+  <script src="js/background/liquid-gradient.js"></script>
+  <script src="js/background/background-init.js"></script>
+  
+  <!-- Scroll Scrubber -->
+  <script src="js/components/scrubber.js"></script>
+  
+  <!-- Projects Script -->
+  <script src="js/pages/projects.js"></script>
+  
+  <!-- Main Script -->
+  <script src="js/main.js"></script>
+  
+</body>
+</html>

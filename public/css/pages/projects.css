@@ -1,0 +1,479 @@
+
+/* ============================================
+   PROJECTS SECTION
+   ============================================ */
+
+.projects-section {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  padding: var(--space-24) var(--content-padding);
+  background-color: var(--color-bg-secondary);
+}
+
+/* Section Header */
+.projects-header {
+  max-width: var(--max-content-width); /* Fixed variable name typo (was --max-width) */
+  margin: 0 auto var(--space-16);
+  text-align: left;
+}
+
+.projects-title {
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.95;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+  margin-bottom: var(--space-4);
+}
+
+.projects-title .text-accent {
+  color: #fff;
+  display: block;
+  transform: translateX(40px);
+}
+
+.projects-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* ============================================
+   PROJECTS GRID
+   ============================================ */
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1rem, 2vw, 2rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 640px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .projects-title .text-accent {
+    transform: translateX(20px);
+  }
+}
+
+/* ============================================
+   GROUP HEADERS
+   ============================================ */
+
+.projects-group-header {
+  grid-column: 1 / -1;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  margin-top: var(--space-12);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Changed from flex-start to center */
+  text-align: center;  /* Ensure text alignment is centered */
+  gap: 0;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.projects-group-header a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 200ms ease, text-decoration 200ms ease;
+}
+
+.projects-group-header a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+/* ============================================
+   PROJECT CARD - 3D Flip Container
+   ============================================ */
+
+.project-card {
+  position: relative;
+  height: 340px;
+  perspective: 1200px;
+  cursor: pointer;
+  outline: none;
+  border-radius: var(--radius-lg);
+}
+
+.project-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* Featured card spans all columns */
+.project-card.featured {
+  grid-column: 1 / -1;
+  height: 420px;
+}
+
+@media (max-width: 640px) {
+  .project-card.featured {
+    height: 380px;
+  }
+  
+  .project-card {
+    height: 320px;
+  }
+}
+
+
+/* Inner container for 3D transform */
+.project-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-card.is-flipped .project-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Reduced motion: instant flip */
+@media (prefers-reduced-motion: reduce) {
+  .project-card-inner {
+    transition: none;
+  }
+}
+
+/* ============================================
+   CARD FACES (Front & Back)
+   ============================================ */
+
+.project-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* Background image layer */
+.project-face::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  transition: transform 400ms ease;
+}
+
+.project-card:hover .project-front::before {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card:hover .project-front::before {
+    transform: none;
+  }
+}
+
+/* Dark overlay gradient */
+.project-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  z-index: 1;
+}
+
+/* Vignette effect */
+.project-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 2;
+  border-radius: var(--radius-lg);
+}
+
+/* Glass border effect */
+.project-face {
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  transition: border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.project-card:hover .project-face,
+.project-card:focus-visible .project-face {
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(177, 76, 255, 0.1);
+}
+
+/* Back face rotation */
+.project-back {
+  transform: rotateY(180deg);
+}
+
+.project-back .project-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.75) 50%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+/* ============================================
+   CARD CONTENT
+   ============================================ */
+
+.project-content {
+  position: relative;
+  z-index: 10;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.project-card.featured .project-content {
+  padding: var(--space-8);
+}
+
+/* Title */
+.project-content h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.project-card.featured .project-content h3 {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+/* Description */
+.project-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-desc.long {
+  -webkit-line-clamp: 6;
+  max-height: 150px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+/* Stats chips (for featured) */
+.project-stats {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.project-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  backdrop-filter: blur(8px);
+}
+
+.project-stat svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--color-accent);
+}
+
+.project-stat.is-star svg {
+  fill: #FFD700; /* Bright Gold/Yellow */
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.project-buttons {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+
+.project-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  backdrop-filter: blur(8px);
+}
+
+.project-btn:hover,
+.project-btn:focus-visible {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.project-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.project-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Primary button (Chrome Store) */
+.project-btn.primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.project-btn.primary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+/* ============================================
+   HINT LABEL
+   ============================================ */
+
+.project-hint {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  transition: opacity 200ms ease;
+  backdrop-filter: blur(8px);
+  z-index: 20;
+}
+
+.project-card:hover .project-hint {
+  opacity: 1;
+}
+
+/* ============================================
+   FALLBACK GRADIENT (no image)
+   ============================================ */
+
+.project-face.no-image::before {
+  background: linear-gradient(135deg, 
+    rgba(177, 76, 255, 0.3) 0%, 
+    rgba(10, 14, 39, 0.9) 50%,
+    rgba(37, 36, 35, 1) 100%
+  );
+}
+
+/* ============================================
+   BACK TO HOME LINK
+   ============================================ */
+
+.back-link {
+  position: fixed;
+  top: var(--space-6);
+  left: var(--space-6);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  transition: all 200ms ease;
+  z-index: 100;
+}
+
+.back-link:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateX(-4px);
+}
+
+.back-link svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card-inner,
+  .project-face::before,
+  .project-btn,
+  .back-link {
+    transition: none;
+  }
+  
+  .project-card:hover .project-front::before {
+    transform: none;
+  }
+}

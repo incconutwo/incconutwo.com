@@ -1,0 +1,126 @@
+/* ============================================
+   MAIN CSS AGGREGATOR
+   Import all stylesheets in correct order
+   ============================================ */
+
+/* 1. Reset & Normalize */
+@import url('./reset.css');
+
+/* 2. Design Tokens */
+@import url('./variables.css');
+
+/* 3. Typography */
+@import url('./typography.css');
+
+/* 4. Layout System */
+@import url('./layout.css');
+
+/* 5. Components */
+@import url('./components/profile-effect.css');
+@import url('./components/social-icons.css');
+@import url('./components/scrubber.css');
+
+/* 6. Page-Specific */
+@import url('./pages/landing.css');
+@import url('./pages/projects.css');
+
+/* ============================================
+   BACKGROUND CANVAS
+   Fixed WebGL layer
+   ============================================ */
+
+#webgl-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-background);
+  pointer-events: auto;
+}
+
+/* Hide native cursor when custom cursor is active */
+body.custom-cursor-active,
+body.custom-cursor-active * {
+  cursor: none !important;
+}
+
+/* Custom Cursor */
+.custom-cursor {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: var(--z-cursor);
+  transform: translate(-50%, -50%);
+  transition: 
+    width 0.2s ease, 
+    height 0.2s ease, 
+    border-width 0.2s ease,
+    background 0.2s ease;
+  background: transparent;
+  will-change: transform;
+  mix-blend-mode: difference;
+}
+
+.custom-cursor::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+}
+
+/* Cursor hover state */
+.custom-cursor.hovering {
+  width: 56px;
+  height: 56px;
+  border-width: 3px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Disable custom cursor on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .custom-cursor {
+    display: none;
+  }
+  
+  body.custom-cursor-active {
+    cursor: auto;
+  }
+}
+
+/* --- Preloader --- */
+#preloader {
+  position: fixed;
+  inset: 0;
+  background: #0a0e27; /* Matches your BG color */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.loader-text {
+  font-family: monospace;
+  color: var(--color-accent);
+  letter-spacing: 2px;
+  animation: pulse 1s infinite;
+}
+
+/* Class to add via JS to lift the curtain */
+body.loaded #preloader {
+  transform: translateY(-100%);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
