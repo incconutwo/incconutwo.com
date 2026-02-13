@@ -274,11 +274,21 @@
           const xRotate = (multiplier * ((y - rect.height / 2) / rect.height));
           const yRotate = -(multiplier * ((x - rect.width / 2) / rect.width));
 
+          // Use GSAP for smooth tracking if desired, or keep direct for instant feel
+          // Direct is usually better for tilt tracking, but let's keep it 'snappy'
           card.style.transform = `perspective(1200px) rotateX(${xRotate}deg) rotateY(${yRotate}deg) scale(1.02)`;
         });
 
         card.addEventListener('mouseleave', () => {
-          card.style.transform = '';
+          // Rule 3: Natural Physics (back.out / elastic)
+          gsap.to(card, {
+            rotationX: 0,
+            rotationY: 0,
+            scale: 1,
+            duration: 0.8,
+            ease: "back.out(1.7)",
+            overwrite: true
+          });
         });
       });
     }

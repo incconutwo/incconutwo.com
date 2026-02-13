@@ -106,6 +106,22 @@ body.custom-cursor-active * {
   justify-content: center;
   align-items: center;
   transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+  overflow: hidden;
+}
+
+/* Animated Grid Background */
+#preloader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center center;
+  animation: gridPulse 4s ease-in-out infinite;
+  transform: perspective(500px) rotateX(60deg);
+  transform-origin: center center;
 }
 
 .loader-text {
@@ -113,6 +129,8 @@ body.custom-cursor-active * {
   color: var(--color-accent);
   letter-spacing: 2px;
   animation: pulse 1s infinite;
+  position: relative;
+  z-index: 1;
 }
 
 /* Class to add via JS to lift the curtain */
@@ -123,4 +141,15 @@ body.loaded #preloader {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+@keyframes gridPulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: perspective(500px) rotateX(60deg) scale(1.1);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: perspective(500px) rotateX(60deg) scale(1.15);
+  }
 }

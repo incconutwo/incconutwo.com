@@ -325,7 +325,8 @@ class ScrubberController {
   }
 
   handleScroll() {
-    this.setValue(this.getScrollPercent(), true);
+    // Rule: Scroll Scrub - Use none (linear/immediate)
+    this.setValue(this.getScrollPercent(), false);
   }
 
   getScrollPercent() {
@@ -481,4 +482,4 @@ document.addEventListener('DOMContentLoaded', () => {
       scrubberEl.dataset.initialized = 'true';
     }
   }
-});
+}); 

@@ -28,7 +28,7 @@
     "id": "ai-overview-disabler",
     "featured": false,
     "title": "Google AI Overview Disabler",
-    "shortDescription": "\"A smaller, unsuccessful project, but they say a winner is just a loser that tried one more time (*^ω^).",
+    "shortDescription": "A smaller, unsuccessful project, but they say a winner is just a loser that tried one more time (*^ω^).",
     "longDescription": "Project description: Automatically switches to Google Web results to disable AI Overview.\"",
     "stamp": "FAILED",
     "links": [
@@ -88,3 +88,4 @@
     "image": "assets/images/projects/aurora-gemini.webp"
   }
 ]
+ 

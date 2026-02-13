@@ -644,4 +644,4 @@ class LiquidGradientApp {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.gradientBackground.onResize(window.innerWidth, window.innerHeight);
   }
-}
+} 
