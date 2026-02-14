@@ -113,6 +113,11 @@ body {
     padding: var(--space-8) var(--content-padding);
   }
   
+  .hero-profile {
+    margin-top: -10rem; /* Move up significantly on mobile */
+    margin-bottom: var(--space-4); /* Reduce gap below */
+  }
+
   :root {
     --content-padding: 1.5rem;
   }

@@ -46,6 +46,12 @@
 }
 
 .profile-effect-container svg:hover .text-content {
-  fill: white;
-  mix-blend-mode: overlay;
+  fill: rgba(255, 255, 255, 0.9);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 640px) {
+  .profile-effect-container {
+    max-width: 70%; /* Shrink to 30% on small screens */
+  }
 }
