@@ -276,6 +276,7 @@ class ScrubberController {
     });
     document.addEventListener('mouseup', this.handleMouseUp);
     
+
     // Touch support
     this.el.container.addEventListener('touchstart', (e) => { 
       e.preventDefault(); 
@@ -286,12 +287,9 @@ class ScrubberController {
     }, { passive: false });
     document.addEventListener('touchend', this.handleMouseUp);
 
-    // Throttled resize handler
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(this.handleResize, 150);
-    });
+    // Debounced resize handler for performance
+    const debouncedResize = this.debounce(this.handleResize, 150);
+    window.addEventListener('resize', debouncedResize);
 
     // Use Lenis scroll listener if available for smoother updates
     if (window.lenis) {
@@ -315,6 +313,14 @@ class ScrubberController {
     }
   }
 
+  debounce(func, wait = 150) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
   handleResize() {
     this.measureDimensions();
     this.generateTicks();
@@ -325,8 +331,7 @@ class ScrubberController {
   }
 
   handleScroll() {
-    // Rule: Scroll Scrub - Use none (linear/immediate)
-    this.setValue(this.getScrollPercent(), false);
+    this.setValue(this.getScrollPercent(), true);
   }
 
   getScrollPercent() {

@@ -1,7 +1,7 @@
 /**
  * ============================================
  * PROJECTS PAGE - Interactive Card Grid
- * Handles data loading, card rendering, and flip interactions
+ * Handles data loading, card rendering, and animations
  * ============================================
  */
 
@@ -44,8 +44,19 @@
 
     async init() {
       await this.loadProjects();
-      await this.fetchGitHubStars();
       this.renderCards();
+
+      // Register ScrollTrigger plugin for entrance animation
+      if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+      }
+
+      // Trigger Animation immediately after render
+      this.animateEntrance();
+
+      // Fetch stats in background
+      this.fetchGitHubStars();
+
       this.attachEventListeners();
       this.handleDeepLink();
       this.initTilt();
@@ -62,30 +73,92 @@
       }
     }
 
+    /**
+     * NEW: Premium Staggered Entrance Animation
+     * Uses ScrollTrigger batching with a heavier elastic feel
+     */
+    animateEntrance() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+      // Ensure ScrollTrigger sees new DOM
+      ScrollTrigger.refresh();
+
+      // Set Initial State: Tilted down, scaled down, transparent
+      gsap.set(".project-card", {
+        y: 100,
+        opacity: 0,
+        scale: 0.85,
+        rotationX: 10,
+        transformPerspective: 1000
+      });
+
+      // Batch Animation
+      ScrollTrigger.batch(".project-card", {
+        start: "top 90%",
+        end: "bottom 10%",
+
+        onEnter: batch => gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotationX: 0,
+          stagger: 0.15, // Slightly slower stagger for weight
+          duration: 1.2,
+          ease: "elastic.out(1, 0.6)", // Heavier bounce than activities
+          overwrite: true
+        }),
+
+        onLeave: batch => gsap.to(batch, {
+          opacity: 0,
+          y: -60, // Float up when leaving top
+          scale: 0.9,
+          duration: 0.6,
+          ease: "power2.in",
+          overwrite: true
+        }),
+
+        onEnterBack: batch => gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotationX: 0,
+          stagger: 0.1,
+          duration: 1,
+          ease: "elastic.out(1, 0.6)",
+          overwrite: true
+        }),
+
+        onLeaveBack: batch => gsap.to(batch, {
+          opacity: 0,
+          y: 60, // Drop down when leaving bottom
+          scale: 0.9,
+          duration: 0.6,
+          ease: "power2.in",
+          overwrite: true
+        })
+      });
+    }
+
     async fetchGitHubStars() {
-      // Dynamic fetching for any project with a GitHub link
-      // This is future-proof: just add a GitHub link to projects.json and stars will load.
-      
       const starPromises = this.projects.map(async (project) => {
         const githubLink = project.links?.find(l => l.kind === 'github' || l.url.includes('github.com'));
-        
+
         if (githubLink) {
           try {
-            // Extract owner/repo from URL (e.g., https://github.com/owner/repo)
             const match = githubLink.url.match(/github\.com\/([^/]+)\/([^/]+)/);
             if (match && match.length >= 3) {
               const [_, owner, repo] = match;
-              // Use absolute path for robustness
               const response = await fetch(`/api/github/stars/${owner}/${repo}`);
-              
+
               if (response.ok) {
                 const data = await response.json();
-                // Only update if stars > 0 to keep UI clean
                 if (data.stars > 0) {
-                  project.stats = { 
-                    ...project.stats, 
-                    stars: data.stars 
+                  project.stats = {
+                    ...project.stats,
+                    stars: data.stars
                   };
+                  // Re-render specifically just this card's stats to avoid full re-render
+                  this.updateCardStats(project.id, project.stats);
                 }
               }
             }
@@ -98,17 +171,31 @@
       await Promise.all(starPromises);
     }
 
+    // Helper to update stats without killing animation state
+    updateCardStats(id, stats) {
+      const card = this.grid?.querySelector(`.project-card[data-id="${id}"]`);
+      if (card) {
+        const frontContent = card.querySelector('.project-front .project-content');
+        const existingStats = frontContent.querySelector('.project-stats');
+        const newStatsHtml = this.createStats(stats);
+
+        if (existingStats) {
+          existingStats.outerHTML = newStatsHtml;
+        } else {
+          frontContent.insertAdjacentHTML('afterbegin', newStatsHtml);
+        }
+      }
+    }
+
     renderCards() {
       if (!this.grid) return;
 
-      // Sort: featured first
       const sorted = [...this.projects].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 
       let html = '';
       let auroraHeaderAdded = false;
 
       sorted.forEach(project => {
-        // Add header before Aurora projects with improved structure
         if (project.id.startsWith('aurora-') && !auroraHeaderAdded) {
           html += `
             <div class="projects-group-header">
@@ -142,7 +229,6 @@
              aria-pressed="false"
              aria-label="View details for ${title}">
           <div class="project-card-inner">
-            <!-- Front Face -->
             <div class="project-face project-front ${noImageClass}" ${hasImage}>
               <div class="project-overlay"></div>
               ${stampHtml}
@@ -154,7 +240,6 @@
                 <div class="project-buttons">${buttonsHtml}</div>
               </div>
             </div>
-            <!-- Back Face -->
             <div class="project-face project-back ${noImageClass}" ${hasImage}>
               <div class="project-overlay"></div>
               <div class="project-hint">Click to go back</div>
@@ -199,27 +284,20 @@
     }
 
     attachEventListeners() {
-      // Event delegation for card flips
       this.grid?.addEventListener('click', (e) => {
         const card = e.target.closest('.project-card');
         if (!card) return;
-
-        // Don't flip if clicking a button
         if (e.target.closest('.project-btn')) return;
-
         this.toggleFlip(card);
       });
 
-      // Keyboard support
       this.grid?.addEventListener('keydown', (e) => {
         const card = e.target.closest('.project-card');
         if (!card) return;
-
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           this.toggleFlip(card);
         }
-
         if (e.key === 'Escape' && card.classList.contains('is-flipped')) {
           this.toggleFlip(card, false);
         }
@@ -228,11 +306,8 @@
 
     toggleFlip(card, force) {
       const shouldFlip = force !== undefined ? force : !card.classList.contains('is-flipped');
-      
       card.classList.toggle('is-flipped', shouldFlip);
       card.setAttribute('aria-pressed', shouldFlip);
-
-      // Update URL hash
       const id = card.dataset.id;
       if (shouldFlip) {
         history.replaceState(null, '', `#${id}`);
@@ -244,10 +319,8 @@
     handleDeepLink() {
       const hash = location.hash.slice(1);
       if (!hash) return;
-
       const card = this.grid?.querySelector(`[data-id="${hash}"]`);
       if (card) {
-        // Scroll to card
         setTimeout(() => {
           card.scrollIntoView({ behavior: 'smooth', block: 'center' });
           this.toggleFlip(card, true);
@@ -256,45 +329,39 @@
     }
 
     initTilt() {
-      // Check for touch device or reduced motion
-      if ('ontouchstart' in window || 
+      if ('ontouchstart' in window ||
           window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return;
       }
 
       const cards = document.querySelectorAll('.project-card[data-tilt]');
-      
+
       cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
-          
+
           const multiplier = 5;
           const xRotate = (multiplier * ((y - rect.height / 2) / rect.height));
           const yRotate = -(multiplier * ((x - rect.width / 2) / rect.width));
 
-          // Use GSAP for smooth tracking if desired, or keep direct for instant feel
-          // Direct is usually better for tilt tracking, but let's keep it 'snappy'
           card.style.transform = `perspective(1200px) rotateX(${xRotate}deg) rotateY(${yRotate}deg) scale(1.02)`;
         });
 
         card.addEventListener('mouseleave', () => {
-          // Rule 3: Natural Physics (back.out / elastic)
           gsap.to(card, {
             rotationX: 0,
             rotationY: 0,
             scale: 1,
-            duration: 0.8,
-            ease: "back.out(1.7)",
-            overwrite: true
+            duration: 0.5,
+            ease: "power2.out"
           });
         });
       });
     }
   }
 
-  // Initialize on DOM ready
   document.addEventListener('DOMContentLoaded', () => {
     new ProjectsPage();
   });

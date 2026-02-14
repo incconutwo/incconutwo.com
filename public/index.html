@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Update CSP to allow source maps from CDNs -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net;">
+  <!-- Update CSP to allow source maps from CDNs + Web Workers for canvas-confetti -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net;">
   
   <!-- SEO Meta Tags -->
   <title>incconu_two — Personal Website</title>
@@ -446,6 +446,12 @@
   
   <!-- Projects Script -->
   <script src="js/pages/projects.js"></script>
+  
+  <!-- Canvas Confetti for Click Explosions -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  
+  <!-- Click Explosions Effect -->
+  <script src="js/effects/click-explosions.js"></script>
   
   <!-- Main Script -->
   <script src="js/main.js"></script>

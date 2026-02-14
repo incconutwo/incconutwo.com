@@ -105,12 +105,24 @@
   --transition-slow: 500ms ease;
   
   /* -------- Z-INDEX LAYERS -------- */
-  
+  --z-back: -1;
   --z-background: 1;
+  --z-base: 2;
   --z-content: 10;
+  --z-floating: 20;
   --z-overlay: 50;
-  --z-modal: 100;
-  --z-cursor: 1000;
+  --z-header: 100;
+  --z-explosions: 2000;
+  --z-modal: 5000;
+  --z-cursor: 9999;
+  --z-preloader: 10000;
+
+  /* -------- RESPONSIVE SPACING -------- */
+  --section-gap-v: clamp(4rem, 8vh, 10rem);
+  --container-padding-v: clamp(3rem, 6vh, 8rem);
+  --card-padding: clamp(1.5rem, 4vw, 2.5rem);
+  --chip-padding: clamp(0.75rem, 2vw, 1.25rem);
+  --element-gap: clamp(1rem, 3vh, 2.5rem);
 }
 
 /* Breakpoint variables for reference (use in media queries) */

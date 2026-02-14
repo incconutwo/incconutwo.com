@@ -5,16 +5,16 @@
 
 .projects-section {
   position: relative;
-  z-index: 10;
+  z-index: var(--z-content);
   min-height: 100vh;
-  padding: var(--space-24) var(--content-padding);
+  padding: var(--section-gap-v) var(--content-padding); /* Was space-24 */
   background-color: var(--color-bg-secondary);
 }
 
 /* Section Header */
 .projects-header {
   max-width: var(--max-content-width); /* Fixed variable name typo (was --max-width) */
-  margin: 0 auto var(--space-16);
+  margin: 0 auto var(--section-gap-v); /* Was space-16 */
   text-align: left;
 }
 
@@ -49,6 +49,8 @@
   gap: clamp(1rem, 2vw, 2rem);
   max-width: 1400px;
   margin: 0 auto;
+  /* CRITICAL for 3D Entrance Animation */
+  perspective: 1500px;
 }
 
 /* Tablet: 2 columns */
@@ -80,7 +82,7 @@
   font-weight: 800;
   text-transform: uppercase;
   color: var(--color-text-primary);
-  margin-top: var(--space-12);
+  margin-top: var(--section-gap-v); /* Was space-12 */
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-2);
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
@@ -111,10 +113,14 @@
 .project-card {
   position: relative;
   height: 340px;
-  perspective: 1200px;
+  perspective: 1200px; /* Internal perspective for Flip */
   cursor: pointer;
   outline: none;
   border-radius: var(--radius-lg);
+
+  /* GPU Acceleration properties for Entrance */
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
 }
 
 .project-card:focus-visible {
@@ -183,7 +189,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  z-index: 0;
+  z-index: var(--z-background);
   transition: transform 400ms ease;
 }
 
@@ -207,7 +213,7 @@
     rgba(0, 0, 0, 0.5) 40%,
     rgba(0, 0, 0, 0.2) 100%
   );
-  z-index: 1;
+  z-index: var(--z-background);
 }
 
 /* Vignette effect */
@@ -217,7 +223,7 @@
   inset: 0;
   box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
   pointer-events: none;
-  z-index: 2;
+  z-index: var(--z-base);
   border-radius: var(--radius-lg);
 }
 
@@ -254,7 +260,7 @@
 
 .project-content {
   position: relative;
-  z-index: 10;
+  z-index: var(--z-content);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
@@ -287,12 +293,14 @@
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .project-desc.long {
   -webkit-line-clamp: 6;
+  line-clamp: 6;
   max-height: 150px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -406,7 +414,7 @@
   opacity: 0.7;
   transition: opacity 200ms ease;
   backdrop-filter: blur(8px);
-  z-index: 20;
+  z-index: var(--z-floating);
 }
 
 .project-card:hover .project-hint {
@@ -446,7 +454,7 @@
   text-decoration: none;
   backdrop-filter: blur(12px);
   transition: all 200ms ease;
-  z-index: 100;
+  z-index: var(--z-header);
 }
 
 .back-link:hover {
@@ -477,9 +485,3 @@
     transform: none;
   }
 }
- 
------------------------------------ 
- 
-=================================== 
- 
-BUNDLING JS FILES 

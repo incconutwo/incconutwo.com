@@ -43,6 +43,9 @@
 body.custom-cursor-active,
 body.custom-cursor-active * {
   cursor: none !important;
+  user-select: none; /* Prevent text selection interference */
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 /* Custom Cursor */
@@ -101,7 +104,7 @@ body.custom-cursor-active * {
   position: fixed;
   inset: 0;
   background: #0a0e27; /* Matches your BG color */
-  z-index: 9999;
+  z-index: var(--z-preloader);
   display: flex;
   justify-content: center;
   align-items: center;

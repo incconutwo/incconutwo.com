@@ -498,11 +498,20 @@ class LiquidGradientApp {
     this.currentScheme = 1;
 
     // Event binding
-    this.onResize = this.onResize.bind(this);
+    this.onResize = this.debounce(this.onResize.bind(this), 200); // Debounced!
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     
     this.init();
+  }
+
+  // Helper: Debounce function
+  debounce(func, wait) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
   }
 
   init() {
@@ -515,12 +524,17 @@ class LiquidGradientApp {
     window.addEventListener("mousemove", this.onMouseMove);
     window.addEventListener("touchmove", this.onTouchMove);
 
-    // Initial wake up
-    if (document.hidden) {
-      document.addEventListener("visibilitychange", () => {
-         if (!document.hidden) this.render();
-      }, { once: true });
-    }
+    // PERFORMANCE FIX: Pause rendering when tab is hidden
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        // Pause loop
+        this.renderer.setAnimationLoop(null);
+      } else {
+        // Resume loop
+        this.clock.start(); // Reset delta so it doesn't jump
+        this.tick();
+      }
+    });
   }
 
   setColorScheme(scheme) {

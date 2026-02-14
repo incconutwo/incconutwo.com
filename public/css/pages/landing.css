@@ -92,13 +92,13 @@
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
   position: relative;
-  z-index: 10; /* Above the fixed WebGL background */
+  z-index: var(--z-content); /* Above the fixed WebGL background */
   width: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   justify-content: center;
-  padding-top: 4vh; /* Closer to top */
+  padding-top: var(--container-padding-v); /* Was 4vh */
 }
 
 /* ============================================
@@ -147,14 +147,14 @@
   max-width: 1200px;
   width: 90%;
   position: relative;
-  z-index: 20;
+  z-index: var(--z-floating);
   padding: 0;
   margin: 0 auto; /* Added centering to fix left-alignment issue */
 }
 
 /* Section Header */
 .section-header {
-  margin-bottom: 5vh; /* Drastically reduced from 15vh */
+  margin-bottom: var(--element-gap); /* Was 5vh */
   text-align: left;
 }
 
@@ -177,19 +177,39 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  margin-bottom: 6rem;
+  margin-bottom: var(--section-gap-v); /* Was 6rem */
 }
 
 /* Glass Cards */
 .glass-card {
+  position: relative; /* For shine sweep */
+  overflow: hidden; /* For shine sweep */
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  padding: 2.5rem;
+  padding: var(--card-padding); /* Was 2.5rem */
   transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
   will-change: transform;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  top: 0; 
+  left: -100%; 
+  width: 50%; 
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: skewX(-25deg);
+  transition: 0.5s;
+  pointer-events: none; /* Don't interfere with clicks */
+}
+
+.glass-card:hover::before {
+  left: 150%;
+  transition: 0.7s ease-in-out;
 }
 
 .glass-card:hover {
@@ -215,7 +235,7 @@
 .info-list li {
   display: flex;
   justify-content: space-between;
-  padding: 0.8rem 0;
+  padding: calc(var(--element-gap) / 3) 0; /* Was 0.8rem 0 */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 1.1rem;
 }
@@ -248,7 +268,7 @@
 
 .info-list .fi:hover {
   transform: scale(1.2) translateY(-2px);
-  z-index: 10;
+  z-index: var(--z-content);
 }
 
 /* Premium Tooltip */
@@ -286,41 +306,74 @@
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
   position: relative;
-  z-index: 10;
+  z-index: var(--z-content);
   width: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 0; /* Remove top padding to push content to the ceiling */
-  padding-bottom: 8vh; /* Move the 'space' to the bottom */
+  padding-bottom: var(--container-padding-v); /* Was 8vh */
 }
 
 .activities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Smaller min-width */
-  gap: 0.8rem; /* Tighter gap */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
   width: 100%;
-  margin-bottom: 2rem; /* Reduced bottom margin */
+  margin-bottom: var(--element-gap);
+  /* Ensure 3D space for the entrance animation */
+  perspective: 1000px;
 }
 
 /* Activity Chip Styles */
 .activity-chip {
+  position: relative;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px; /* Slightly tighter radius */
-  padding: 1rem; /* Reduced padding */
+  border-radius: 12px;
+  padding: var(--chip-padding);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: default;
-  position: relative;
-  overflow: hidden;
-  min-height: 110px; /* Reduced height */
+  min-height: 110px;
+
+  /* GPU Acceleration for smooth pop-in */
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+
+  /* Transition for hover states only (GSAP handles entrance) */
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover Shine Effect - Hardware Accelerated */
+.activity-chip::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; /* Start off-screen */
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+  z-index: var(--z-background);
+  transition: none; /* No transition by default */
+}
+
+.activity-chip:hover::after {
+  left: 200%; /* Move all the way across */
+  transition: left 0.7s ease-in-out;
 }
 
 .activity-chip.wide {
@@ -333,13 +386,16 @@
   }
 }
 
+/* Enhanced Hover State */
 .activity-chip:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 15px 30px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset; /* Inner light ring */
 }
 
+/* Base Glow Effect (Renamed pseudo to avoid conflict with Shine) */
 .activity-chip::before {
   content: '';
   position: absolute;
@@ -347,25 +403,28 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(162, 155, 254, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(162, 155, 254, 0.1) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
+  z-index: 0;
 }
 
 .activity-chip:hover::before {
   opacity: 1;
 }
 
+/* Icon Animation */
 .activity-icon {
-  font-size: 2rem; /* Smaller icon */
+  font-size: 2rem;
   margin-bottom: 0.8rem;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy spring */
+  display: inline-block;
 }
 
 .activity-chip:hover .activity-icon {
-  transform: scale(1.2) rotate(5deg);
+  transform: scale(1.2) rotate(8deg);
 }
 
 .activity-name {
@@ -393,12 +452,12 @@
 }
 
 .music-card .chip-content {
-  padding: 1.5rem;
+  padding: var(--chip-padding); /* Was 1.5rem */
   display: flex;
   flex-direction: column;
   justify-content: center;
   flex: 0 0 auto;
-  z-index: 2;
+  z-index: var(--z-base);
 }
 
 .spotify-widget {
@@ -555,7 +614,7 @@
 /* Hobby Block */
 .hobby-block {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--element-gap); /* Was 2rem */
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -573,7 +632,7 @@
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
   position: relative;
-  z-index: 10;
+  z-index: var(--z-content);
   width: 100%;
   display: flex;
   align-items: center;
@@ -607,7 +666,7 @@
   font-weight: 500;
   letter-spacing: -0.01em;
   border-left: 2px solid var(--color-accent, #a29bfe);
-  padding-left: 2rem;
+  padding-left: var(--element-gap); /* Was 2rem */
   animation: blurIn 1.2s ease forwards;
 }
 
@@ -630,7 +689,7 @@
 
 .connect-section {
   position: relative;
-  z-index: 10;
+  z-index: var(--z-content);
   padding: var(--space-20) var(--content-padding);
   background-color: var(--color-bg-secondary);
   overflow: hidden;
@@ -660,7 +719,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 1.5rem 0;
+  padding: calc(var(--element-gap) / 2) 0; /* Was 1.5rem 0 */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-decoration: none;
   transition: padding 0.3s ease;
@@ -692,7 +751,7 @@
   color: var(--color-text-muted);
   margin-right: 2rem;
   position: relative;
-  z-index: 2;
+  z-index: var(--z-base);
   transition: color 0.3s ease;
 }
 
@@ -703,7 +762,7 @@
   color: #fff;
   flex: 1;
   position: relative;
-  z-index: 2;
+  z-index: var(--z-base);
   transition: transform 0.3s ease;
 }
 
@@ -712,7 +771,7 @@
   font-size: 0.9rem;
   color: var(--color-text-muted);
   position: relative;
-  z-index: 2;
+  z-index: var(--z-base);
   opacity: 0.6;
   transform: translateX(-10px);
   transition: all 0.3s ease;
@@ -733,7 +792,7 @@
 }
 
 .ledger-mini-row {
-  margin-top: 2rem;
+  margin-top: var(--element-gap); /* Was 2rem */
   font-family: var(--font-display);
   font-size: 1.1rem;
   color: var(--color-text-muted);
@@ -790,7 +849,7 @@
   background: #ff3333;
   box-shadow: 0 0 10px #ff3333;
   opacity: 0;
-  z-index: 5;
+  z-index: var(--z-content); /* Reduced to content layer */
 }
 
 .private-vault-container:hover .vault-scanner {
@@ -821,7 +880,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
+  padding: 0 var(--card-padding); /* Was 0 2rem */
   cursor: not-allowed;
   position: relative;
   overflow: hidden;
@@ -868,7 +927,7 @@
 }
 
 .vault-message {
-  margin-top: 1.5rem;
+  margin-top: var(--space-4); /* Consistent spacing */
   color: #ff3333;
   font-family: monospace;
   opacity: 0;
@@ -904,7 +963,7 @@
 
 .inspiration-section {
   position: relative;
-  z-index: 10;
+  z-index: var(--z-content);
   /* Top padding: 8rem, Bottom padding: 15rem + 15vh buffer */
   padding: var(--space-32) var(--content-padding) calc(var(--space-32) + 15vh);
   background-color: var(--color-bg-secondary); /* #252423 */
@@ -916,7 +975,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: var(--space-8);
+  gap: var(--element-gap); /* Was space-8 */
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -999,7 +1058,7 @@
   border-radius: 50%;
   background: var(--color-accent);
   box-shadow: 0 0 15px var(--color-accent);
-  z-index: 2;
+  z-index: var(--z-base);
   transform: scale(0); /* Animate this */
 }
 
@@ -1063,7 +1122,7 @@
   top: 1.5rem;
   left: 1rem;
   transform: rotate(-15deg);
-  z-index: 10;
+  z-index: var(--z-content);
   border: 4px solid #d32f2f;
   color: #d32f2f;
   font-family: 'Courier New', Courier, monospace;

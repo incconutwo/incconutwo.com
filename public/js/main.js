@@ -3,28 +3,49 @@
  * Handles custom cursor, smooth interactions, and general page logic
  */
 
-window.addEventListener('load', () => {
-  // Small timeout to ensure Three.js is ready
+// 1. CORE STABILITY: Robust Preloading
+// Wait for images and fonts before lifting curtain
+Promise.all([
+  document.fonts.ready,
+  new Promise(resolve => {
+    if (document.readyState === 'complete') {
+      resolve();
+    } else {
+      window.addEventListener('load', resolve);
+    }
+  })
+]).then(() => {
+  // Small buffer for Three.js shader compilation
   setTimeout(() => {
     document.body.classList.add('loaded');
     initHackerScramble();
-  }, 800);
+  }, 200);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  initSmoothScroll(); // Initialize Lenis first
+  initSmoothScroll();
   gsap.registerPlugin(ScrollTrigger);
+
+  // UI & Effects
   initCustomCursor();
   initSocialIconHovers();
+  initClickExplosions();
+  initMagneticButtons(); // NEW: Physics for buttons
+
+  // Visuals
   initBackgroundFade();
   initTextReveal();
   initGlobalTitleAnimations();
+
+  // Section Specifics
   initAboutMeAnimations();
-  initActivitiesAnimations();
-  initSpotifyWidget();
-  initScrubber();
+  initActivitiesAnimations(); // UPDATED: Better physics
   initSocialLedger();
   initInspiration();
+
+  // Live Data
+  initSpotifyWidget();
+  initScrubber();
 });
 
 /**
@@ -176,8 +197,8 @@ function initTextReveal() {
     },
     y: "0%",
     duration: 1.4,
-    ease: "power4.out",
-    stagger: 0.1
+    ease: "expo.out",
+    stagger: 0.15
   });
 }
 
@@ -215,7 +236,7 @@ function initGlobalTitleAnimations() {
         x: 0,
         opacity: 1,
         duration: 1.5,
-        delay: 0.1,
+        delay: 0.2,
         ease: "power4.out"
       });
     }
@@ -224,116 +245,189 @@ function initGlobalTitleAnimations() {
 
 /**
  * Cinematic About Me Animations
- * Parallax effects and scroll-triggered reveals
+ * Standard fade-up for info cards
  */
 function initAboutMeAnimations() {
-  // Staggered Cards Reveal with Parallax (Scoped)
   const cards = document.querySelectorAll("#second-page .story-card");
+
   cards.forEach((card, i) => {
-    // Reveal using fromTo for stability on restart
-    gsap.fromTo(card, 
-      {
-        y: 100,
-        rotationX: 10,
-        opacity: 0
-      },
+    gsap.fromTo(card,
+      { y: 60, opacity: 0, scale: 0.95 },
       {
         scrollTrigger: {
           trigger: card,
           start: "top 90%",
-          toggleActions: "play none none reverse"
+          end: "bottom 10%",
+          toggleActions: "play reverse play reverse"
         },
         y: 0,
-        rotationX: 0,
         opacity: 1,
-        duration: 1.2,
-        ease: "power4.out",
+        scale: 1,
+        duration: 1,
+        ease: "power3.out",
         delay: i * 0.1
       }
     );
+  });
 
-    // Parallax effect
-    const speed = card.getAttribute('data-speed') || 1;
-    gsap.to(card, {
+  // Tech Arsenal Reveal
+  gsap.fromTo(".tech-arsenal",
+    { scale: 0.9, opacity: 0 },
+    {
       scrollTrigger: {
-        trigger: "#second-page .story-grid",
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1
+        trigger: ".tech-arsenal",
+        start: "top 85%",
+        toggleActions: "play reverse play reverse"
       },
-      y: -50 * speed,
-      ease: "none"
-    });
-  });
+      scale: 1,
+      opacity: 1,
+      duration: 1.2,
+      ease: "expo.out"
+    }
+  );
 
-  // Tech Arsenal Reveal (Third Page)
-  gsap.from(".tech-arsenal", {
-    scrollTrigger: {
-      trigger: ".tech-arsenal",
-      start: "top 90%",
-      toggleActions: "play none none reverse"
-    },
-    scale: 0.95,
-    opacity: 0,
-    duration: 1.2,
-    ease: "power4.out"
-  });
-
-  // Projects Section Reveal
-  gsap.from(".projects-header, .projects-grid", {
-    scrollTrigger: {
-      trigger: ".projects-section",
-      start: "top 85%",
-      toggleActions: "play none none reverse"
-    },
-    y: 50,
-    opacity: 0,
-    duration: 1.2,
-    stagger: 0.1,
-    ease: "power4.out"
-  });
+  // Projects Header Reveal ONLY (Grid animation moved to projects.js)
+  gsap.fromTo(".projects-header",
+    { y: 50, opacity: 0 },
+    {
+      scrollTrigger: {
+        trigger: ".projects-section",
+        start: "top 75%",
+        toggleActions: "play reverse play reverse"
+      },
+      y: 0,
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out"
+    }
+  );
 }
 
 /**
- * Activities Page Animations
- * Staggered entrance and 3D tilt effects
+ * UPDATED: Activities Page Animations
+ * Uses ScrollTrigger.batch for a snappy, satisfying "Pop" effect
+ * that works perfectly when scrolling up or down.
  */
 function initActivitiesAnimations() {
-  // Staggered Chip Reveal
-  gsap.from(".activity-chip", {
-    scrollTrigger: {
-      trigger: ".activities-grid",
-      start: "top 85%",
-      toggleActions: "play none none reverse"
-    },
-    y: 40,
-    opacity: 0,
-    rotation: 3,
-    duration: 1.0,
-    stagger: {
-      amount: 0.6,
-      from: "random"
-    },
-    ease: "power4.out",
-    immediateRender: false
+  // 1. The Cards "Pop" Effect
+  // Batch allows elements to animate in groups as they enter the viewport
+  ScrollTrigger.batch(".activity-chip", {
+    start: "top 90%",
+    end: "bottom 10%",
+    onEnter: batch => gsap.to(batch, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotationX: 0,
+      stagger: 0.05,
+      duration: 0.8,
+      ease: "elastic.out(1, 0.75)", // Bouncy entrance
+      overwrite: true
+    }),
+    onLeave: batch => gsap.to(batch, {
+      opacity: 0,
+      y: -50, // Exit UP when scrolling down past them
+      scale: 0.9,
+      duration: 0.5,
+      ease: "power2.in",
+      overwrite: true
+    }),
+    onEnterBack: batch => gsap.to(batch, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotationX: 0,
+      stagger: 0.05,
+      duration: 0.8,
+      ease: "elastic.out(1, 0.75)",
+      overwrite: true
+    }),
+    onLeaveBack: batch => gsap.to(batch, {
+      opacity: 0,
+      y: 50, // Exit DOWN when scrolling up past them
+      scale: 0.9,
+      duration: 0.5,
+      ease: "power2.in",
+      overwrite: true
+    })
   });
 
-  // Hobby Block Reveal
-  gsap.from(".hobby-block", {
-    scrollTrigger: {
-      trigger: ".hobby-block",
-      start: "top 95%",
-      toggleActions: "play none none reverse"
-    },
-    y: 30,
+  // Set initial state for batching
+  gsap.set(".activity-chip", {
+    y: 50,
     opacity: 0,
-    duration: 1.2,
-    ease: "power4.out",
-    delay: 0.2,
-    immediateRender: false
+    scale: 0.8,
+    rotationX: 15,
+    transformPerspective: 1000
   });
 
-  init3DTilt();
+  // 2. Hobby Block (Simple fade)
+  gsap.fromTo(".hobby-block",
+    { y: 40, opacity: 0 },
+    {
+      scrollTrigger: {
+        trigger: ".hobby-block",
+        start: "top 90%",
+        toggleActions: "play reverse play reverse"
+      },
+      y: 0,
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out"
+    }
+  );
+
+  init3DTilt(); // Keep existing tilt logic
+}
+
+/**
+ * NEW: Magnetic Buttons
+ * Makes buttons physically stick to the cursor slightly
+ */
+function initMagneticButtons() {
+  const magnets = document.querySelectorAll('.project-btn, .back-link, .social-icon');
+
+  if (window.matchMedia("(pointer: coarse)").matches) return; // Disable on touch
+
+  magnets.forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      // Move button towards mouse (Magnetic effect)
+      gsap.to(btn, {
+        x: x * 0.3, // Strength
+        y: y * 0.3,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+
+      // Move child svg/text slightly more for depth
+      gsap.to(btn.children, {
+        x: x * 0.1,
+        y: y * 0.1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      // Snap back
+      gsap.to(btn, {
+        x: 0,
+        y: 0,
+        duration: 0.8,
+        ease: "elastic.out(1, 0.4)"
+      });
+      gsap.to(btn.children, {
+        x: 0,
+        y: 0,
+        duration: 0.8,
+        ease: "elastic.out(1, 0.4)"
+      });
+    });
+  });
 }
 
 /**
@@ -460,7 +554,8 @@ function init3DTilt() {
       gsap.to(el, {
         rotationX: xRotate,
         rotationY: yRotate,
-        duration: 0.5,
+        scale: 1.05, // Subtle lift
+        duration: 0.4,
         ease: "power2.out"
       });
     });
@@ -470,8 +565,8 @@ function init3DTilt() {
         rotationX: 0,
         rotationY: 0,
         scale: 1,
-        duration: 0.5,
-        ease: "power2.out"
+        duration: 0.6,
+        ease: "elastic.out(1, 0.5)" // Catchy bounce back
       });
     });
   });
@@ -492,11 +587,11 @@ function initSocialLedger() {
       toggleActions: "play none none reverse"
     },
     borderBottomColor: "rgba(255,255,255,0)",
-    x: -30,
+    x: -50,
     opacity: 0,
-    stagger: 0.08,
-    duration: 1.2,
-    ease: "power4.out"
+    stagger: 0.1,
+    duration: 1,
+    ease: "power3.out"
   });
 
   // 1. Social Ledger Interaction Logic
@@ -517,14 +612,14 @@ function initSocialLedger() {
       gsap.to(name, {
         x: xCent * 0.1,
         y: yCent * 0.2,
-        duration: 0.4,
+        duration: 0.5,
         ease: "power3.out"
       });
 
       gsap.to(status, {
         x: xCent * 0.05,
         y: yCent * 0.1,
-        duration: 0.4,
+        duration: 0.5,
         ease: "power3.out"
       });
     });
@@ -537,18 +632,64 @@ function initSocialLedger() {
     item.addEventListener('mouseleave', () => {
       gsap.to(item, { color: '#ffffff', duration: 0.3 });
       
-      // Snap back with bounce - Rule 3
+      // Snap back with bounce
       gsap.to([name, status], {
         x: 0,
         y: 0,
-        duration: 0.6,
-        ease: "back.out(1.7)"
+        duration: 0.5,
+        ease: "elastic.out(1, 0.5)"
       });
     });
   });
 
-  // ... (Vault logic remains)
+  // 2. Private Vault Security Scan Logic
+  if (vault) {
+    const originalTextSpan = vault.querySelector('.vault-text-original');
+    const glitchTextSpan = vault.querySelector('.vault-text-glitch');
+    const originalText = originalTextSpan.innerText;
+    const targetText = "ACCESS DENIED";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
+    let interval = null;
 
+    const scrambleText = (target, text) => {
+      let iteration = 0;
+      clearInterval(interval);
+      
+      interval = setInterval(() => {
+        target.innerText = text
+          .split("")
+          .map((letter, index) => {
+            if (index < iteration) {
+              return text[index];
+            }
+            return chars[Math.floor(Math.random() * chars.length)];
+          })
+          .join("");
+        
+        if (iteration >= text.length) {
+          clearInterval(interval);
+        }
+        
+        iteration += 1 / 3;
+      }, 30);
+    };
+
+    // Scramble original text on entrance
+    vault.addEventListener('mouseenter', () => {
+      scrambleText(originalTextSpan, originalText);
+      // Scramble glitch text so it's ready/active
+      scrambleText(glitchTextSpan, targetText);
+    });
+
+    vault.addEventListener('click', () => {
+      // Re-trigger scramble for punch
+      scrambleText(glitchTextSpan, targetText);
+      
+      vault.style.animation = 'none';
+      vault.offsetHeight; // trigger reflow
+      vault.style.animation = null; 
+    });
+  }
 }
 
 /**
@@ -558,7 +699,7 @@ function initInspiration() {
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: ".inspiration-section",
-      start: "top 85%", 
+      start: "top 80%", // Starts when section enters view
       end: "bottom bottom",
       toggleActions: "play none none reverse"
     }
@@ -568,8 +709,8 @@ function initInspiration() {
   tl.from(".inspiration-label", {
     y: 20,
     opacity: 0,
-    duration: 1.0,
-    ease: "power4.out"
+    duration: 0.6,
+    ease: "power2.out"
   });
 
   // 2. Reveal Classic Quote (Blur In)
@@ -577,20 +718,20 @@ function initInspiration() {
     filter: "blur(10px)",
     opacity: 0,
     y: 30,
-    duration: 1.2,
-    ease: "power4.out"
-  }, "-=0.8");
+    duration: 1,
+    ease: "power3.out"
+  }, "-=0.4");
 
   // 3. Draw the connector line (Fill downwards)
   tl.to(".connector-line", {
     height: "100%",
-    duration: 1.0,
-    ease: "power3.inOut"
-  }, "-=0.8");
+    duration: 1.2,
+    ease: "power2.inOut"
+  }, "-=0.5");
 
   tl.to(".connector-node", {
     scale: 1,
-    duration: 0.6,
+    duration: 0.4,
     ease: "back.out(1.7)"
   }, "-=0.2");
 
@@ -598,16 +739,15 @@ function initInspiration() {
   tl.to(".personal-tag", {
     y: 0,
     opacity: 1,
-    duration: 0.6,
-    ease: "power2.out"
+    duration: 0.5
   });
 
   // 5. Reveal Personal Quote (Masked Slide Up - Butter Smooth)
   tl.to(".personal-quote .quote-text", {
     y: "0%",
-    duration: 1.4,
-    ease: "power4.out"
-  }, "-=0.4");
+    duration: 1.5,
+    ease: "power3.out"
+  }, "-=0.3");
 }
 
 /**
