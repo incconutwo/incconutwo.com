@@ -8,6 +8,7 @@
     "auth-spotify": "node scripts/setup-spotify-tokens.js"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "axios": "^1.13.4",
     "canvas-confetti": "^1.9.3",
     "cors": "^2.8.6",
