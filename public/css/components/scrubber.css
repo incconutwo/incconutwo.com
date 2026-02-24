@@ -41,8 +41,10 @@
 /* Base Container */
 .scrubber {
   position: relative;
-  background: var(--scrubber-bg);
-  border: 1px solid var(--scrubber-border);
+  background: rgba(20, 20, 20, 0.45);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--container-radius);
   height: var(--container-height);
   padding: 0 var(--container-padding);
@@ -55,6 +57,7 @@
   touch-action: pan-y;
   opacity: 0; /* JS handles entrance */
   box-sizing: border-box;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
 .scrubber * {

@@ -113,8 +113,17 @@
 .cinematic-title .text-accent {
   display: inline-block;
   opacity: 0;
-  transform: translateX(-50px);
+  transform: translateX(40px);
   will-change: transform, opacity;
+  color: #fff;
+}
+
+/* FIX: Reset translation on mobile to prevent overflow */
+@media (max-width: 768px) {
+  .cinematic-title .text-accent {
+    transform: translateX(0); /* Reset shift */
+    display: block; /* Ensure it wraps properly */
+  }
 }
 
 /* Transition Blend Overlay */
@@ -651,12 +660,62 @@
   max-width: 900px;
 }
 
+/* ============================================
+   TECH ARSENAL (Marquee Fix)
+   ============================================ */
+.marquee-container {
+  /* FIX: Change 100vw to 100% to prevent scrollbar overflow */
+  width: 100%;
+  
+  /* Break out of container safely */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  width: 100vw; 
+  
+  /* Ensure it doesn't trigger scrollbars */
+  max-width: 100vw;
+  overflow: hidden;
+  
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 0;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+  display: flex;
+  gap: 2rem;
+  white-space: nowrap;
+  animation: scrollLeft 20s linear infinite;
+  /* Hardware accelerate the scrolling text */
+  will-change: transform;
+}
+
+@keyframes scrollLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); } 
+}
+
 .subsection-title {
   font-size: 2.2rem;
   margin-bottom: 2rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 800;
   letter-spacing: -0.03em;
+  /* Ensure it doesn't wrap "The cool things" into two lines */
+  white-space: normal; 
+}
+
+@media (max-width: 640px) {
+  .subsection-title {
+    font-size: 1.8rem; /* Slightly smaller on mobile to ensure it fits */
+    white-space: nowrap; /* Force 1-line for the parts separated by <br> */
+  }
+  .subsection-title .text-accent {
+    display: inline-block !important; /* Keep on same line as <br> flow */
+  }
 }
 
 .tech-text-content {
@@ -740,7 +799,8 @@
   z-index: 0;
 }
 
-.ledger-item:hover .ledger-bg {
+.ledger-item:hover .ledger-bg,
+.ledger-item.active .ledger-bg {
   opacity: 0.15;
   transform: scaleY(1);
 }

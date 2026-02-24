@@ -4,9 +4,16 @@
    ============================================ */
 
 /* Base body setup */
+html, body {
+  width: 100%;
+  overflow-x: hidden; /* CRITICAL: Forces no horizontal scroll */
+  position: relative; /* Context for absolute positioning */
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background-color: var(--color-bg-primary);
-  overflow-x: hidden;
 }
 
 /* Main Content Container */
@@ -16,6 +23,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden; /* Double safety */
 }
 
 /* Content wrapper with max-width */
@@ -120,6 +129,15 @@ body {
 
   :root {
     --content-padding: 1.5rem;
+  }
+
+  .scroll-scrubber {
+    left: 50%;
+    right: auto;
+    bottom: 2rem;
+    transform: translateX(-50%);
+    width: calc(100% - 2 * var(--content-padding));
+    max-width: 400px;
   }
 }
 

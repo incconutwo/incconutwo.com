@@ -52,6 +52,8 @@
 /* Mobile Adjustments */
 @media (max-width: 640px) {
   .profile-effect-container {
-    max-width: 70%; /* Shrink to 30% on small screens */
+    max-width: 70%; 
+    margin: 0 auto;
+    overflow: hidden; /* Clip the blob if it gets too wild */
   }
 }

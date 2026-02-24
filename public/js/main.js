@@ -451,27 +451,35 @@ function initSpotifyWidget() {
     if (document.hidden) return; 
 
     try {
-      // Use absolute path for robustness (works regardless of current URL depth)
       const response = await fetch('/api/spotify/now-playing');
       const data = await response.json();
 
-      if (data.isPlaying && data.track) {
-        // --- PLAYING STATE ---
+      // Log for debugging
+      if (data.error) {
+        console.warn('🎵 Music Widget:', data.error);
+      }
+
+      if (data.track) {
+        // --- HAS TRACK DATA (Playing OR Recently Played) ---
         if (offlineState) offlineState.style.display = 'none';
         
         if (liveState) {
           liveState.style.display = 'flex';
-          void liveState.offsetWidth; // Force reflow
+          void liveState.offsetWidth;
           liveState.classList.add('active');
           liveState.href = data.spotifyUrl;
         }
 
-        if (elArt) elArt.src = data.albumArt;
+        if (elArt && data.albumArt) elArt.src = data.albumArt;
         if (elTrack) elTrack.textContent = data.track;
         if (elArtist) elArtist.textContent = data.artist;
+        
+        if (elStatusIcon) {
+          elStatusIcon.textContent = data.isPlaying ? 'Now Playing' : 'Recently Played';
+        }
 
       } else {
-        // --- OFFLINE / RECENTLY PLAYED STATE ---
+        // --- TRULY OFFLINE ---
         if (liveState) {
           liveState.classList.remove('active');
           liveState.style.display = 'none';
@@ -479,15 +487,13 @@ function initSpotifyWidget() {
         
         if (offlineState) offlineState.style.display = 'flex';
         
-        if (elStatusIcon && data.statusText) {
-          elStatusIcon.textContent = data.statusText === "Recently Played" 
-            ? "Recently Played" 
-            : "Not Playing";
+        if (elStatusIcon) {
+          elStatusIcon.textContent = data.statusText || 'Not Playing';
         }
       }
 
     } catch (error) {
-      console.warn("Spotify Widget Error:", error);
+      console.warn('🎵 Music Widget Error:', error.message || error);
       if(liveState) liveState.style.display = 'none';
       if(offlineState) offlineState.style.display = 'flex';
     }
@@ -599,9 +605,31 @@ function initSocialLedger() {
     const name = item.querySelector('.ledger-name');
     const status = item.querySelector('.ledger-status');
     const color = item.getAttribute('data-color');
+    const bg = item.querySelector('.ledger-bg');
+
+    const activate = () => {
+      item.classList.add('active');
+      gsap.to(item, { color: color, duration: 0.3 });
+      gsap.to(bg, { color: color, duration: 0 });
+    };
+
+    const deactivate = () => {
+      item.classList.remove('active');
+      gsap.to(item, { color: '#ffffff', duration: 0.3 });
+      
+      // Snap back with bounce
+      gsap.to([name, status], {
+        x: 0,
+        y: 0,
+        duration: 0.5,
+        ease: "elastic.out(1, 0.5)"
+      });
+    };
     
     // Magnetic Move on MouseMove
     item.addEventListener('mousemove', (e) => {
+      if (window.innerWidth <= 768) return; // Skip on mobile for perf
+      
       const rect = item.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -624,25 +652,24 @@ function initSocialLedger() {
       });
     });
 
-    item.addEventListener('mouseenter', () => {
-      gsap.to(item, { color: color, duration: 0.3 });
-      gsap.to(item.querySelector('.ledger-bg'), { color: color, duration: 0 });
-    });
+    item.addEventListener('mouseenter', activate);
+    item.addEventListener('mouseleave', deactivate);
 
-    item.addEventListener('mouseleave', () => {
-      gsap.to(item, { color: '#ffffff', duration: 0.3 });
-      
-      // Snap back with bounce
-      gsap.to([name, status], {
-        x: 0,
-        y: 0,
-        duration: 0.5,
-        ease: "elastic.out(1, 0.5)"
+    // 2. Mobile-Only Scroll Selection
+    if (window.innerWidth <= 768) {
+      ScrollTrigger.create({
+        trigger: item,
+        start: "top center",
+        end: "bottom center",
+        onEnter: activate,
+        onEnterBack: activate,
+        onLeave: deactivate,
+        onLeaveBack: deactivate
       });
-    });
+    }
   });
 
-  // 2. Private Vault Security Scan Logic
+  // 3. Private Vault Security Scan Logic
   if (vault) {
     const originalTextSpan = vault.querySelector('.vault-text-original');
     const glitchTextSpan = vault.querySelector('.vault-text-glitch');
