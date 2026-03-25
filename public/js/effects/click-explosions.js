@@ -17,8 +17,6 @@ function initClickExplosions() {
     return;
   }
 
-  console.log('[Click Explosions] Enhanced Mode Initialized');
-
   // Premium neon palette (Brand-inspired)
   const colors = [
     '#F15A22', // Neon Orange

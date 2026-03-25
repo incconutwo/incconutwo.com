@@ -3,49 +3,83 @@
  * Handles custom cursor, smooth interactions, and general page logic
  */
 
-// 1. CORE STABILITY: Robust Preloading
-// Wait for images and fonts before lifting curtain
-Promise.all([
-  document.fonts.ready,
-  new Promise(resolve => {
-    if (document.readyState === 'complete') {
-      resolve();
-    } else {
-      window.addEventListener('load', resolve);
-    }
-  })
-]).then(() => {
-  // Small buffer for Three.js shader compilation
-  setTimeout(() => {
-    document.body.classList.add('loaded');
-    initHackerScramble();
-  }, 200);
-});
+// Global DOM Cache to prevent excessive querying
+const DOM = {
+  cursor: null,
+  spotifyLive: null,
+  spotifyOffline: null,
+  spotifyArt: null,
+  spotifyTrack: null,
+  spotifyArtist: null,
+  spotifyStatusIcon: null,
+  scrubber: null,
+  tiltElements: null,
+  socialIcons: null,
+  ledgerItems: null,
+  privateVault: null
+};
 
+// Consolidated Application Bootstrap
+class ApplicationBootstrap {
+  static init() {
+    // 1. Core DOM Caching
+    this.cacheDOM();
+
+    // 2. Foundation Setup
+    initSmoothScroll();
+    gsap.registerPlugin(ScrollTrigger);
+
+    // 3. Interactive UI & Effects
+    initCustomCursor();
+    initSocialIconHovers();
+    initClickExplosions();
+    initMagneticButtons();
+
+    // 4. Core Visuals
+    initBackgroundFade();
+    initTextReveal();
+    initGlobalTitleAnimations();
+
+    // 5. Section Specifics
+    initAboutMeAnimations();
+    initActivitiesAnimations();
+    initSocialLedger();
+    initInspiration();
+    initScrubber();
+
+    // 6. Finalize Initial Load State
+    setTimeout(() => {
+      document.body.classList.add('loaded'); 
+      initHackerScramble();
+    }, 800);
+
+    // 7. Defer Network/API Heavy Lifting until assets finish loading
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        initSpotifyWidget();
+      }, 2000); 
+    });
+  }
+
+  static cacheDOM() {
+    DOM.cursor = document.getElementById('custom-cursor');
+    DOM.spotifyLive = document.getElementById('spotify-live');
+    DOM.spotifyOffline = document.getElementById('spotify-offline');
+    DOM.spotifyArt = document.getElementById('spotify-art');
+    DOM.spotifyTrack = document.getElementById('spotify-track');
+    DOM.spotifyArtist = document.getElementById('spotify-artist');
+    DOM.spotifyStatusIcon = document.querySelector('.spotify-status-text');
+    DOM.scrubber = document.getElementById('pageScrubber');
+    DOM.tiltElements = document.querySelectorAll('[data-tilt]');
+    DOM.socialIcons = document.querySelectorAll('.social-icon');
+    DOM.ledgerItems = document.querySelectorAll('.ledger-item');
+    DOM.privateVault = document.getElementById('private-trigger');
+  }
+}
+
+// Single Entry Point
 document.addEventListener('DOMContentLoaded', () => {
-  initSmoothScroll();
-  gsap.registerPlugin(ScrollTrigger);
-
-  // UI & Effects
-  initCustomCursor();
-  initSocialIconHovers();
-  initClickExplosions();
-  initMagneticButtons(); // NEW: Physics for buttons
-
-  // Visuals
-  initBackgroundFade();
-  initTextReveal();
-  initGlobalTitleAnimations();
-
-  // Section Specifics
-  initAboutMeAnimations();
-  initActivitiesAnimations(); // UPDATED: Better physics
-  initSocialLedger();
-  initInspiration();
-
-  // Live Data
-  initSpotifyWidget();
-  initScrubber();
+  ApplicationBootstrap.init();
 });
 
 /**
@@ -77,13 +111,12 @@ function initSmoothScroll() {
 }
 
 /**
- * Custom Cursor with smooth follow
+ * Custom Cursor Logic
+ * Performance optimized with requestAnimationFrame
  */
 function initCustomCursor() {
-  const cursor = document.getElementById('custom-cursor');
-  if (!cursor) return;
-  
-  // Check for touch device
+  const cursor = DOM.cursor;
+  if (!cursor || ('ontouchstart' in window)) return; // Disable on touch devices
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     cursor.style.display = 'none';
     return;
@@ -109,6 +142,17 @@ function initCustomCursor() {
     // Smooth interpolation
     const distX = mouseX - cursorX;
     const distY = mouseY - cursorY;
+    
+    // Optimization: Stop the RAF loop when the cursor catches up to the mouse
+    if (Math.abs(distX) < 0.1 && Math.abs(distY) < 0.1) {
+      isAnimating = false;
+      cursorX = mouseX;
+      cursorY = mouseY;
+      cursor.style.left = cursorX + 'px';
+      cursor.style.top = cursorY + 'px';
+      cursor.style.transform = `translate(-50%, -50%) scale(1)`;
+      return;
+    }
     
     cursorX += distX * 0.15;
     cursorY += distY * 0.15;
@@ -143,7 +187,7 @@ function initCustomCursor() {
  * Social Icon Hover Sound/Haptic (optional enhancement)
  */
 function initSocialIconHovers() {
-  const icons = document.querySelectorAll('.social-icon');
+  const icons = DOM.socialIcons;
   
   icons.forEach(icon => {
     icon.addEventListener('mouseenter', () => {
@@ -436,14 +480,14 @@ function initMagneticButtons() {
  * Optimized: Pauses polling when tab is inactive to save resources
  */
 function initSpotifyWidget() {
-  const offlineState = document.getElementById('spotify-offline');
-  const liveState = document.getElementById('spotify-live');
+  const offlineState = DOM.spotifyOffline;
+  const liveState = DOM.spotifyLive;
   
   // Elements to update
-  const elArt = document.getElementById('spotify-art');
-  const elTrack = document.getElementById('spotify-track');
-  const elArtist = document.getElementById('spotify-artist');
-  const elStatusIcon = document.querySelector('.spotify-status-text');
+  const elArt = DOM.spotifyArt;
+  const elTrack = DOM.spotifyTrack;
+  const elArtist = DOM.spotifyArtist;
+  const elStatusIcon = DOM.spotifyStatusIcon;
 
   let pollInterval;
 
@@ -451,7 +495,12 @@ function initSpotifyWidget() {
     if (document.hidden) return; 
 
     try {
-      const response = await fetch('/api/spotify/now-playing');
+      const response = await fetch(window.location.origin + '/api/spotify/now-playing');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
 
       // Log for debugging
@@ -465,8 +514,10 @@ function initSpotifyWidget() {
         
         if (liveState) {
           liveState.style.display = 'flex';
-          void liveState.offsetWidth;
-          liveState.classList.add('active');
+          // Fix: Prevent synchronous layout reflow
+          requestAnimationFrame(() => {
+            liveState.classList.add('active');
+          });
           liveState.href = data.spotifyUrl;
         }
 
@@ -531,7 +582,7 @@ function initSpotifyWidget() {
  * Initializes the class-based scrubber component
  */
 function initScrubber() {
-  const el = document.getElementById('pageScrubber');
+  const el = DOM.scrubber;
   if (el && typeof ScrubberController !== 'undefined') {
     new ScrubberController(el);
   }
@@ -544,7 +595,7 @@ function initScrubber() {
 function init3DTilt() {
   if ('ontouchstart' in window) return; // Skip on touch
 
-  const tiltElements = document.querySelectorAll('[data-tilt]');
+  const tiltElements = DOM.tiltElements;
 
   tiltElements.forEach(el => {
     el.addEventListener('mousemove', (e) => {
@@ -582,8 +633,8 @@ function init3DTilt() {
  * Handles the Connect Section Interactions
  */
 function initSocialLedger() {
-  const items = document.querySelectorAll('.ledger-item');
-  const vault = document.getElementById('private-trigger');
+  const items = DOM.ledgerItems;
+  const vault = DOM.privateVault;
 
   // Entrance Animation (ScrollTrigger)
   gsap.from(".ledger-item", {
@@ -626,6 +677,12 @@ function initSocialLedger() {
       });
     };
     
+    // Pre-calculate GSAP quickTo setters for massive performance boost
+    const xNameTo = gsap.quickTo(name, "x", { duration: 0.5, ease: "power3.out" });
+    const yNameTo = gsap.quickTo(name, "y", { duration: 0.5, ease: "power3.out" });
+    const xStatusTo = gsap.quickTo(status, "x", { duration: 0.5, ease: "power3.out" });
+    const yStatusTo = gsap.quickTo(status, "y", { duration: 0.5, ease: "power3.out" });
+
     // Magnetic Move on MouseMove
     item.addEventListener('mousemove', (e) => {
       if (window.innerWidth <= 768) return; // Skip on mobile for perf
@@ -637,19 +694,10 @@ function initSocialLedger() {
       const xCent = x - (rect.width / 2);
       const yCent = y - (rect.height / 2);
       
-      gsap.to(name, {
-        x: xCent * 0.1,
-        y: yCent * 0.2,
-        duration: 0.5,
-        ease: "power3.out"
-      });
-
-      gsap.to(status, {
-        x: xCent * 0.05,
-        y: yCent * 0.1,
-        duration: 0.5,
-        ease: "power3.out"
-      });
+      xNameTo(xCent * 0.1);
+      yNameTo(yCent * 0.2);
+      xStatusTo(xCent * 0.05);
+      yStatusTo(yCent * 0.1);
     });
 
     item.addEventListener('mouseenter', activate);

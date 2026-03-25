@@ -9,7 +9,7 @@
       {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla", "kind": "chrome"},
       {"label": "GitHub", "url": "https://github.com/incconutwo/twitter-account-location-in-username", "kind": "github"}
     ],
-    "stats": {"weeklyUsers": 900, "dailyUsers": 250},
+    "stats": {"weeklyUsers": 563, "dailyUsers": 340},
     "image": "assets/images/projects/twitter-flags.webp"
   },
   {
@@ -36,7 +36,7 @@
       {"label": "GitHub", "url": "https://github.com/incconutwo/Google-AI-Overview-Disabler", "kind": "github"}
     ],
     "stats": null,
-    "image": "assets/images/projects/ai-disabler.webp"
+    "image": null
   },
   {
     "id": "math-explorer",
@@ -49,7 +49,20 @@
       {"label": "Live Demo", "url": "https://incconutwomathproject.netlify.app", "kind": "external"}
     ],
     "stats": null,
-    "image": "assets/images/projects/math-explorer.webp"
+    "image": null
+  },
+  {
+    "id": "gemini-cleaner",
+    "featured": false,
+    "title": "gemini-cleaner",
+    "shortDescription": "Hide \"Upgrade to Ultra\" ads and banners on Gemini for a cleaner AI experience.",
+    "longDescription": "Gemini Cleaner is a lightweight browser extension designed to optimize your Google Gemini experience by removing intrusive 'Upgrade to Ultra' banners and promotional ads, leaving you with a distraction-free AI interface.",
+    "links": [
+      {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/gemini-cleaner-hide-upgra/effcebofhjdoknbmmpbncneoihbbahpg", "kind": "chrome"},
+      {"label": "GitHub", "url": "https://github.com/incconutwo/gemini-cleaner", "kind": "github"}
+    ],
+    "stats": null,
+    "image": "assets/images/projects/gemini-cleaner.png"
   },
   {
     "id": "aurora-chatgpt",
@@ -73,7 +86,7 @@
       {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-Grok", "kind": "github"}
     ],
     "stats": null,
-    "image": "assets/images/projects/aurora-grok.webp"
+    "image": null
   },
   {
     "id": "aurora-gemini",
@@ -85,7 +98,7 @@
       {"label": "Patreon", "url": "https://www.patreon.com/14488985/join", "kind": "external"}
     ],
     "stats": null,
-    "image": "assets/images/projects/aurora-gemini.webp"
+    "image": null
   }
 ]
  

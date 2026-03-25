@@ -448,8 +448,31 @@ class LiquidGradientApp {
       this.renderer.domElement.style.width = '100%';
       this.renderer.domElement.style.height = '100%';
     }
-    
     this.domElement.appendChild(this.renderer.domElement);
+
+    // Default to true to render initially
+    this.isIntersecting = true;
+
+    // Performance Optimization: Pause rendering if canvas container is off-screen
+    if ('IntersectionObserver' in window) {
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          this.isIntersecting = entry.isIntersecting;
+        });
+      }, {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.01 // Trigger as soon as 1% is visible
+      });
+      
+      // Observe the element containing the canvas (or body)
+      // For personal website, usually we want to pause when scrolling past Hero section
+      // If attached to body, we might need a specific element to track (like #hero)
+      const targetElement = document.getElementById('hero') || this.domElement;
+      if (targetElement) {
+        this.observer.observe(targetElement);
+      }
+    }
 
     this.camera = new THREE.PerspectiveCamera(
       45,
@@ -517,8 +540,7 @@ class LiquidGradientApp {
   init() {
     this.gradientBackground.init();
     this.setColorScheme(1);
-    this.render();
-    this.tick();
+    this.start(); // Use standardized loop with observer support
 
     window.addEventListener("resize", this.onResize);
     window.addEventListener("mousemove", this.onMouseMove);
@@ -527,12 +549,10 @@ class LiquidGradientApp {
     // PERFORMANCE FIX: Pause rendering when tab is hidden
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
-        // Pause loop
         this.renderer.setAnimationLoop(null);
       } else {
-        // Resume loop
-        this.clock.start(); // Reset delta so it doesn't jump
-        this.tick();
+        this.clock.start(); 
+        this.start();
       }
     });
   }
@@ -581,12 +601,14 @@ class LiquidGradientApp {
        }
     }
 
+    const isMobile = window.innerWidth <= 768; // basic mobile check
+    
     // Background and base settings (simplified for export)
     if (scheme === 1 || scheme === 5 || scheme === 6 || scheme === 7 || scheme === 8) {
       this.scene.background = new THREE.Color(0x0a0e27);
       uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
       uniforms.uGradientSize.value = 0.45;
-      uniforms.uGradientCount.value = 12.0;
+      uniforms.uGradientCount.value = isMobile ? 6.0 : 12.0; // Cut in half for mobile phones
       uniforms.uSpeed.value = 1.5;
       uniforms.uColor1Weight.value = 0.5;
       uniforms.uColor2Weight.value = 1.8;
@@ -598,7 +620,7 @@ class LiquidGradientApp {
       this.scene.background = new THREE.Color(0x0a0e27);
       uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
       uniforms.uGradientSize.value = 1.0;
-      uniforms.uGradientCount.value = 6.0;
+      uniforms.uGradientCount.value = isMobile ? 3.0 : 6.0; // Reduced for default schemes
       uniforms.uSpeed.value = 1.2;
       uniforms.uColor1Weight.value = 1.0;
       uniforms.uColor2Weight.value = 1.0;
@@ -611,6 +633,10 @@ class LiquidGradientApp {
   }
 
   onMouseMove(ev) {
+    const now = performance.now();
+    if (this.lastTouchTime && now - this.lastTouchTime < 32) return; // ~30fps throttle
+    this.lastTouchTime = now;
+
     this.mouse = {
       x: ev.clientX / window.innerWidth,
       y: 1 - ev.clientY / window.innerHeight
@@ -631,25 +657,23 @@ class LiquidGradientApp {
     this.gradientBackground.update(delta);
   }
 
-  render() {
-    // Optimization: Don't render if canvas is fully transparent or off-screen
-    // You can control this via a class on the canvas
-    if (this.renderer.domElement.classList.contains('fade-out') && 
-        getComputedStyle(this.renderer.domElement).opacity === "0") {
-      // Still request frame to check for changes, but skip heavy draw
-      requestAnimationFrame(() => this.tick());
-      return; 
-    }
-
-    const delta = this.clock.getDelta();
-    const clampedDelta = Math.min(delta, 0.1);
-    this.renderer.render(this.scene, this.camera);
-    this.update(clampedDelta);
+  start() {
+    this.renderer.setAnimationLoop((time) => {
+      // Pause if tab is hidden or canvas is not intersecting
+      if (document.hidden || !this.isIntersecting) return;
+      
+      const delta = this.clock.getDelta();
+      
+      // Safety cap on delta time to prevent physics explosions after long pause
+      const clampedDelta = Math.min(delta, 0.1); 
+      
+      this.update(clampedDelta);
+      this.render();
+    });
   }
 
-  tick() {
-    this.render();
-    requestAnimationFrame(() => this.tick());
+  render() {
+    this.renderer.render(this.scene, this.camera);
   }
 
   onResize() {

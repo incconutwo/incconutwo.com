@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Update CSP to allow source maps from CDNs -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net https://vitals.vercel-insights.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co https://lastfm.freetls.fastly.net https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net https://vitals.vercel-insights.com;">
   
   <!-- SEO Meta Tags -->
   <title>My Projects — incconu_two</title>
@@ -22,12 +22,14 @@
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   
   <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/pages/projects.css">
   
   <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Syne:wght@800&display=swap">
   
   <!-- Vercel Web Analytics -->
   <script>
@@ -53,10 +55,17 @@
       
       <!-- Section Header -->
       <header class="projects-header">
-        <h1 class="projects-title">
-          <span>MY</span>
-          <span class="text-accent">PROJECTS</span>
-        </h1>
+        <div class="projects-title-wrapper">
+          <h1 class="projects-title">
+            <span>MY</span>
+            <span class="text-accent">PROJECTS</span>
+          </h1>
+          <p>
+            <a href="https://github.com/incconutwo">
+              <img src="https://github-readme-stats-nine-liart-90.vercel.app/api?username=incconutwo&show_icons=true&theme=radical" alt="My GitHub Stats">
+            </a>
+          </p>
+        </div>
         <p class="projects-subtitle">Things I built and shipped.</p>
       </header>
 
@@ -71,11 +80,11 @@
 
   <!-- Scripts -->
   <!-- GSAP + ScrollTrigger (needed for card entrance animation) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   
   <!-- Projects Page Script -->
-  <script src="js/pages/projects.js"></script>
+  <script defer src="js/pages/projects.js"></script>
   
   <!-- Minimal cursor script (reused pattern) -->
   <script>

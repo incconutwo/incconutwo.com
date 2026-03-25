@@ -32,6 +32,18 @@
       ],
       stats: {weeklyUsers: 900, dailyUsers: 250},
       image: "assets/images/projects/twitter-flags.webp"
+    },
+    {
+      id: "gemini-cleaner",
+      featured: false,
+      title: "gemini-cleaner",
+      shortDescription: "Hide \"Upgrade to Ultra\" ads and banners on Gemini for a cleaner AI experience.",
+      longDescription: "Gemini Cleaner is a lightweight browser extension designed to optimize your Google Gemini experience by removing intrusive 'Upgrade to Ultra' banners and promotional ads, leaving you with a distraction-free AI interface.",
+      links: [
+        {label: "GitHub", url: "https://github.com/incconutwo/gemini-cleaner", kind: "github"}
+      ],
+      stats: null,
+      image: "assets/images/projects/gemini-cleaner.png"
     }
   ];
 
@@ -64,7 +76,7 @@
 
     async loadProjects() {
       try {
-        const response = await fetch('data/projects.json');
+        const response = await fetch(window.location.origin + '/data/projects.json');
         if (!response.ok) throw new Error('Failed to load');
         this.projects = await response.json();
       } catch (e) {
@@ -148,7 +160,7 @@
             const match = githubLink.url.match(/github\.com\/([^/]+)\/([^/]+)/);
             if (match && match.length >= 3) {
               const [_, owner, repo] = match;
-              const response = await fetch(`/api/github/stars/${owner}/${repo}`);
+              const response = await fetch(window.location.origin + `/api/github/stars/${owner}/${repo}`);
 
               if (response.ok) {
                 const data = await response.json();

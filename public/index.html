@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Update CSP to allow source maps from CDNs + Web Workers for canvas-confetti -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https://cdn.jsdelivr.net https://i.scdn.co; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net https://vitals.vercel-insights.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https://cdn.jsdelivr.net https://i.scdn.co https://lastfm.freetls.fastly.net https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net https://vitals.vercel-insights.com;">
   
   <!-- SEO Meta Tags -->
   <title>incconu_two — Personal Website</title>
@@ -22,12 +22,15 @@
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   
   <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
   
   <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Syne:wght@800&display=swap">
   
   <!-- Vercel Web Analytics -->
   <script>
@@ -182,59 +185,90 @@
         <!-- Activities Grid -->
         <div class="activities-grid">
           <!-- Physical -->
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">🏋️‍♂️</span>
-            <span class="activity-name">Gym</span>
+          <div class="activity-chip hover-card" style="--hc-color: #FF6B35;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">🏋️‍♂️</span>
+              <span class="activity-name">Gym</span>
+            </div>
           </div>
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">🏃</span>
-            <span class="activity-name">Walk / Running</span>
+          <div class="activity-chip hover-card" style="--hc-color: #4ECDC4;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">🏃</span>
+              <span class="activity-name">Walk / Running</span>
+            </div>
           </div>
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">🏊‍♂️</span>
-            <span class="activity-name">Swimming</span>
-            <span class="activity-detail">4 years of learning</span>
+          <div class="activity-chip hover-card" style="--hc-color: #00B4D8;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">🏊‍♂️</span>
+              <span class="activity-name">Swimming</span>
+              <span class="activity-detail">4 years of learning</span>
+            </div>
           </div>
 
           <!-- Tech & Creation -->
-          <div class="activity-chip wide" data-tilt>
-            <span class="activity-icon">💻</span>
-            <span class="activity-name">Web + Extension Coding</span>
-            <span class="activity-detail">Chrome / Firefox</span>
+          <div class="activity-chip hover-card wide" style="--hc-color: #b14cff;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">💻</span>
+              <span class="activity-name">Web + Extension Coding</span>
+              <span class="activity-detail">Chrome / Firefox</span>
+            </div>
           </div>
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">🎬</span>
-            <span class="activity-name">Video / Audio Editing</span>
+          <div class="activity-chip hover-card" style="--hc-color: #E63946;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">🎬</span>
+              <span class="activity-name">Video / Audio Editing</span>
+            </div>
           </div>
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">📱</span>
-            <span class="activity-name">Social Media Influencing</span>
+          <div class="activity-chip hover-card" style="--hc-color: #F72585;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">📱</span>
+              <span class="activity-name">Social Media Influencing</span>
+            </div>
           </div>
 
           <!-- Strategy & Finance -->
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">📈</span>
-            <span class="activity-name">Crypto / Day Trading</span>
+          <div class="activity-chip hover-card" style="--hc-color: #2DC653;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">📈</span>
+              <span class="activity-name">Crypto / Day Trading</span>
+            </div>
           </div>
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">💹</span>
-            <span class="activity-name">Long-term Investment</span>
+          <div class="activity-chip hover-card" style="--hc-color: #FFD60A;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">💹</span>
+              <span class="activity-name">Long-term Investment</span>
+            </div>
           </div>
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">♟️</span>
-            <span class="activity-name">Chess</span>
-            <span class="activity-detail">2-3 years of learning</span>
+          <div class="activity-chip hover-card" style="--hc-color: #C9ADA7;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">♟️</span>
+              <span class="activity-name">Chess</span>
+              <span class="activity-detail">2-3 years of learning</span>
+            </div>
           </div>
 
           <!-- Culture -->
-          <div class="activity-chip" data-tilt>
-            <span class="activity-icon">📚</span>
-            <span class="activity-name">Reading Books</span>
-            <span class="activity-detail">Cherub top 1</span>
+          <div class="activity-chip hover-card" style="--hc-color: #E9C46A;" data-tilt>
+            <div class="hover-card-content">
+              <div class="hover-card-bg-layer"></div>
+              <span class="activity-icon">📚</span>
+              <span class="activity-name">Reading Books</span>
+              <span class="activity-detail">Cherub top 1</span>
+            </div>
           </div>
           
           <!-- Music with Spotify Widget -->
-          <div class="activity-chip music-card wide" id="spotify-card" data-tilt>
+          <div class="activity-chip hover-card music-card wide" id="spotify-card" style="--hc-color: #1DB954;" data-tilt>
+            <div class="hover-card-bg-layer"></div>
             <!-- Default Content -->
             <div class="chip-content">
               <span class="activity-icon">🎧</span>
@@ -247,7 +281,7 @@
               <div class="spotify-state" id="spotify-offline">
                 <div class="spotify-icon-container">
                   <span class="spotify-brand-icon"></span>
-                </div>
+                </div> 
                 <span class="spotify-status-text">Not Playing</span>
               </div>
 
@@ -374,7 +408,14 @@
     <section class="projects-section" id="projects-section">
       <div class="content-container">
         <header class="projects-header">
-          <h2 class="cinematic-title">My <br><span class="text-accent">Projects</span></h2>
+          <div class="projects-title-wrapper">
+            <h2 class="cinematic-title">My <br><span class="text-accent">Projects</span></h2>
+            <p>
+              <a href="https://github.com/incconutwo">
+                <img src="https://github-readme-stats-nine-liart-90.vercel.app/api?username=incconutwo&show_icons=true&theme=radical" alt="My GitHub Stats">
+              </a>
+            </p>
+          </div>
           <p class="projects-subtitle">Things I built and shipped.</p>
         </header>
 
@@ -431,36 +472,39 @@
 
   <!-- Scripts -->
   <!-- Lenis for Premium Smooth Scrolling -->
-  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script defer src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
   <!-- GSAP for smooth animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   
   <!-- Anime.js Dependency -->
-  <script src="https://cdn.jsdelivr.net/npm/animejs@4.0.0/lib/anime.iife.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/animejs@4.0.0/lib/anime.iife.min.js"></script>
   
   <!-- Three.js Dependency -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   
   <!-- WebGL Liquid Gradient Background -->
-  <script src="js/background/liquid-gradient.js"></script>
-  <script src="js/background/background-init.js"></script>
+  <script defer src="js/background/liquid-gradient.js"></script>
+  <script defer src="js/background/background-init.js"></script>
   
   <!-- Scroll Scrubber -->
-  <script src="js/components/scrubber.js"></script>
+  <script defer src="js/components/scrubber.js"></script>
   
   <!-- Projects Script -->
-  <script src="js/pages/projects.js"></script>
+  <script defer src="js/pages/projects.js"></script>
   
   <!-- Canvas Confetti for Click Explosions -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   
   <!-- Click Explosions Effect -->
-  <script src="js/effects/click-explosions.js"></script>
+  <script defer src="js/effects/click-explosions.js"></script>
+  
+  <!-- Hover Card Pointer Tracking -->
+  <script defer src="js/components/hover-card.js"></script>
   
   <!-- Main Script -->
-  <script src="js/main.js"></script>
+  <script defer src="js/main.js"></script>
   
 </body>
 </html> 
