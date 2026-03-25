@@ -10,19 +10,24 @@
       {"label": "GitHub", "url": "https://github.com/incconutwo/twitter-account-location-in-username", "kind": "github"}
     ],
     "stats": {"weeklyUsers": 563, "dailyUsers": 340},
-    "image": "assets/images/projects/twitter-flags.webp"
+    "image": "assets/images/projects/twitter-flags.webp",
+    "screenshots": [
+      "assets/images/projects/twitter-flags.webp",
+      "assets/images/projects/1774468532098.jpeg"
+    ]
   },
   {
     "id": "personal-website",
     "featured": false,
-    "title": "This website (＾∀＾)",
+    "title": "incconutwo.com",
     "shortDescription": "This website (＾∀＾)",
     "longDescription": "This website (＾∀＾)",
     "links": [
       {"label": "Link", "url": "https://temp.com", "kind": "external"}
     ],
     "stats": null,
-    "image": null
+    "image": null,
+    "screenshots": []
   },
   {
     "id": "ai-overview-disabler",
@@ -36,20 +41,22 @@
       {"label": "GitHub", "url": "https://github.com/incconutwo/Google-AI-Overview-Disabler", "kind": "github"}
     ],
     "stats": null,
-    "image": null
+    "image": null,
+    "screenshots": []
   },
   {
     "id": "math-explorer",
     "featured": false,
     "title": "My Math Explorer",
     "shortDescription": "A math website I made for school for a geometry lesson, where you can choose between different geometric shapes to view in 3D, while demonstrating some theoretical relations in 3D for the student to see.",
-    "longDescription": "A math website I made for school for a geometry lesson, where you can choose between different geometric shapes to view in 3D, while demonstrating some theoretical relations in 3D for the student to see.",
+    "longDescription": "This interactive 3D Geometry Explorer is a web-based tool designed to help students visualize and manipulate spatial concepts in real-time. Built using Three.js, it features dynamic demonstrations of fundamental axioms, theorems, and the relative positions of lines and planes. Users can explore various 3D shapes, construct custom edges, and measure distances, making complex mathematical properties easier to grasp through hands-on exploration.",
     "links": [
       {"label": "GitHub", "url": "https://github.com/incconutwo/my-math-explorer", "kind": "github"},
       {"label": "Live Demo", "url": "https://incconutwomathproject.netlify.app", "kind": "external"}
     ],
     "stats": null,
-    "image": null
+    "image": null,
+    "screenshots": []
   },
   {
     "id": "gemini-cleaner",
@@ -62,7 +69,8 @@
       {"label": "GitHub", "url": "https://github.com/incconutwo/gemini-cleaner", "kind": "github"}
     ],
     "stats": null,
-    "image": "assets/images/projects/gemini-cleaner.png"
+    "image": "assets/images/projects/gemini-cleaner.png",
+    "screenshots": []
   },
   {
     "id": "aurora-chatgpt",
@@ -74,7 +82,8 @@
       {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-ChatGPT", "kind": "github"}
     ],
     "stats": null,
-    "image": "assets/images/projects/aurora-chatgpt.webp"
+    "image": "assets/images/projects/aurora-chatgpt.webp",
+    "screenshots": []
   },
   {
     "id": "aurora-grok",
@@ -86,19 +95,20 @@
       {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-Grok", "kind": "github"}
     ],
     "stats": null,
-    "image": null
+    "image": null,
+    "screenshots": []
   },
   {
     "id": "aurora-gemini",
     "featured": false,
     "title": "Aurora for Gemini",
-    "shortDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release. It features glassmorphism-style backgrounds designed to wrap the Gemini interface in soft, glassy aurora effects, maintaining a calm and visually engaging chat environment.",
+    "shortDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release.",
     "longDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release. It features glassmorphism-style backgrounds designed to wrap the Gemini interface in soft, glassy aurora effects, maintaining a calm and visually engaging chat environment.",
     "links": [
       {"label": "Patreon", "url": "https://www.patreon.com/14488985/join", "kind": "external"}
     ],
     "stats": null,
-    "image": null
+    "image": null,
+    "screenshots": []
   }
 ]
- 

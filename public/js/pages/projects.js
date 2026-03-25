@@ -15,7 +15,11 @@
     external: `<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.3 9.29 1.42 1.42L19 6.41V10h2V3h-7zM5 5v14h14v-7h-2v5H7V7h5V5H5z"/></svg>`,
     arrow: `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`,
     users: `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`,
-    star: `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`
+    star: `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`,
+    close: `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`,
+    back: `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`,
+    chevronLeft: `<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>`,
+    chevronRight: `<svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`
   };
 
   // Fallback data if fetch fails
@@ -31,7 +35,8 @@
         {label: "GitHub", url: "https://github.com/incconutwo/X-Twitter-Country-Flags-Blocker", kind: "github"}
       ],
       stats: {weeklyUsers: 900, dailyUsers: 250},
-      image: "assets/images/projects/twitter-flags.webp"
+      image: "assets/images/projects/twitter-flags.webp",
+      screenshots: []
     },
     {
       id: "gemini-cleaner",
@@ -43,7 +48,8 @@
         {label: "GitHub", url: "https://github.com/incconutwo/gemini-cleaner", kind: "github"}
       ],
       stats: null,
-      image: "assets/images/projects/gemini-cleaner.png"
+      image: "assets/images/projects/gemini-cleaner.png",
+      screenshots: []
     }
   ];
 
@@ -51,11 +57,17 @@
     constructor() {
       this.grid = document.getElementById('projectsGrid');
       this.projects = [];
+      this.detailOverlay = null;
+      this.isDetailOpen = false;
+      this._carouselIndex = 0;
+      this._carouselSlides = [];
+      this._carouselTouchStartX = 0;
       this.init();
     }
 
     async init() {
       await this.loadProjects();
+      this.createDetailOverlay();
       this.renderCards();
 
       // Register ScrollTrigger plugin for entrance animation
@@ -85,112 +97,342 @@
       }
     }
 
+    // ============================================
+    // DETAIL OVERLAY
+    // ============================================
+
     /**
-     * NEW: Premium Staggered Entrance Animation
-     * Uses ScrollTrigger batching with a heavier elastic feel
+     * Create the full-screen detail overlay (once, reused for all projects).
+     * The carousel is rebuilt each time a project is opened via _buildCarousel().
      */
+    createDetailOverlay() {
+      const overlay = document.createElement('div');
+      overlay.className = 'project-detail-overlay';
+      overlay.id = 'projectDetailOverlay';
+      overlay.innerHTML = `
+        <div class="project-detail-bg"></div>
+        <div class="project-detail-overlay-inner">
+          <button class="project-detail-close" aria-label="Close project details">
+            ${ICONS.back}
+            <span>Back to projects</span>
+          </button>
+          <div class="project-detail-layout">
+            <div class="project-detail-left">
+              <div class="project-detail-top">
+                <div class="project-detail-stats"></div>
+                <h1 class="project-detail-title"></h1>
+              </div>
+              <div class="project-detail-center">
+                <p class="project-detail-desc"></p>
+              </div>
+              <div class="project-detail-bottom">
+                <div class="project-detail-buttons"></div>
+              </div>
+            </div>
+            <div class="project-detail-right">
+              <div class="project-detail-carousel">
+                <div class="carousel-track-wrapper">
+                  <button class="carousel-arrow carousel-arrow-prev" aria-label="Previous screenshot">
+                    ${ICONS.chevronLeft}
+                  </button>
+                  <div class="carousel-viewport">
+                    <div class="carousel-track"></div>
+                  </div>
+                  <button class="carousel-arrow carousel-arrow-next" aria-label="Next screenshot">
+                    ${ICONS.chevronRight}
+                  </button>
+                </div>
+                <div class="carousel-dots"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      this.detailOverlay = overlay;
+
+      // Wire carousel arrow buttons
+      overlay.querySelector('.carousel-arrow-prev').addEventListener('click', () => {
+        this._carouselGoTo(this._carouselIndex - 1);
+      });
+      overlay.querySelector('.carousel-arrow-next').addEventListener('click', () => {
+        this._carouselGoTo(this._carouselIndex + 1);
+      });
+
+      // Touch / swipe support on the viewport
+      const viewport = overlay.querySelector('.carousel-viewport');
+      viewport.addEventListener('touchstart', (e) => {
+        this._carouselTouchStartX = e.touches[0].clientX;
+      }, { passive: true });
+      viewport.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - this._carouselTouchStartX;
+        if (Math.abs(dx) > 40) this._carouselGoTo(this._carouselIndex + (dx < 0 ? 1 : -1));
+      }, { passive: true });
+    }
+
+    /**
+     * Build carousel slides from project data.
+     *
+     * ──────────────────────────────────────────────────────────
+     * HOW TO ADD SCREENSHOTS FOR A PROJECT
+     * ──────────────────────────────────────────────────────────
+     * In projects.json, add image file paths to the "screenshots"
+     * array for any project. Example:
+     *
+     *   "screenshots": [
+     *     "assets/images/projects/my-project-screen1.webp",
+     *     "assets/images/projects/my-project-screen2.png",
+     *     "assets/images/projects/my-project-screen3.webp"
+     *   ]
+     *
+     * Leave "screenshots": [] to show animated placeholders instead.
+     * ──────────────────────────────────────────────────────────
+     */
+    _buildCarousel(project) {
+      const track    = this.detailOverlay.querySelector('.carousel-track');
+      const dotsEl   = this.detailOverlay.querySelector('.carousel-dots');
+      const prevBtn  = this.detailOverlay.querySelector('.carousel-arrow-prev');
+      const nextBtn  = this.detailOverlay.querySelector('.carousel-arrow-next');
+
+      const hasReal = Array.isArray(project.screenshots) && project.screenshots.length > 0;
+      const shots   = hasReal
+        ? project.screenshots
+        : ['__placeholder__', '__placeholder__', '__placeholder__'];
+
+      this._carouselSlides = shots;
+      this._carouselIndex  = 0;
+
+      // Render slides as a horizontal strip inside the track
+      track.innerHTML = shots.map((src, i) => {
+        if (src === '__placeholder__') {
+          return `
+            <div class="carousel-slide" data-index="${i}" aria-hidden="${i !== 0}">
+              <div class="carousel-placeholder">
+                <div class="placeholder-shimmer"></div>
+                <span class="placeholder-label">Screenshot ${i + 1}</span>
+              </div>
+            </div>`;
+        }
+        return `
+          <div class="carousel-slide" data-index="${i}" aria-hidden="${i !== 0}">
+            <img src="${src}" alt="Screenshot ${i + 1}" class="carousel-img" loading="lazy" draggable="false">
+          </div>`;
+      }).join('');
+
+      // Render dots
+      dotsEl.innerHTML = shots.map((_, i) =>
+        `<span class="carousel-dot${i === 0 ? ' active' : ''}" data-index="${i}" role="button" aria-label="Go to screenshot ${i + 1}"></span>`
+      ).join('');
+
+      dotsEl.querySelectorAll('.carousel-dot').forEach(dot => {
+        dot.addEventListener('click', () => this._carouselGoTo(+dot.dataset.index));
+      });
+
+      // Hide arrows when only one slide
+      const multi = shots.length > 1;
+      prevBtn.style.display = multi ? '' : 'none';
+      nextBtn.style.display = multi ? '' : 'none';
+
+      // Jump to first slide without animation
+      this._carouselGoTo(0, false);
+    }
+
+    /**
+     * Navigate the carousel to a given slide index (wraps around).
+     * @param {number}  index
+     * @param {boolean} animate - use GSAP transition (default true)
+     */
+    _carouselGoTo(index, animate = true) {
+      const count = this._carouselSlides.length;
+      if (!count) return;
+      index = ((index % count) + count) % count;
+      this._carouselIndex = index;
+
+      const track  = this.detailOverlay.querySelector('.carousel-track');
+      const dotsEl = this.detailOverlay.querySelector('.carousel-dots');
+
+      if (animate && typeof gsap !== 'undefined') {
+        gsap.to(track, { x: `-${index * 100}%`, duration: 0.6, ease: 'power4.out' });
+      } else {
+        track.style.transition = 'none';
+        track.style.transform  = `translateX(-${index * 100}%)`;
+        requestAnimationFrame(() => { track.style.transition = ''; });
+      }
+
+      // Sync dots
+      dotsEl.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      // Update aria-hidden on slides
+      track.querySelectorAll('.carousel-slide').forEach((slide, i) => {
+        slide.setAttribute('aria-hidden', i !== index);
+      });
+    }
+
+    // ============================================
+    // OPEN / CLOSE DETAIL
+    // ============================================
+
+    openDetail(projectId) {
+      const project = this.projects.find(p => p.id === projectId);
+      if (!project) return;
+
+      const overlay = this.detailOverlay;
+      const bg      = overlay.querySelector('.project-detail-bg');
+      const title   = overlay.querySelector('.project-detail-title');
+      const desc    = overlay.querySelector('.project-detail-desc');
+      const buttons = overlay.querySelector('.project-detail-buttons');
+      const stats   = overlay.querySelector('.project-detail-stats');
+
+      // Background blur layer (use image, fallback to first screenshot, else fallback to CSS gradient)
+      const bgImageUrl = project.image || (project.screenshots && project.screenshots.length > 0 ? project.screenshots[0] : null);
+      if (bgImageUrl) {
+        bg.style.backgroundImage = `url('${bgImageUrl}')`;
+        bg.classList.remove('no-image');
+      } else {
+        bg.style.backgroundImage = '';
+        bg.classList.add('no-image');
+      }
+
+      // Text content
+      title.textContent = project.title;
+      desc.textContent  = project.longDescription || project.shortDescription;
+      buttons.innerHTML = this.createButtons(project.links);
+      stats.innerHTML   = project.stats ? this.createStats(project.stats) : '';
+
+      // Stamp badge
+      const existingStamp = overlay.querySelector('.project-detail-stamp');
+      if (existingStamp) existingStamp.remove();
+      if (project.stamp) {
+        const stampEl = document.createElement('div');
+        stampEl.className   = 'project-detail-stamp';
+        stampEl.textContent = project.stamp;
+        overlay.querySelector('.project-detail-top').prepend(stampEl);
+      }
+
+      // Build carousel from project.screenshots
+      this._buildCarousel(project);
+
+      // Show overlay & lock scroll
+      overlay.classList.add('is-open');
+      document.body.classList.add('no-scroll');
+      document.documentElement.classList.add('no-scroll');
+      this.isDetailOpen = true;
+
+      history.replaceState(null, '', `#${projectId}`);
+
+      // Entrance animation
+      if (typeof gsap !== 'undefined') {
+        const tl = gsap.timeline();
+        tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+        tl.fromTo(overlay.querySelector('.project-detail-title'),
+          { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, '-=0.2');
+        tl.fromTo(overlay.querySelector('.project-detail-desc'),
+          { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }, '-=0.4');
+        tl.fromTo(overlay.querySelector('.project-detail-buttons'),
+          { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }, '-=0.3');
+        tl.fromTo(overlay.querySelector('.project-detail-carousel'),
+          { x: 80, opacity: 0, scale: 0.9 }, { x: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }, '-=0.4');
+        tl.fromTo(overlay.querySelector('.project-detail-close'),
+          { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }, '-=0.5');
+      }
+    }
+
+    closeDetail() {
+      if (!this.isDetailOpen) return;
+      const overlay = this.detailOverlay;
+
+      if (typeof gsap !== 'undefined') {
+        gsap.to(overlay, {
+          opacity: 0,
+          duration: 0.35,
+          ease: 'power2.in',
+          onComplete: () => {
+            overlay.classList.remove('is-open');
+            document.body.classList.remove('no-scroll');
+            document.documentElement.classList.remove('no-scroll');
+            this.isDetailOpen = false;
+          }
+        });
+      } else {
+        overlay.classList.remove('is-open');
+        document.body.classList.remove('no-scroll');
+        document.documentElement.classList.remove('no-scroll');
+        this.isDetailOpen = false;
+      }
+
+      history.replaceState(null, '', location.pathname);
+    }
+
+    // ============================================
+    // CARD ANIMATIONS
+    // ============================================
+
     animateEntrance() {
       if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-      // Ensure ScrollTrigger sees new DOM
       ScrollTrigger.refresh();
 
-      // Set Initial State: Tilted down, scaled down, transparent
-      gsap.set(".project-card", {
-        y: 100,
-        opacity: 0,
-        scale: 0.85,
-        rotationX: 10,
-        transformPerspective: 1000
+      gsap.set('.project-card', {
+        y: 100, opacity: 0, scale: 0.85, rotationX: 10, transformPerspective: 1000
       });
 
-      // Batch Animation
-      ScrollTrigger.batch(".project-card", {
-        start: "top 90%",
-        end: "bottom 10%",
+      ScrollTrigger.batch('.project-card', {
+        start: 'top 90%',
+        end: 'bottom 10%',
 
         onEnter: batch => gsap.to(batch, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotationX: 0,
-          stagger: 0.15, // Slightly slower stagger for weight
-          duration: 1.2,
-          ease: "elastic.out(1, 0.6)", // Heavier bounce than activities
-          overwrite: true
+          opacity: 1, y: 0, scale: 1, rotationX: 0,
+          stagger: 0.15, duration: 1.2, ease: 'elastic.out(1, 0.6)', overwrite: true
         }),
-
         onLeave: batch => gsap.to(batch, {
-          opacity: 0,
-          y: -60, // Float up when leaving top
-          scale: 0.9,
-          duration: 0.6,
-          ease: "power2.in",
-          overwrite: true
+          opacity: 0, y: -60, scale: 0.9, duration: 0.6, ease: 'power2.in', overwrite: true
         }),
-
         onEnterBack: batch => gsap.to(batch, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotationX: 0,
-          stagger: 0.1,
-          duration: 1,
-          ease: "elastic.out(1, 0.6)",
-          overwrite: true
+          opacity: 1, y: 0, scale: 1, rotationX: 0,
+          stagger: 0.1, duration: 1, ease: 'elastic.out(1, 0.6)', overwrite: true
         }),
-
         onLeaveBack: batch => gsap.to(batch, {
-          opacity: 0,
-          y: 60, // Drop down when leaving bottom
-          scale: 0.9,
-          duration: 0.6,
-          ease: "power2.in",
-          overwrite: true
+          opacity: 0, y: 60, scale: 0.9, duration: 0.6, ease: 'power2.in', overwrite: true
         })
       });
     }
 
+    // ============================================
+    // GITHUB STARS
+    // ============================================
+
     async fetchGitHubStars() {
       const starPromises = this.projects.map(async (project) => {
         const githubLink = project.links?.find(l => l.kind === 'github' || l.url.includes('github.com'));
-
-        if (githubLink) {
-          try {
-            const match = githubLink.url.match(/github\.com\/([^/]+)\/([^/]+)/);
-            if (match && match.length >= 3) {
-              const [_, owner, repo] = match;
-              const response = await fetch(window.location.origin + `/api/github/stars/${owner}/${repo}`);
-
-              if (response.ok) {
-                const data = await response.json();
-                if (data.stars > 0) {
-                  project.stats = {
-                    ...project.stats,
-                    stars: data.stars
-                  };
-                  // Re-render specifically just this card's stats to avoid full re-render
-                  this.updateCardStats(project.id, project.stats);
-                }
+        if (!githubLink) return;
+        try {
+          const match = githubLink.url.match(/github\.com\/([^/]+)\/([^/]+)/);
+          if (match && match.length >= 3) {
+            const [_, owner, repo] = match;
+            const response = await fetch(window.location.origin + `/api/github/stars/${owner}/${repo}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.stars > 0) {
+                project.stats = { ...project.stats, stars: data.stars };
+                this.updateCardStats(project.id, project.stats);
               }
             }
-          } catch (e) {
-            console.warn(`[Projects] Failed to fetch stars for ${project.title}:`, e);
           }
+        } catch (e) {
+          console.warn(`[Projects] Failed to fetch stars for ${project.title}:`, e);
         }
       });
-
       await Promise.all(starPromises);
     }
 
-    // Helper to update stats without killing animation state
     updateCardStats(id, stats) {
       const card = this.grid?.querySelector(`.project-card[data-id="${id}"]`);
       if (card) {
-        const frontContent = card.querySelector('.project-front .project-content');
+        const frontContent  = card.querySelector('.project-front .project-content');
         const existingStats = frontContent.querySelector('.project-stats');
-        const newStatsHtml = this.createStats(stats);
-
+        const newStatsHtml  = this.createStats(stats);
         if (existingStats) {
           existingStats.outerHTML = newStatsHtml;
         } else {
@@ -199,11 +441,14 @@
       }
     }
 
+    // ============================================
+    // RENDERING
+    // ============================================
+
     renderCards() {
       if (!this.grid) return;
 
       const sorted = [...this.projects].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-
       let html = '';
       let auroraHeaderAdded = false;
 
@@ -224,41 +469,28 @@
     }
 
     createCard(project) {
-      const { id, featured, title, shortDescription, longDescription, links, stats, image, stamp } = project;
-
-      const buttonsHtml = this.createButtons(links);
-      const statsHtml = stats ? this.createStats(stats) : '';
-      const hasImage = image ? `style="--bg:url('${image}')"` : '';
-      const noImageClass = image ? '' : 'no-image';
-      const stampHtml = stamp ? `<div class="project-stamp">${stamp}</div>` : '';
+      const { id, featured, title, shortDescription, links, stats, image, stamp } = project;
+      const statsHtml  = stats ? this.createStats(stats) : '';
+      const hasImage   = image ? `style="--bg:url('${image}')"` : '';
+      const noImgClass = image ? '' : 'no-image';
+      const stampHtml  = stamp ? `<div class="project-stamp">${stamp}</div>` : '';
 
       return `
-        <div class="project-card ${featured ? 'featured' : ''}" 
-             data-id="${id}" 
+        <div class="project-card ${featured ? 'featured' : ''}"
+             data-id="${id}"
              data-tilt
              tabindex="0"
              role="button"
-             aria-pressed="false"
              aria-label="View details for ${title}">
           <div class="project-card-inner">
-            <div class="project-face project-front ${noImageClass}" ${hasImage}>
+            <div class="project-face project-front ${noImgClass}" ${hasImage}>
               <div class="project-overlay"></div>
               ${stampHtml}
-              <div class="project-hint">Click for details</div>
+              <div class="project-hint">Click to view</div>
               <div class="project-content">
                 ${statsHtml}
                 <h3>${title}</h3>
                 <p class="project-desc">${shortDescription}</p>
-                <div class="project-buttons">${buttonsHtml}</div>
-              </div>
-            </div>
-            <div class="project-face project-back ${noImageClass}" ${hasImage}>
-              <div class="project-overlay"></div>
-              <div class="project-hint">Click to go back</div>
-              <div class="project-content">
-                <h3>${title}</h3>
-                <p class="project-desc long">${longDescription}</p>
-                <div class="project-buttons">${buttonsHtml}</div>
               </div>
             </div>
           </div>
@@ -268,14 +500,13 @@
 
     createButtons(links) {
       if (!links || !links.length) return '';
-
       return links.map((link, i) => {
-        const icon = ICONS[link.kind] || ICONS.external;
+        const icon      = ICONS[link.kind] || ICONS.external;
         const isPrimary = i === 0 && link.kind === 'chrome';
         return `
-          <a href="${link.url}" 
-             target="_blank" 
-             rel="noopener noreferrer" 
+          <a href="${link.url}"
+             target="_blank"
+             rel="noopener noreferrer"
              class="project-btn ${isPrimary ? 'primary' : ''}"
              onclick="event.stopPropagation()">
             ${icon}
@@ -289,43 +520,52 @@
       return `
         <div class="project-stats">
           ${stats.weeklyUsers ? `<span class="project-stat">${ICONS.users} ${stats.weeklyUsers} weekly</span>` : ''}
-          ${stats.dailyUsers ? `<span class="project-stat">${ICONS.users} ${stats.dailyUsers} daily</span>` : ''}
-          ${stats.stars ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
+          ${stats.dailyUsers  ? `<span class="project-stat">${ICONS.users} ${stats.dailyUsers} daily</span>`  : ''}
+          ${stats.stars       ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
         </div>
       `;
     }
 
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+
     attachEventListeners() {
+      // Card click → open detail
       this.grid?.addEventListener('click', (e) => {
         const card = e.target.closest('.project-card');
         if (!card) return;
         if (e.target.closest('.project-btn')) return;
-        this.toggleFlip(card);
+        this.openDetail(card.dataset.id);
       });
 
+      // Card keyboard
       this.grid?.addEventListener('keydown', (e) => {
         const card = e.target.closest('.project-card');
         if (!card) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          this.toggleFlip(card);
-        }
-        if (e.key === 'Escape' && card.classList.contains('is-flipped')) {
-          this.toggleFlip(card, false);
+          this.openDetail(card.dataset.id);
         }
       });
-    }
 
-    toggleFlip(card, force) {
-      const shouldFlip = force !== undefined ? force : !card.classList.contains('is-flipped');
-      card.classList.toggle('is-flipped', shouldFlip);
-      card.setAttribute('aria-pressed', shouldFlip);
-      const id = card.dataset.id;
-      if (shouldFlip) {
-        history.replaceState(null, '', `#${id}`);
-      } else if (location.hash === `#${id}`) {
-        history.replaceState(null, '', location.pathname);
-      }
+      // Close button
+      this.detailOverlay?.querySelector('.project-detail-close')?.addEventListener('click', () => {
+        this.closeDetail();
+      });
+
+      // Escape key + carousel left/right arrows
+      document.addEventListener('keydown', (e) => {
+        if (!this.isDetailOpen) return;
+        if (e.key === 'Escape')     this.closeDetail();
+        if (e.key === 'ArrowLeft')  this._carouselGoTo(this._carouselIndex - 1);
+        if (e.key === 'ArrowRight') this._carouselGoTo(this._carouselIndex + 1);
+      });
+
+      // Prevent link clicks from bubbling to close
+      this.detailOverlay?.addEventListener('click', (e) => {
+        if (e.target.closest('.project-btn')) e.stopPropagation();
+      });
     }
 
     handleDeepLink() {
@@ -333,42 +573,31 @@
       if (!hash) return;
       const card = this.grid?.querySelector(`[data-id="${hash}"]`);
       if (card) {
-        setTimeout(() => {
-          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          this.toggleFlip(card, true);
-        }, 300);
+        setTimeout(() => this.openDetail(hash), 300);
       }
     }
 
+    // ============================================
+    // TILT EFFECT
+    // ============================================
+
     initTilt() {
       if ('ontouchstart' in window ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return;
-      }
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      const cards = document.querySelectorAll('.project-card[data-tilt]');
-
-      cards.forEach(card => {
+      document.querySelectorAll('.project-card[data-tilt]').forEach(card => {
         card.addEventListener('mousemove', (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          const multiplier = 5;
-          const xRotate = (multiplier * ((y - rect.height / 2) / rect.height));
-          const yRotate = -(multiplier * ((x - rect.width / 2) / rect.width));
-
+          const rect      = card.getBoundingClientRect();
+          const x         = e.clientX - rect.left;
+          const y         = e.clientY - rect.top;
+          const mult      = 5;
+          const xRotate   = mult * ((y - rect.height / 2) / rect.height);
+          const yRotate   = -mult * ((x - rect.width  / 2) / rect.width);
           card.style.transform = `perspective(1200px) rotateX(${xRotate}deg) rotateY(${yRotate}deg) scale(1.02)`;
         });
 
         card.addEventListener('mouseleave', () => {
-          gsap.to(card, {
-            rotationX: 0,
-            rotationY: 0,
-            scale: 1,
-            duration: 0.5,
-            ease: "power2.out"
-          });
+          gsap.to(card, { rotationX: 0, rotationY: 0, scale: 1, duration: 0.5, ease: 'power2.out' });
         });
       });
     }
