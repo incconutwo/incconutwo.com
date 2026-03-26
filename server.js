@@ -41,8 +41,7 @@ const LASTFM_BASE = 'https://ws.audioscrobbler.com/2.0/';
 
 if (!LASTFM_API_KEY || !LASTFM_USERNAME) {
   if (process.env.NODE_ENV === 'production') {
-    console.error("❌ CRITICAL ERROR: Missing Last.fm credentials (LASTFM_API_KEY, LASTFM_USERNAME). Exiting.");
-    process.exit(1);
+    console.error("❌ CRITICAL ERROR: Missing Last.fm credentials (LASTFM_API_KEY, LASTFM_USERNAME). Spotify widget will remain offline.");
   } else {
     console.warn("⚠️  Warning: Missing Last.fm credentials in .env (LASTFM_API_KEY, LASTFM_USERNAME). Spotify widget will remain offline.");
   }
@@ -200,6 +199,10 @@ app.get('/api/github/stars/:owner/:repo', async (req, res) => {
   }
 });
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`✅ Server is running on http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`✅ Server is running on http://localhost:${port}`);
+  });
+}
+
+module.exports = app;
