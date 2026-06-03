@@ -31,127 +31,213 @@ app.use('/api/', limiter);
 // Enable CORS
 app.use(cors());
 
+// Enable JSON parsing for request bodies
+app.use(express.json());
+
+// Mock Vercel Insights for local development
+app.get('/_vercel/insights/script.js', (req, res) => {
+  res.type('application/javascript').send('// Mock Vercel Insights');
+});
+
 // Serve public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Last.fm Credentials
-const LASTFM_API_KEY = process.env.LASTFM_API_KEY;
-const LASTFM_USERNAME = process.env.LASTFM_USERNAME;
-const LASTFM_BASE = 'https://ws.audioscrobbler.com/2.0/';
+// Spotify Credentials
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+const SPOTIFY_REFRESH_TOKEN = process.env.SPOTIFY_REFRESH_TOKEN;
 
-if (!LASTFM_API_KEY || !LASTFM_USERNAME) {
+if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
   if (process.env.NODE_ENV === 'production') {
-    console.error("❌ CRITICAL ERROR: Missing Last.fm credentials (LASTFM_API_KEY, LASTFM_USERNAME). Spotify widget will remain offline.");
+    console.error("❌ CRITICAL ERROR: Missing Spotify credentials (SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN). Spotify widget will remain offline.");
   } else {
-    console.warn("⚠️  Warning: Missing Last.fm credentials in .env (LASTFM_API_KEY, LASTFM_USERNAME). Spotify widget will remain offline.");
+    console.warn("⚠️  Warning: Missing Spotify credentials in .env (SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN). Spotify widget will remain offline.");
   }
 }
 
 // Global Axios defaults
 axios.defaults.timeout = 5000;
 
-let pendingLastFmRequest = null;
+let pendingSpotifyRequest = null;
+
+/**
+ * Helper: Retrieve a valid Spotify access token, using node-cache to store it
+ */
+async function getSpotifyAccessToken() {
+  const cachedToken = cache.get('spotify_access_token');
+  if (cachedToken) return cachedToken;
+
+  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
+    throw new Error('Missing Spotify credentials in .env');
+  }
+
+  const response = await axios({
+    method: 'post',
+    url: 'https://accounts.spotify.com/api/token',
+    data: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: SPOTIFY_REFRESH_TOKEN
+    }).toString(),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: 'Basic ' + Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')
+    }
+  });
+
+  const accessToken = response.data.access_token;
+  const expiresIn = response.data.expires_in || 3600;
+  // Cache the token slightly less than expiration time (e.g. 5 minutes early)
+  cache.set('spotify_access_token', accessToken, expiresIn - 300);
+  return accessToken;
+}
 
 /**
  * Endpoint: /api/spotify/now-playing
- * Uses Last.fm — no Spotify Premium required!
+ * Uses Spotify Web API directly.
  * Returns the same JSON shape so the frontend works unchanged.
  */
 app.get('/api/spotify/now-playing', async (req, res) => {
   const cachedData = cache.get('now-playing');
   if (cachedData) return res.json(cachedData);
 
-  if (!LASTFM_API_KEY || !LASTFM_USERNAME) {
-    console.warn('⚠️  /api/spotify/now-playing called but LASTFM_API_KEY or LASTFM_USERNAME is missing in .env');
-    return res.json({ isPlaying: false, statusText: "Offline", error: "Missing Last.fm credentials in .env" });
+  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
+    console.warn('⚠️  /api/spotify/now-playing called but Spotify credentials are missing in .env');
+    return res.json({ isPlaying: false, statusText: "Offline", error: "Missing Spotify credentials in .env" });
   }
 
   // Prevent Thundering Herd
-  if (pendingLastFmRequest) {
+  if (pendingSpotifyRequest) {
     try {
-      const data = await pendingLastFmRequest;
+      const data = await pendingSpotifyRequest;
       return res.json(data);
     } catch(err) {
       // Allow fallback if pending request failed
     }
   }
 
-  pendingLastFmRequest = (async () => {
+  pendingSpotifyRequest = (async () => {
     try {
-      console.log(`🎵 Fetching Last.fm data for user: ${LASTFM_USERNAME}`);
-      const response = await axios.get(LASTFM_BASE, {
-        params: {
-          method: 'user.getRecentTracks',
-          user: LASTFM_USERNAME,
-          api_key: LASTFM_API_KEY,
-          format: 'json',
-          limit: 1
+      const accessToken = await getSpotifyAccessToken();
+      console.log('🎵 Fetching currently playing track from Spotify...');
+
+      const currentResponse = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
         }
       });
 
-      // Check for Last.fm error responses
-      if (response.data.error) {
-        console.error(`❌ Last.fm API returned error ${response.data.error}: ${response.data.message}`);
-        return { 
-          isPlaying: false, 
-          statusText: "API Error", 
-          error: `Last.fm error ${response.data.error}: ${response.data.message}` 
+      // Handle 204 No Content or no active playback
+      if (currentResponse.status === 204 || !currentResponse.data || !currentResponse.data.item) {
+        console.log('ℹ️  No track currently playing. Fetching recently played...');
+        const recentResponse = await axios.get('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+
+        const recentItems = recentResponse.data?.items;
+        if (!recentItems || recentItems.length === 0) {
+          return { isPlaying: false, statusText: "Not Playing" };
+        }
+
+        const recentTrack = recentItems[0].track;
+        const responseData = {
+          isPlaying: false,
+          statusText: "Recently Played",
+          track: recentTrack.name,
+          artist: recentTrack.artists.map(a => a.name).join(', '),
+          album: recentTrack.album.name,
+          albumArt: recentTrack.album.images?.[0]?.url || null,
+          spotifyUrl: recentTrack.external_urls?.spotify || null
         };
+
+        console.log(`✅ Recently Played: "${responseData.track}" by ${responseData.artist}`);
+        cache.set('now-playing', responseData, 10);
+        return responseData;
       }
 
-      const tracks = response.data?.recenttracks?.track;
-      if (!tracks || tracks.length === 0) {
-        console.log('ℹ️  No recent tracks found for this user.');
-        return { isPlaying: false, statusText: "No Tracks" };
-      }
-
-      const track = Array.isArray(tracks) ? tracks[0] : tracks;
-      const isPlaying = track['@attr']?.nowplaying === 'true';
+      const currentTrack = currentResponse.data.item;
+      const isPlaying = currentResponse.data.is_playing;
 
       const responseData = {
         isPlaying,
         statusText: isPlaying ? "Now Playing" : "Recently Played",
-        track: track.name,
-        artist: track.artist['#text'] || track.artist.name,
-        album: track.album['#text'],
-        albumArt: track.image?.find(img => img.size === 'extralarge')?.['#text']
-              || track.image?.[track.image.length - 1]?.['#text']
-              || null,
-        spotifyUrl: `https://open.spotify.com/search/${encodeURIComponent(track.name + ' ' + (track.artist['#text'] || ''))}`
+        track: currentTrack.name,
+        artist: currentTrack.artists.map(a => a.name).join(', '),
+        album: currentTrack.album.name,
+        albumArt: currentTrack.album.images?.[0]?.url || null,
+        spotifyUrl: currentTrack.external_urls?.spotify || null
       };
 
       console.log(`✅ ${responseData.statusText}: "${responseData.track}" by ${responseData.artist}`);
-
-      // Cache for 10 seconds
       cache.set('now-playing', responseData, 10);
       return responseData;
 
     } catch (error) {
       const status = error.response?.status;
       const errData = error.response?.data;
-      console.error('❌ Last.fm API Error:', {
+      console.error('❌ Spotify API Error:', {
         message: error.message,
         status: status || 'N/A',
-        responseData: errData || 'No response body',
-        url: error.config?.url || 'N/A'
+        responseData: errData || 'No response body'
       });
       throw error;
     } finally {
-      pendingLastFmRequest = null;
+      pendingSpotifyRequest = null;
     }
   })();
 
   try {
-    const data = await pendingLastFmRequest;
+    const data = await pendingSpotifyRequest;
     return res.json(data);
   } catch (err) {
     return res.status(500).json({ 
       isPlaying: false, 
       statusText: "Error",
-      error: "Failed to retrieve data" 
+      error: "Failed to retrieve data from Spotify" 
     });
   }
 });
+
+// Rate Limiter specifically for notifications to prevent spam
+const notifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per 15 minutes
+  message: { error: 'Too many notifications sent. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post('/api/notify', notifyLimiter, async (req, res) => {
+  const { message } = req.body;
+
+  if (!message || typeof message !== 'string' || message.trim() === '') {
+    return res.status(400).json({ error: 'Message content is required' });
+  }
+
+  try {
+    const response = await axios.post('https://ntfy.sh/my-site-alerts-98x21q', message.trim(), {
+      headers: {
+        'Title': 'New Custom Website Alert',
+        'Priority': 'high',
+        'Tags': 'bell,incoming_letter'
+      }
+    });
+
+    if (response.status === 200) {
+      console.log('✅ Notification sent successfully to ntfy');
+      return res.json({ success: true, message: 'Notification sent successfully' });
+    } else {
+      throw new Error(`ntfy returned status ${response.status}`);
+    }
+  } catch (error) {
+    console.error('❌ Failed to send notification via ntfy:', error.message);
+    return res.status(500).json({ error: 'Failed to send notification' });
+  }
+});
+
+
+
 
 app.get('/api/github/stars/:owner/:repo', async (req, res) => {
   const { owner, repo } = req.params;

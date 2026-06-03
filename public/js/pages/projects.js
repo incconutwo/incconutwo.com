@@ -88,12 +88,45 @@
 
     async loadProjects() {
       try {
+        const cached = sessionStorage.getItem('portfolio_projects');
+        if (cached) {
+          this.projects = JSON.parse(cached);
+          this.loadProjectsBackground();
+          return;
+        }
+      } catch (e) {
+        console.warn('[Projects] Failed to read from sessionStorage:', e);
+      }
+
+      await this.fetchProjectsFresh();
+    }
+
+    async fetchProjectsFresh() {
+      try {
         const response = await fetch(window.location.origin + '/data/projects.json');
         if (!response.ok) throw new Error('Failed to load');
         this.projects = await response.json();
+        sessionStorage.setItem('portfolio_projects', JSON.stringify(this.projects));
       } catch (e) {
         console.warn('[Projects] Using fallback data:', e);
         this.projects = FALLBACK_PROJECTS;
+      }
+    }
+
+    async loadProjectsBackground() {
+      try {
+        const response = await fetch(window.location.origin + '/data/projects.json');
+        if (response.ok) {
+          const freshProjects = await response.json();
+          if (JSON.stringify(freshProjects) !== JSON.stringify(this.projects)) {
+            this.projects = freshProjects;
+            sessionStorage.setItem('portfolio_projects', JSON.stringify(freshProjects));
+            this.renderCards();
+            this.initTilt();
+          }
+        }
+      } catch (e) {
+        console.warn('[Projects] Background refresh failed:', e);
       }
     }
 
@@ -301,15 +334,7 @@
       buttons.innerHTML = this.createButtons(project.links);
       stats.innerHTML   = project.stats ? this.createStats(project.stats) : '';
 
-      // Stamp badge
-      const existingStamp = overlay.querySelector('.project-detail-stamp');
-      if (existingStamp) existingStamp.remove();
-      if (project.stamp) {
-        const stampEl = document.createElement('div');
-        stampEl.className   = 'project-detail-stamp';
-        stampEl.textContent = project.stamp;
-        overlay.querySelector('.project-detail-top').prepend(stampEl);
-      }
+
 
       // Build carousel from project.screenshots
       this._buildCarousel(project);
@@ -404,6 +429,18 @@
     // ============================================
 
     async fetchGitHubStars() {
+      let cache = {};
+      try {
+        const cached = sessionStorage.getItem('github_stars_cache');
+        if (cached) {
+          cache = JSON.parse(cached);
+        }
+      } catch (e) {
+        console.warn('[Projects] Failed to read stars cache:', e);
+      }
+
+      let cacheUpdated = false;
+
       const starPromises = this.projects.map(async (project) => {
         const githubLink = project.links?.find(l => l.kind === 'github' || l.url.includes('github.com'));
         if (!githubLink) return;
@@ -411,10 +448,20 @@
           const match = githubLink.url.match(/github\.com\/([^/]+)\/([^/]+)/);
           if (match && match.length >= 3) {
             const [_, owner, repo] = match;
+            const repoKey = `${owner}/${repo}`;
+
+            if (cache[repoKey] !== undefined) {
+              project.stats = { ...project.stats, stars: cache[repoKey] };
+              this.updateCardStats(project.id, project.stats);
+              return;
+            }
+
             const response = await fetch(window.location.origin + `/api/github/stars/${owner}/${repo}`);
             if (response.ok) {
               const data = await response.json();
-              if (data.stars > 0) {
+              if (data.stars >= 0) {
+                cache[repoKey] = data.stars;
+                cacheUpdated = true;
                 project.stats = { ...project.stats, stars: data.stars };
                 this.updateCardStats(project.id, project.stats);
               }
@@ -425,6 +472,14 @@
         }
       });
       await Promise.all(starPromises);
+
+      if (cacheUpdated) {
+        try {
+          sessionStorage.setItem('github_stars_cache', JSON.stringify(cache));
+        } catch (e) {
+          console.warn('[Projects] Failed to save stars cache:', e);
+        }
+      }
     }
 
     updateCardStats(id, stats) {
@@ -469,12 +524,10 @@
     }
 
     createCard(project) {
-      const { id, featured, title, shortDescription, links, stats, image, stamp } = project;
+      const { id, featured, title, shortDescription, links, stats, image } = project;
       const statsHtml  = stats ? this.createStats(stats) : '';
       const hasImage   = image ? `style="--bg:url('${image}')"` : '';
       const noImgClass = image ? '' : 'no-image';
-      const stampHtml  = stamp ? `<div class="project-stamp">${stamp}</div>` : '';
-
       return `
         <div class="project-card ${featured ? 'featured' : ''}"
              data-id="${id}"
@@ -485,7 +538,7 @@
           <div class="project-card-inner">
             <div class="project-face project-front ${noImgClass}" ${hasImage}>
               <div class="project-overlay"></div>
-              ${stampHtml}
+              
               <div class="project-hint">Click to view</div>
               <div class="project-content">
                 ${statsHtml}

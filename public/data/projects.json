@@ -35,7 +35,6 @@
     "title": "Google AI Overview Disabler",
     "shortDescription": "A smaller, unsuccessful project, but they say a winner is just a loser that tried one more time (*^ω^).",
     "longDescription": "Project description: Automatically switches to Google Web results to disable AI Overview.\"",
-    "stamp": "FAILED",
     "links": [
       {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/google-ai-overview-disabl/oomhgmbdfkjilamcidkljlhcjogjbkeb", "kind": "chrome"},
       {"label": "GitHub", "url": "https://github.com/incconutwo/Google-AI-Overview-Disabler", "kind": "github"}
@@ -69,7 +68,7 @@
       {"label": "GitHub", "url": "https://github.com/incconutwo/gemini-cleaner", "kind": "github"}
     ],
     "stats": null,
-    "image": "assets/images/projects/gemini-cleaner.png",
+    "image": "assets/images/projects/gemini-cleaner.webp",
     "screenshots": []
   },
   {

@@ -142,6 +142,15 @@ class ScrubberController {
     this.state.tickWidth = parseInt(styles.getPropertyValue('--tick-width')) || 2;
     this.state.padding = parseInt(styles.getPropertyValue('--container-padding')) || 24;
     this.state.containerWidth = this.el.container.offsetWidth || 300;
+    this.updateCachedHeights();
+  }
+
+  updateCachedHeights() {
+    const h = document.documentElement;
+    const b = document.body;
+    this.state.cachedScrollHeight = Math.max(h.scrollHeight || 0, b.scrollHeight || 0);
+    this.state.cachedInnerHeight = window.innerHeight;
+    this.state.cachedClientHeight = h.clientHeight;
   }
 
   generateTicks() {
@@ -322,6 +331,7 @@ class ScrubberController {
   }
 
   handleResize() {
+    this.state.containerRect = null;
     this.measureDimensions();
     this.generateTicks();
     requestAnimationFrame(() => {
@@ -335,25 +345,21 @@ class ScrubberController {
   }
 
   getScrollPercent() {
-    const h = document.documentElement;
-    const b = document.body;
-    
-    // Use Lenis scroll value if available for precision
-    if (window.lenis) {
-      const scrollTop = window.lenis.scroll;
-      const scrollHeight = (h.scrollHeight || b.scrollHeight) - window.innerHeight;
-      return scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    if (!this.state.cachedScrollHeight) {
+      this.updateCachedHeights();
     }
-    
-    const scrollTop = h.scrollTop || b.scrollTop;
-    const scrollHeight = (h.scrollHeight || b.scrollHeight) - h.clientHeight;
+    const scrollTop = window.lenis ? window.lenis.scroll : (document.documentElement.scrollTop || document.body.scrollTop);
+    const scrollHeight = window.lenis 
+      ? (this.state.cachedScrollHeight - this.state.cachedInnerHeight)
+      : (this.state.cachedScrollHeight - this.state.cachedClientHeight);
     return scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
   }
 
   setPageScroll(value) {
-    const h = document.documentElement;
-    const b = document.body;
-    const maxScroll = (h.scrollHeight || b.scrollHeight) - window.innerHeight;
+    if (!this.state.cachedScrollHeight) {
+      this.updateCachedHeights();
+    }
+    const maxScroll = this.state.cachedScrollHeight - this.state.cachedInnerHeight;
     const scrollDest = (value / 100) * maxScroll;
 
     // Use Lenis if available for instant non-smoothed update (critical for drag)
@@ -366,12 +372,14 @@ class ScrubberController {
 
   handleMouseEnter() {
     if (!this.state.isReady || this.state.isDragging) return;
+    this.state.containerRect = this.el.container.getBoundingClientRect();
+    this.updateCachedHeights();
     this.safeAnimate(this.el.markerGhost, { opacity: [0, 1], duration: 200, ease: 'outQuad' });
   }
 
   handleMouseMove(e) {
     if (!this.state.isReady || this.state.isDragging) return;
-    const rect = this.el.container.getBoundingClientRect();
+    const rect = this.state.containerRect || this.el.container.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const tick = this.findNearestTick(x);
     if (tick && this.el.markerGhost) {
@@ -386,6 +394,7 @@ class ScrubberController {
 
   handleMouseLeave() {
     if (this.state.isDragging) return;
+    this.state.containerRect = null;
     this.safeAnimate(this.el.markerGhost, { opacity: 0, duration: 200, ease: 'outQuad' });
   }
 
@@ -395,8 +404,11 @@ class ScrubberController {
     this.el.container?.classList.add('dragging', 'show-tooltip');
     this.safeAnimate(this.el.markerGhost, { opacity: 0, duration: 80 });
     
+    this.state.containerRect = this.el.container.getBoundingClientRect();
+    this.updateCachedHeights();
+    
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const rect = this.el.container.getBoundingClientRect();
+    const rect = this.state.containerRect;
     const tick = this.findNearestTick(clientX - rect.left);
     if (tick) {
       this.applyValue(tick, true);
@@ -407,7 +419,7 @@ class ScrubberController {
   handleDragMove(e) {
     if (!this.state.isDragging) return;
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const rect = this.el.container.getBoundingClientRect();
+    const rect = this.state.containerRect || this.el.container.getBoundingClientRect();
     const tick = this.findNearestTick(clientX - rect.left);
     if (tick) {
       this.applyValue(tick, false);

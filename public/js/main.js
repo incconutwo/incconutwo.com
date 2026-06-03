@@ -45,6 +45,8 @@ class ApplicationBootstrap {
     initActivitiesAnimations();
     initSocialLedger();
     initInspiration();
+    initContactSupportAnimations();
+    initNotificationForm();
     initScrubber();
 
     // 6. Finalize Initial Load State
@@ -823,6 +825,89 @@ function initInspiration() {
     duration: 1.5,
     ease: "power3.out"
   }, "-=0.3");
+}
+
+/**
+ * Contact & Support Section Animations (GSAP)
+ * Snappy fade-up for cards
+ */
+function initContactSupportAnimations() {
+  const cards = document.querySelectorAll('.contact-support-section .glass-card');
+  if (cards.length === 0) return;
+
+  cards.forEach((card, i) => {
+    gsap.fromTo(card,
+      { y: 50, opacity: 0, scale: 0.95 },
+      {
+        scrollTrigger: {
+          trigger: card,
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        },
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 1,
+        ease: "power3.out",
+        delay: i * 0.15
+      }
+    );
+  });
+}
+
+/**
+ * Handle inline notification form for Support section
+ */
+function initNotificationForm() {
+  const container = document.getElementById('notification-form-container');
+  const textarea = document.getElementById('notification-msg');
+  const sendBtn = document.getElementById('notify-send-btn');
+  const status = document.getElementById('notify-status-text');
+
+  if (!container || !textarea || !sendBtn || !status) return;
+
+  sendBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const msg = textarea.value.trim();
+    if (!msg) {
+      status.className = 'notify-status error';
+      status.textContent = 'Please enter a message.';
+      return;
+    }
+
+    sendBtn.disabled = true;
+    status.className = 'notify-status info';
+    status.textContent = 'Sending...';
+
+    try {
+      const response = await fetch(window.location.origin + '/api/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        status.className = 'notify-status success';
+        status.textContent = 'Notification sent successfully! ❤️';
+        textarea.value = '';
+        setTimeout(() => {
+          status.className = 'notify-status';
+          status.textContent = '';
+        }, 2000);
+      } else {
+        throw new Error(data.error || 'Failed to send');
+      }
+    } catch (err) {
+      status.className = 'notify-status error';
+      status.textContent = err.message || 'Error sending notification.';
+    } finally {
+      sendBtn.disabled = false;
+    }
+  });
 }
 
 /**

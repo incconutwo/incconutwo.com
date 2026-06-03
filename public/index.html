@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Update CSP to allow source maps from CDNs + Web Workers for canvas-confetti -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https://cdn.jsdelivr.net https://i.scdn.co https://lastfm.freetls.fastly.net https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://unpkg.com https://cdn.jsdelivr.net https://vitals.vercel-insights.com;">
+  <!-- Tightened CSP for maximum security and local-first asset speed -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https://cdn.jsdelivr.net https://i.scdn.co https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self'; connect-src 'self' https://vitals.vercel-insights.com;">
   
   <!-- SEO Meta Tags -->
   <title>incconu_two — Personal Website</title>
@@ -24,13 +24,9 @@
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/typography.css">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
-  
-  <!-- Preconnect to Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Syne:wght@800&display=swap">
   
   <!-- Vercel Web Analytics -->
   <script>
@@ -78,7 +74,7 @@
           
           <!-- Bio Paragraph -->
           <p class="hero-bio text-body">
-            (or @tnemoroccan). I am 16 years old, living in Morocco, and in my first year of baccalaureate. I have one brother and one sister. I've been online since late 2024 and am quite active in real life, doing a lot of different sports and activities. I'm your typical "tech guy" at school, and I love music—all of it. New week, new music style, and this is my personal page for everything I do online and offline :-&gt;
+            I am 16 years old, living in Morocco, and in my first year of baccalaureate. I have one brother and one sister. I've been online since late 2024 and am quite active in real life, doing a lot of different sports and activities. I'm your typical "tech guy" at school, and I love music—all of it. New week, new music style, and this is my personal page for everything I do online and offline :-&gt;
           </p>
           
         </div>
@@ -99,7 +95,7 @@
                       transform="translate(100 100)" />
               </defs>
 
-              <image href="assets/images/profile.jpg"
+              <image href="assets/images/profile.webp"
                      width="200" height="200"
                      preserveAspectRatio="xMidYMid slice"
                      clip-path="url(#pe-blob-clip)" />
@@ -353,7 +349,7 @@
             </a>
 
             <!-- Item 3: Discord -->
-            <a href="https://discord.gg/rfgv22wp" target="_blank" class="ledger-item" data-color="#5865F2">
+            <a href="https://discord.com/users/867895216228925460" target="_blank" class="ledger-item" data-color="#5865F2">
               <span class="ledger-index">03</span>
               <span class="ledger-name">Discord</span>
               <span class="ledger-status">Community</span>
@@ -412,7 +408,7 @@
             <h2 class="cinematic-title">My <br><span class="text-accent">Projects</span></h2>
             <p>
               <a href="https://github.com/incconutwo">
-                <img src="https://github-readme-stats-nine-liart-90.vercel.app/api?username=incconutwo&show_icons=true&theme=radical" alt="My GitHub Stats">
+                <img src="https://github-readme-stats-nine-liart-90.vercel.app/api?username=incconutwo&show_icons=true&theme=radical&hide_rank=true&include_all_commits=true&count_private=true&border_radius=12" alt="Github General Stats of incconu_two" alt="My GitHub Stats">
               </a>
             </p>
           </div>
@@ -464,6 +460,85 @@
       </div>
     </section>
     
+    <!-- Contact & Support Section -->
+    <section class="contact-support-section" id="contact-support">
+      <div class="content-container">
+        <div class="contact-support-layout">
+          <!-- Left Column: Contact -->
+          <div class="contact-card-wrapper glass-card">
+            <h2 class="cinematic-title subsection-title">Want to <span class="text-accent">contact me?</span></h2>
+            <p class="contact-text text-body">
+              You can do it via my many social media accounts:
+            </p>
+            <ul class="contact-links-list">
+              <li>
+                <a href="https://x.com/tnemoroccan" target="_blank" rel="noopener noreferrer" class="contact-link-item">
+                  <span class="contact-icon-label">Twitter / X:</span> @tnemoroccan
+                </a>
+              </li>
+              <li>
+                <a href="https://discord.com/users/867895216228925460" target="_blank" rel="noopener noreferrer" class="contact-link-item">
+                  <span class="contact-icon-label">Discord:</span> @incconu_two
+                </a>
+              </li>
+              <li>
+                <a href="https://t.me/Incconu_two" target="_blank" rel="noopener noreferrer" class="contact-link-item">
+                  <span class="contact-icon-label">Telegram:</span> @Incconu_two
+                </a>
+              </li>
+            </ul>
+            <p class="contact-text text-body email-paragraph">
+              Or directly via my email:
+              <a href="mailto:incconutwousa@gmail.com" class="contact-email">incconutwousa@gmail.com</a>
+            </p>
+          </div>
+
+          <!-- Right Column: Support -->
+          <div class="support-card-wrapper glass-card">
+            <h2 class="cinematic-title subsection-title">Want to <span class="text-accent">support me?</span></h2>
+            <p class="support-subtitle text-body">You can do it in many ways:</p>
+            <ul class="support-list">
+              <li class="support-item notification-support-item">
+                <div class="support-item-header">
+                  <span class="support-icon">🔔</span>
+                  <span class="support-text">Sending me a notification directly on my phone</span>
+                </div>
+                <div class="notification-input-container" id="notification-form-container">
+                  <textarea id="notification-msg" placeholder="Type your motivation message here..." maxlength="200"></textarea>
+                  <div class="notification-btn-row">
+                    <button class="notify-btn send" id="notify-send-btn">Send</button>
+                  </div>
+                  <div class="notify-status" id="notify-status-text"></div>
+                </div>
+              </li>
+              <li class="support-item">
+                <span class="support-icon">⭐</span>
+                <span class="support-text"><a href="https://github.com/incconutwo?tab=repositories" target="_blank" rel="noopener noreferrer" class="support-github-link">Starring my many repos.</a></span>
+              </li>
+              <li class="support-item">
+                <span class="support-icon">👍</span>
+                <span class="support-text">Liking my posts (Reddit/Twitter).</span>
+              </li>
+              <li class="support-item">
+                <span class="support-icon">☕</span>
+                <span class="support-text">Helping me directly via <a href="https://ko-fi.com/incconutwo" target="_blank" rel="noopener noreferrer" class="support-kofi-link">Ko-fi</a>.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Dedication & Thanks -->
+        <div class="contact-support-dedication">
+          <p class="thanks-parents">Thanks to my parents for everything ❤️</p>
+        </div>
+
+        <!-- Site Footer Info -->
+        <footer class="footer-info">
+          <p class="footer-text">No AI was used to write the text of this website / thanks for scrolling until here ❤️</p>
+        </footer>
+      </div>
+    </section>
+    
     <div class="scroll-scrubber">
       <div class="scrubber" id="pageScrubber"></div>
     </div>
@@ -472,17 +547,17 @@
 
   <!-- Scripts -->
   <!-- Lenis for Premium Smooth Scrolling -->
-  <script defer src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script defer src="js/vendor/lenis.min.js"></script>
 
   <!-- GSAP for smooth animations -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script defer src="js/vendor/gsap.min.js"></script>
+  <script defer src="js/vendor/ScrollTrigger.min.js"></script>
   
   <!-- Anime.js Dependency -->
-  <script defer src="https://cdn.jsdelivr.net/npm/animejs@4.0.0/lib/anime.iife.min.js"></script>
+  <script defer src="js/vendor/anime.min.js"></script>
   
   <!-- Three.js Dependency -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script defer src="js/vendor/three.min.js"></script>
   
   <!-- WebGL Liquid Gradient Background -->
   <script defer src="js/background/liquid-gradient.js"></script>
@@ -495,7 +570,7 @@
   <script defer src="js/pages/projects.js"></script>
   
   <!-- Canvas Confetti for Click Explosions -->
-  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script defer src="js/vendor/confetti.min.js"></script>
   
   <!-- Click Explosions Effect -->
   <script defer src="js/effects/click-explosions.js"></script>
