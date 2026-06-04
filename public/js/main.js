@@ -436,8 +436,14 @@ function initMagneticButtons() {
   if (window.matchMedia("(pointer: coarse)").matches) return; // Disable on touch
 
   magnets.forEach(btn => {
+    let rect = null;
+
+    btn.addEventListener('mouseenter', () => {
+      rect = btn.getBoundingClientRect();
+    });
+
     btn.addEventListener('mousemove', (e) => {
-      const rect = btn.getBoundingClientRect();
+      if (!rect) rect = btn.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
 
@@ -459,6 +465,7 @@ function initMagneticButtons() {
     });
 
     btn.addEventListener('mouseleave', () => {
+      rect = null;
       // Snap back
       gsap.to(btn, {
         x: 0,
@@ -600,8 +607,14 @@ function init3DTilt() {
   const tiltElements = DOM.tiltElements;
 
   tiltElements.forEach(el => {
+    let rect = null;
+
+    el.addEventListener('mouseenter', () => {
+      rect = el.getBoundingClientRect();
+    });
+
     el.addEventListener('mousemove', (e) => {
-      const rect = el.getBoundingClientRect();
+      if (!rect) rect = el.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
@@ -620,6 +633,7 @@ function init3DTilt() {
     });
 
     el.addEventListener('mouseleave', () => {
+      rect = null;
       gsap.to(el, {
         rotationX: 0,
         rotationY: 0,
@@ -659,14 +673,17 @@ function initSocialLedger() {
     const status = item.querySelector('.ledger-status');
     const color = item.getAttribute('data-color');
     const bg = item.querySelector('.ledger-bg');
+    let rect = null;
 
     const activate = () => {
+      rect = item.getBoundingClientRect();
       item.classList.add('active');
       gsap.to(item, { color: color, duration: 0.3 });
       gsap.to(bg, { color: color, duration: 0 });
     };
 
     const deactivate = () => {
+      rect = null;
       item.classList.remove('active');
       gsap.to(item, { color: '#ffffff', duration: 0.3 });
       
@@ -689,7 +706,7 @@ function initSocialLedger() {
     item.addEventListener('mousemove', (e) => {
       if (window.innerWidth <= 768) return; // Skip on mobile for perf
       
-      const rect = item.getBoundingClientRect();
+      if (!rect) rect = item.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
