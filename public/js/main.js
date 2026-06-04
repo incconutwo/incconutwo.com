@@ -26,28 +26,31 @@ class ApplicationBootstrap {
     this.cacheDOM();
 
     // 2. Foundation Setup
-    initSmoothScroll();
     gsap.registerPlugin(ScrollTrigger);
 
-    // 3. Interactive UI & Effects
+    // 3. Interactive UI & Effects (Immediate, layout-independent)
     initCustomCursor();
     initSocialIconHovers();
     initClickExplosions();
-    initMagneticButtons();
-
-    // 4. Core Visuals
-    initBackgroundFade();
-    initTextReveal();
-    initGlobalTitleAnimations();
-
-    // 5. Section Specifics
-    initAboutMeAnimations();
-    initActivitiesAnimations();
-    initSocialLedger();
-    initInspiration();
-    initContactSupportAnimations();
     initNotificationForm();
-    initScrubber();
+
+    // 4. Defer all scroll and layout-heavy initialization to the next frame
+    // This allows the browser to paint and compute layout first, avoiding forced reflows.
+    requestAnimationFrame(() => {
+      initSmoothScroll();
+      initMagneticButtons();
+      
+      initBackgroundFade();
+      initTextReveal();
+      initGlobalTitleAnimations();
+
+      initAboutMeAnimations();
+      initActivitiesAnimations();
+      initSocialLedger();
+      initInspiration();
+      initContactSupportAnimations();
+      initScrubber();
+    });
 
     // 6. Finalize Initial Load State
     setTimeout(() => {
