@@ -34,22 +34,41 @@ class ApplicationBootstrap {
     initClickExplosions();
     initNotificationForm();
 
-    // 4. Defer all scroll and layout-heavy initialization to the next frame
-    // This allows the browser to paint and compute layout first, avoiding forced reflows.
-    requestAnimationFrame(() => {
-      initSmoothScroll();
-      initMagneticButtons();
-      
-      initBackgroundFade();
-      initTextReveal();
-      initGlobalTitleAnimations();
+    // 4. Staggered Progressive Boot to eliminate Long Tasks (TBT)
+    window.addEventListener('load', () => {
+      // Task 1: Start WebGL Background & Smooth Scrolling
+      setTimeout(() => {
+        if (typeof initBackgroundApp === 'function') {
+          initBackgroundApp();
+        }
+        initSmoothScroll();
+      }, 50);
 
-      initAboutMeAnimations();
-      initActivitiesAnimations();
-      initSocialLedger();
-      initInspiration();
-      initContactSupportAnimations();
-      initScrubber();
+      // Task 2: Core visible hero animations
+      setTimeout(() => {
+        initBackgroundFade();
+        initTextReveal();
+        initGlobalTitleAnimations();
+      }, 150);
+
+      // Task 3: Secondary page reveals
+      setTimeout(() => {
+        initAboutMeAnimations();
+        initActivitiesAnimations();
+      }, 300);
+
+      // Task 4: Remaining elements & ledger triggers
+      setTimeout(() => {
+        initSocialLedger();
+        initInspiration();
+      }, 450);
+
+      // Task 5: Interactive controls & footer
+      setTimeout(() => {
+        initContactSupportAnimations();
+        initScrubber();
+        initMagneticButtons();
+      }, 600);
     });
 
     // 6. Finalize Initial Load State

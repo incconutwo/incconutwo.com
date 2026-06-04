@@ -3,8 +3,10 @@
  * Initializes the WebGL liquid gradient with Scheme 5
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('webgl-background') || document.body;
+function initBackgroundApp() {
+  const container = document.getElementById('webgl-background');
+  if (!container || window.gradientApp) return;
+
   const app = new LiquidGradientApp(container);
 
   if (app.gradientBackground) {
@@ -12,4 +14,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.gradientApp = app;
-});
+}
