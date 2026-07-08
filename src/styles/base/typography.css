@@ -1,0 +1,117 @@
+/* ============================================
+   TYPOGRAPHY SYSTEM
+   Self-hosted Web Fonts & base text styles
+   ============================================ */
+
+/* Inter Variable Font (Weights 100 to 900) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/inter.woff2') format('woff2');
+}
+
+/* Syne Font (Extra Bold 800) */
+@font-face {
+  font-family: 'Syne';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../fonts/syne.woff2') format('woff2');
+}
+
+/* Base Typography */
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+h1 {
+  font-size: var(--text-display);
+  font-weight: var(--font-extrabold);
+  line-height: var(--leading-tight);
+}
+
+h2 {
+  font-size: var(--text-3xl);
+}
+
+h3 {
+  font-size: var(--text-2xl);
+}
+
+h4 {
+  font-size: var(--text-xl);
+}
+
+/* Display Headline (Landing page hero) */
+.headline-display {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: var(--font-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.headline-accent {
+  color: var(--color-accent);
+}
+
+.headline-white {
+  color: var(--color-text-primary);
+}
+
+/* Body Text Styles */
+.text-body {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  max-width: 520px;
+}
+
+.text-sm {
+  font-size: var(--text-sm);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+/* Links */
+a {
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+/* Hacker Text Effect (.dud) */
+.dud {
+  color: var(--color-accent);
+  opacity: 0.7;
+}

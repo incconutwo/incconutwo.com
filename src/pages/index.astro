@@ -1,0 +1,64 @@
+---
+import FloatingWidgets from '../components/FloatingWidgets.astro';
+import Inspiration from '../components/Inspiration.astro';
+import ContactSupport from '../components/ContactSupport.astro';
+import Projects from '../components/Projects.astro';
+import Connect from '../components/Connect.astro';
+import TechArsenal from '../components/TechArsenal.astro';
+import Activities from '../components/Activities.astro';
+import About from '../components/About.astro';
+import Hero from '../components/Hero.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="incconu_two — Personal Website">
+
+  <!-- Curtain Preloader -->
+  <div id="preloader">
+    <div class="loader-text">INITIALIZING SYSTEM...</div>
+  </div>
+
+  <!-- WebGL Background Canvas -->
+  <div id="webgl-background"></div>
+
+  <!-- Custom Cursor -->
+  <div id="custom-cursor" class="custom-cursor"></div>
+
+
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Section -->
+    <Hero />
+
+    <!-- Cinematic About Me Section -->
+    <About />
+
+    <!-- Cinematic Activities Section -->
+    <Activities />
+
+    <!-- Third Page: Tech Arsenal -->
+    <TechArsenal />
+
+    <!-- Connect / Profiles Section -->
+    <Connect />
+
+    <!-- Projects Section (Merged) -->
+    <Projects />
+
+    <!-- Inspiration / Philosophy Section -->
+    <Inspiration />
+
+    <!-- Contact & Support Section -->
+    <ContactSupport />
+    
+    <!-- Floating Widgets Container -->
+    <FloatingWidgets />
+
+    <div class="scroll-scrubber">
+      <div class="scrubber" id="pageScrubber"></div>
+    </div>
+
+  </main>
+</Layout>

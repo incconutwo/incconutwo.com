@@ -1,0 +1,169 @@
+/* ============================================
+   CINEMATIC "ABOUT ME" SECTION
+   ============================================ */
+
+.content-container {
+  max-width: 1200px;
+  width: 90%;
+  position: relative;
+  z-index: var(--z-floating);
+  padding: 0;
+  margin: 0 auto;
+  /* Added centering to fix left-alignment issue */
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: var(--element-gap);
+  /* Was 5vh */
+  text-align: left;
+}
+
+.cinematic-title {
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.95;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.cinematic-title .text-accent {
+  color: #fff;
+  display: block;
+  transform: translateX(40px);
+}
+
+/* Story Grid Layout */
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: var(--section-gap-v);
+  /* Was 6rem */
+}
+
+
+
+/* Glass Cards */
+.glass-card {
+  position: relative;
+  /* For shine sweep */
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: var(--card-padding);
+  /* Was 2.5rem */
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  will-change: transform;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(115deg, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.12) 50%, transparent 60%, transparent 100%);
+  background-size: 250% 100%;
+  background-position: 160% 0;
+  transition: background-position 0.5s ease;
+  pointer-events: none;
+  /* Don't interfere with clicks */
+  border-radius: inherit;
+}
+
+.glass-card:hover::before {
+  background-position: -60% 0;
+  transition: background-position 0.7s ease-in-out;
+}
+
+.glass-card:hover {
+  transform: translateY(-10px) rotateX(2deg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: var(--color-accent, #a29bfe);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Info List Styling */
+.info-list {
+  list-style: none;
+  padding: 0;
+}
+
+.info-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: calc(var(--element-gap) / 3) 0;
+  /* Was 0.8rem 0 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 1.1rem;
+}
+
+.info-list li:last-child {
+  border-bottom: none;
+}
+
+.info-list .label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.info-list .value {
+  color: #fff;
+  font-weight: 500;
+  text-align: right;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.info-list .fi {
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.info-list .fi:hover {
+  transform: scale(1.2) translateY(-2px);
+  z-index: var(--z-content);
+}
+
+/* Premium Tooltip */
+.info-list .fi[title]::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: 6px 12px;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-list .fi[title]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}

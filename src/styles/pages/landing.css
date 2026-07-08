@@ -1,0 +1,198 @@
+/* ============================================
+   LANDING PAGE STYLES
+   Hero section and page-specific styles
+   ============================================ */
+
+/* Landing page specific overrides */
+.page-landing {
+  overflow: visible;
+  overflow-x: hidden;
+}
+
+/* Hero section reveal animations */
+.headline-reveal {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.1;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+}
+
+.line-mask {
+  overflow: hidden;
+  margin-bottom: 0.2rem;
+}
+
+.reveal-item {
+  display: block;
+  transform: translateY(115%);
+  will-change: transform;
+}
+
+.hero-headline {
+  opacity: 1;
+  animation: none;
+}
+
+.hero-bio {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 0.4s;
+}
+
+.hero-projects-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-6);
+  background: rgba(177, 76, 255, 0.1);
+  border: 1px solid rgba(177, 76, 255, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 300ms cubic-bezier(0.25, 1, 0.5, 1);
+  width: fit-content;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 0.5s;
+  z-index: var(--z-content);
+}
+
+.hero-projects-btn:hover {
+  background: rgba(177, 76, 255, 0.25);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 25px rgba(177, 76, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.hero-projects-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  transition: transform 300ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hero-projects-btn:hover svg {
+  transform: translateX(4px);
+}
+
+.hero-profile {
+  opacity: 0;
+  animation: fadeInScale 1s ease forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Ensure profile effect container works on dark bg */
+.hero-profile .profile-effect-container .text-content {
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.hero-profile .profile-effect-container svg:hover .text-content {
+  fill: rgba(255, 255, 255, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-headline,
+  .hero-bio,
+  .hero-profile {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Second Page Styling */
+.second-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+  position: relative;
+  z-index: var(--z-content);
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--container-padding-v);
+}
+
+/* ============================================
+   CINEMATIC TITLE ANIMATION SETUP (Anti-Flash)
+   ============================================ */
+.cinematic-title {
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.95;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transform: translateY(100px);
+  will-change: transform, opacity;
+}
+
+.cinematic-title .text-accent {
+  color: #fff;
+  display: block;
+  transform: translateX(40px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* FIX: Reset translation on mobile to prevent overflow */
+@media (max-width: 768px) {
+  .cinematic-title .text-accent {
+    transform: translateX(0);
+    display: block;
+  }
+}
+
+/* Transition Blend Overlay */
+.second-page::before {
+  content: "";
+  position: absolute;
+  top: -200px;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg-secondary));
+  pointer-events: none;
+}
+
+/* Background Transition Effect */
+#webgl-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-background);
+  pointer-events: auto;
+  transition: opacity 0.8s ease-in-out;
+}
+
+#webgl-background.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}

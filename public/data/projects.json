@@ -1,33 +1,113 @@
 [
   {
+    "id": "jihawi-2026",
+    "featured": false,
+    "title": "ina-9a3a.app",
+    "shortDescription": "A website I built some weeks before the regional exams, where students can enter their Instagram handle, and select the class they were going to be in the exam, and the ability to see the people with you, it features an Instagram-like design.",
+    "links": [
+      {
+        "label": "Live Demo",
+        "url": "https://ina-9a3a.vercel.app",
+        "kind": "external"
+      }
+    ],
+    "stats": null,
+    "image": "assets/images/projects/ina-9a3a/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/ina-9a3a/screenshot1.webp",
+      "assets/images/projects/ina-9a3a/screenshot2.webp"
+    ],
+    "group": "Jihawi Apps"
+  },
+  {
+    "id": "jihawi-snap-hg",
+    "featured": false,
+    "title": "snap-hg.app",
+    "shortDescription": "A website I created to help me memorize the history and geography lesson I had in the regional exam, the special feature is that it divides all the lessons into 4 parts, so the student can concentrate on bite-sized sentences and not the whole lesson at once.",
+    "links": [
+      {
+        "label": "Live Demo",
+        "url": "https://snap-hg.vercel.app",
+        "kind": "external"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/SnapHG",
+        "kind": "github"
+      }
+    ],
+    "stats": null,
+    "image": null,
+    "screenshots": [],
+    "group": "Jihawi Apps"
+  },
+  {
+    "id": "jihawi-prep-challenge",
+    "featured": false,
+    "title": "Prep-Challenge",
+    "shortDescription": "Small apps for French and Arabic: I used to train the lesson I had, and the writing for both languages. It uses the fly AI to generate a new set of questions instead of locking a pre-written database. An offline mode is also available.",
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/Jihawii-Prep-Challenge",
+        "kind": "github"
+      }
+    ],
+    "stats": null,
+    "image": null,
+    "screenshots": [],
+    "group": "Jihawi Apps"
+  },
+  {
     "id": "twitter-flags",
     "featured": true,
     "title": "X/Twitter Country Flags & Blocker",
-    "shortDescription": "\"This is my biggest project yet, with about 900 weekly users and 250 daily.",
-    "longDescription": "Extension description: This extension adds a country flag emoji next to usernames on your timeline, letting you instantly see the account's location context. It also features a powerful \"Block by Country\" mode to automatically hide tweets from specific regions.\"",
+    "shortDescription": "One of my biggest project yet, with about 1400 weekly users and 1083 daily.",
+    "longDescription": "This extension adds a country flag emoji next to usernames on your timeline, letting you instantly see the account's location context. It also features a powerful \"Block by Country\" mode to automatically hide tweets from specific regions.\"",
     "links": [
-      {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla", "kind": "chrome"},
-      {"label": "GitHub", "url": "https://github.com/incconutwo/twitter-account-location-in-username", "kind": "github"}
+      {
+        "label": "Chrome Store",
+        "url": "https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla",
+        "kind": "chrome"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/twitter-account-location-in-username",
+        "kind": "github"
+      }
     ],
-    "stats": {"weeklyUsers": 563, "dailyUsers": 340},
-    "image": "assets/images/projects/twitter-flags.webp",
+    "stats": {
+      "weeklyUsers": 1400,
+      "dailyUsers": 1083
+    },
+    "image": "assets/images/projects/twitter-flags/screenshot1.webp",
     "screenshots": [
-      "assets/images/projects/twitter-flags.webp",
-      "assets/images/projects/1774468532098.jpeg"
-    ]
+      "assets/images/projects/twitter-flags/screenshot1.webp",
+      "assets/images/projects/twitter-flags/screenshot4.webp",
+      "assets/images/projects/twitter-flags/screenshot2.webp",
+      "assets/images/projects/twitter-flags/screenshot3.webp"
+    ],
+    "group": "Others"
   },
   {
     "id": "personal-website",
     "featured": false,
     "title": "incconutwo.com",
     "shortDescription": "This website (＾∀＾)",
-    "longDescription": "This website (＾∀＾)",
     "links": [
-      {"label": "Link", "url": "https://temp.com", "kind": "external"}
+      {
+        "label": "Link",
+        "url": "https://temp.com",
+        "kind": "external"
+      }
     ],
     "stats": null,
-    "image": null,
-    "screenshots": []
+    "image": "assets/images/projects/incconutwo.com/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/incconutwo.com/screenshot1.webp",
+      "assets/images/projects/incconutwo.com/screenshot2.webp"
+    ],
+    "group": "Others"
   },
   {
     "id": "ai-overview-disabler",
@@ -36,12 +116,21 @@
     "shortDescription": "A smaller, unsuccessful project, but they say a winner is just a loser that tried one more time (*^ω^).",
     "longDescription": "Project description: Automatically switches to Google Web results to disable AI Overview.\"",
     "links": [
-      {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/google-ai-overview-disabl/oomhgmbdfkjilamcidkljlhcjogjbkeb", "kind": "chrome"},
-      {"label": "GitHub", "url": "https://github.com/incconutwo/Google-AI-Overview-Disabler", "kind": "github"}
+      {
+        "label": "Chrome Store",
+        "url": "https://chromewebstore.google.com/detail/google-ai-overview-disabl/oomhgmbdfkjilamcidkljlhcjogjbkeb",
+        "kind": "chrome"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/Google-AI-Overview-Disabler",
+        "kind": "github"
+      }
     ],
     "stats": null,
     "image": null,
-    "screenshots": []
+    "screenshots": [],
+    "group": "Others"
   },
   {
     "id": "math-explorer",
@@ -50,12 +139,24 @@
     "shortDescription": "A math website I made for school for a geometry lesson, where you can choose between different geometric shapes to view in 3D, while demonstrating some theoretical relations in 3D for the student to see.",
     "longDescription": "This interactive 3D Geometry Explorer is a web-based tool designed to help students visualize and manipulate spatial concepts in real-time. Built using Three.js, it features dynamic demonstrations of fundamental axioms, theorems, and the relative positions of lines and planes. Users can explore various 3D shapes, construct custom edges, and measure distances, making complex mathematical properties easier to grasp through hands-on exploration.",
     "links": [
-      {"label": "GitHub", "url": "https://github.com/incconutwo/my-math-explorer", "kind": "github"},
-      {"label": "Live Demo", "url": "https://incconutwomathproject.netlify.app", "kind": "external"}
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/my-math-explorer",
+        "kind": "github"
+      },
+      {
+        "label": "Live Demo",
+        "url": "https://incconutwomathproject.netlify.app",
+        "kind": "external"
+      }
     ],
     "stats": null,
-    "image": null,
-    "screenshots": []
+    "image": "assets/images/projects/MY MATH EXPLORER/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/MY MATH EXPLORER/screenshot1.webp",
+      "assets/images/projects/MY MATH EXPLORER/screenshot2.webp"
+    ],
+    "group": "Others"
   },
   {
     "id": "gemini-cleaner",
@@ -64,38 +165,58 @@
     "shortDescription": "Hide \"Upgrade to Ultra\" ads and banners on Gemini for a cleaner AI experience.",
     "longDescription": "Gemini Cleaner is a lightweight browser extension designed to optimize your Google Gemini experience by removing intrusive 'Upgrade to Ultra' banners and promotional ads, leaving you with a distraction-free AI interface.",
     "links": [
-      {"label": "Chrome Store", "url": "https://chromewebstore.google.com/detail/gemini-cleaner-hide-upgra/effcebofhjdoknbmmpbncneoihbbahpg", "kind": "chrome"},
-      {"label": "GitHub", "url": "https://github.com/incconutwo/gemini-cleaner", "kind": "github"}
+      {
+        "label": "Chrome Store",
+        "url": "https://chromewebstore.google.com/detail/gemini-cleaner-hide-upgra/effcebofhjdoknbmmpbncneoihbbahpg",
+        "kind": "chrome"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/gemini-cleaner",
+        "kind": "github"
+      }
     ],
     "stats": null,
-    "image": "assets/images/projects/gemini-cleaner.webp",
-    "screenshots": []
+    "image": "assets/images/projects/gemini-cleaner/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/gemini-cleaner/screenshot1.webp",
+      "assets/images/projects/gemini-cleaner/screenshot2.webp"
+    ],
+    "group": "Others"
   },
   {
     "id": "aurora-chatgpt",
     "featured": false,
     "title": "Aurora for ChatGPT",
     "shortDescription": "The project Aurora for ChatGPT, launched in 2025, provides an ambient blurred background under the ChatGPT UI, enabling users to personalize their experience with visual enhancements while maintaining functionality.",
-    "longDescription": "The project Aurora for ChatGPT, launched in 2025, provides an ambient blurred background under the ChatGPT UI, enabling users to personalize their experience with visual enhancements while maintaining functionality.",
     "links": [
-      {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-ChatGPT", "kind": "github"}
+      {
+        "label": "GitHub",
+        "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-ChatGPT",
+        "kind": "github"
+      }
     ],
     "stats": null,
-    "image": "assets/images/projects/aurora-chatgpt.webp",
-    "screenshots": []
+    "image": "assets/images/projects/aurora/chatgpt.webp",
+    "screenshots": [],
+    "group": "Aurora Ecosystem"
   },
   {
     "id": "aurora-grok",
     "featured": false,
     "title": "Aurora for Grok",
     "shortDescription": "Similarly to Aurora for ChatGPT, Aurora for Grok, released in November 2025, extends these features to the Grok AI website, allowing selection among different aurora visuals or custom uploads, and is available as a Firefox extension.",
-    "longDescription": "Similarly to Aurora for ChatGPT, Aurora for Grok, released in November 2025, extends these features to the Grok AI website, allowing selection among different aurora visuals or custom uploads, and is available as a Firefox extension.",
     "links": [
-      {"label": "GitHub", "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-Grok", "kind": "github"}
+      {
+        "label": "GitHub",
+        "url": "https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-Grok",
+        "kind": "github"
+      }
     ],
     "stats": null,
     "image": null,
-    "screenshots": []
+    "screenshots": [],
+    "group": "Aurora Ecosystem"
   },
   {
     "id": "aurora-gemini",
@@ -104,10 +225,15 @@
     "shortDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release.",
     "longDescription": "Aurora for Gemini is a browser extension that enhances the user interface of the Gemini AI platform with customizable aurora-themed backgrounds, similar to previous projects in the Aurora series. It is currently available exclusively to Patreon supporters for testing and feedback prior to public release. It features glassmorphism-style backgrounds designed to wrap the Gemini interface in soft, glassy aurora effects, maintaining a calm and visually engaging chat environment.",
     "links": [
-      {"label": "Patreon", "url": "https://www.patreon.com/14488985/join", "kind": "external"}
+      {
+        "label": "Patreon",
+        "url": "https://www.patreon.com/14488985/join",
+        "kind": "external"
+      }
     ],
     "stats": null,
     "image": null,
-    "screenshots": []
+    "screenshots": [],
+    "group": "Aurora Ecosystem"
   }
 ]

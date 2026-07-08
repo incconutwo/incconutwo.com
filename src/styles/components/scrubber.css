@@ -1,0 +1,144 @@
+/* ============================================
+   SCRUBBER COMPONENT CSS
+   ============================================ */
+
+/* Base Container */
+.scrubber {
+  position: relative;
+  background: rgba(20, 20, 20, 0.45);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--container-radius);
+  height: var(--container-height);
+  padding: 0 var(--container-padding);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  opacity: 0;
+  /* JS handles entrance */
+  box-sizing: border-box;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.scrubber * {
+  box-sizing: border-box;
+}
+
+.scrubber.dragging {
+  cursor: grabbing;
+}
+
+.scrubber.ready {
+  cursor: pointer;
+}
+
+/* White Ticker Bar */
+.white-ticker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--ticker-white);
+  border-radius: var(--container-radius) 0 0 var(--container-radius);
+  pointer-events: none;
+  z-index: var(--z-content);
+  width: 0;
+}
+
+/* Ticks Container */
+.ticks-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--tick-gap);
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-content);
+}
+
+/* Individual Tick */
+.tick {
+  flex-shrink: 0;
+  width: var(--tick-width);
+  height: var(--tick-height);
+  background: var(--tick-default);
+  border-radius: 1px;
+  pointer-events: none;
+  transform: scaleY(0);
+  opacity: 0;
+}
+
+.tick.active {
+  background: var(--tick-active);
+}
+
+/* Primary Marker */
+.marker-primary {
+  position: absolute;
+  width: var(--marker-width);
+  height: var(--marker-height);
+  background: var(--marker-primary);
+  border-radius: 2px;
+  top: 50%;
+  margin-top: calc(var(--marker-height) * -0.5);
+  transform: scale(0);
+  pointer-events: none;
+  z-index: var(--z-floating);
+  left: var(--container-padding);
+  box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+}
+
+/* Ghost Marker */
+.marker-ghost {
+  position: absolute;
+  width: var(--ghost-width);
+  height: var(--ghost-height);
+  background: var(--marker-ghost);
+  border-radius: 2px;
+  top: 50%;
+  margin-top: calc(var(--ghost-height) * -0.5);
+  pointer-events: none;
+  z-index: var(--z-floating);
+  opacity: 0;
+  left: var(--container-padding);
+}
+
+/* Value Tooltip */
+.value-tooltip {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: var(--scrubber-bg);
+  border: 1px solid var(--scrubber-border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 150ms ease, transform 150ms ease;
+  z-index: var(--z-header);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.scrubber.show-tooltip .value-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  :root {
+    --tick-gap: 6px;
+    --tick-height: 14px;
+    --container-height: 46px;
+    --container-padding: 18px;
+  }
+}

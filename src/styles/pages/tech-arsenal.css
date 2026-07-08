@@ -1,0 +1,116 @@
+.third-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+  position: relative;
+  z-index: var(--z-content);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.third-page .content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.tech-arsenal {
+  margin-top: 0;
+  /* Reset since it's on own page */
+  max-width: 900px;
+}
+
+/* ============================================
+   TECH ARSENAL (Marquee Fix)
+   ============================================ */
+.marquee-container {
+  /* FIX: Change 100vw to 100% to prevent scrollbar overflow */
+  width: 100%;
+
+  /* Break out of container safely */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  width: 100vw;
+
+  /* Ensure it doesn't trigger scrollbars */
+  max-width: 100vw;
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 0;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+  display: flex;
+  gap: 2rem;
+  white-space: nowrap;
+  animation: scrollLeft 20s linear infinite;
+  /* Hardware accelerate the scrolling text */
+  will-change: transform;
+}
+
+@keyframes scrollLeft {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.subsection-title {
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  /* Ensure it doesn't wrap "The cool things" into two lines */
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .subsection-title {
+    font-size: 1.8rem;
+    /* Slightly smaller on mobile to ensure it fits */
+    white-space: nowrap;
+    /* Force 1-line for the parts separated by <br> */
+  }
+
+  .subsection-title .text-accent {
+    display: inline-block !important;
+    /* Keep on same line as <br> flow */
+  }
+}
+
+.tech-text-content {
+  font-size: 1.4rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-left: 2px solid var(--color-accent, #a29bfe);
+  padding-left: var(--element-gap);
+  /* Was 2rem */
+  animation: blurIn 1.2s ease forwards;
+}
+
+@keyframes blurIn {
+  from {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

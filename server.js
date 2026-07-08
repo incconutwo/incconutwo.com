@@ -39,8 +39,8 @@ app.get('/_vercel/insights/script.js', (req, res) => {
   res.type('application/javascript').send('// Mock Vercel Insights');
 });
 
-// Serve public folder
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve built Astro folder
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Spotify Credentials
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;

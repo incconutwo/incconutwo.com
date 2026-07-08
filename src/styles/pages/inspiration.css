@@ -1,0 +1,171 @@
+/* ============================================
+   INSPIRATION SECTION
+   ============================================ */
+
+.inspiration-section {
+  position: relative;
+  z-index: var(--z-content);
+  /* Top padding: 8rem, Bottom padding: 15rem + 15vh buffer */
+  padding: var(--space-32) var(--content-padding) calc(var(--space-32) + 15vh);
+  background-color: var(--color-bg-secondary);
+  /* #252423 */
+  overflow: hidden;
+}
+
+.inspiration-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--element-gap);
+  /* Was space-8 */
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Label Style */
+.inspiration-label {
+  font-family: monospace;
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: var(--space-6);
+  opacity: 0.8;
+}
+
+.inspiration-label .bracket {
+  color: var(--color-accent);
+}
+
+/* Quote Blocks */
+.quote-block {
+  position: relative;
+  width: 100%;
+}
+
+.quote-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.1;
+  /* Fluid font size for big impact */
+  font-size: clamp(2rem, 5vw, 4rem);
+  letter-spacing: -0.02em;
+}
+
+/* Classic Quote Styling (Dimmed) */
+.classic-quote .quote-text {
+  color: rgba(255, 255, 255, 0.3);
+  /* Ghostly look */
+  transition: color 0.5s ease;
+}
+
+.classic-quote:hover .quote-text {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.quote-mark {
+  position: absolute;
+  top: -40px;
+  left: -20px;
+  font-family: var(--font-display);
+  font-size: 8rem;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+/* Visual Connector Line */
+.inspiration-connector {
+  height: 80px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  /* Track */
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.connector-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  /* Animate this */
+  background: var(--color-accent);
+  /* Fill */
+}
+
+.connector-node {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 15px var(--color-accent);
+  z-index: var(--z-base);
+  transform: scale(0);
+  /* Animate this */
+}
+
+/* Personal Quote Styling (The Hero) */
+.personal-quote {
+  text-align: center;
+}
+
+.quote-mask {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.personal-quote .quote-text {
+  /* Initial state for slide-up */
+  transform: translateY(100%);
+  opacity: 1;
+  /* Visible but hidden by mask */
+}
+
+.personal-tag {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 1.1rem;
+  background: rgba(177, 76, 255, 0.15);
+  color: var(--color-accent);
+  padding: 6px 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(177, 76, 255, 0.4);
+  margin-bottom: var(--space-6);
+  transform: translateY(20px);
+  opacity: 0;
+  /* Animated in JS */
+}
+
+/* Text Gradient Effect */
+.text-gradient {
+  background: linear-gradient(90deg, #fff, #b14cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: shine 5s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quote-mark {
+    display: none;
+  }
+
+  .inspiration-connector {
+    height: 50px;
+  }
+}

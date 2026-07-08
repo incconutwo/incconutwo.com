@@ -1,0 +1,64 @@
+---
+import '../styles/index.css';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <ClientRouter />
+
+  <!-- Tightened CSP for maximum security and local-first asset speed -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https://cdn.jsdelivr.net https://i.scdn.co https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self'; connect-src 'self' https://vitals.vercel-insights.com https://hr-dashboard.tnemoroccan.workers.dev;">
+
+  <!-- SEO Meta Tags -->
+  <title>{title}</title>
+  <meta name="description"
+    content="Personal page for incconu_two (@tnemoroccan) — 16-year-old from Morocco. Tech enthusiast, music lover, and creator of Aurora browser extensions.">
+  <meta name="author" content="incconu_two">
+  <meta name="keywords" content="incconu_two, tnemoroccan, Morocco, developer, tech, Aurora extensions">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content="Personal page for everything I do online and offline.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
+
+  <!-- Vercel Web Analytics -->
+  <script is:inline>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body class="page-landing">
+  <slot />
+
+<!-- Vite Bundled Scripts -->
+  <script>
+    // 1. Load Vendor Libraries & attach to window first (prevents hoisting ReferenceErrors)
+    import '../js/utils/globals.js';
+
+    // 2. Import local modules in dependency order
+    import '../js/background/liquid-gradient.js';
+    import '../js/background/background-init.js';
+    import '../js/components/scrubber.js';
+    import '../js/pages/projects.js';
+    import '../js/effects/click-explosions.js';
+    import '../js/components/hover-card.js';
+    import '../js/main.js';
+  </script>
+
+
+</body>
+</html>

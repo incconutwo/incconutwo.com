@@ -1,0 +1,89 @@
+/* ============================================
+   SOCIAL ICONS
+   Glassmorphic icon buttons
+   ============================================ */
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  transition:
+    transform var(--transition-base),
+    background var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.social-icon:hover {
+  transform: translateY(-4px);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.social-icon:active {
+  transform: translateY(-2px);
+}
+
+.social-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.social-icon:hover svg {
+  transform: scale(1.1);
+}
+
+/* Icon-specific accent colors on hover */
+.social-icon--twitter:hover {
+  color: #1DA1F2;
+  border-color: rgba(29, 161, 242, 0.4);
+}
+
+.social-icon--github:hover {
+  color: #f0f6fc;
+  border-color: rgba(240, 246, 252, 0.4);
+}
+
+.social-icon--spotify:hover {
+  color: #1DB954;
+  border-color: rgba(29, 185, 84, 0.4);
+}
+
+.social-icon--kofi:hover {
+  color: #FF5E5B;
+  border-color: rgba(255, 94, 91, 0.4);
+}
+
+.social-icon--discord:hover {
+  color: #5865F2;
+  border-color: rgba(88, 101, 242, 0.4);
+}
+
+.social-icon--telegram:hover {
+  color: #0088cc;
+  border-color: rgba(0, 136, 204, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .social-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .social-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}

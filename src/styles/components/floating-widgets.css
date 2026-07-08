@@ -1,0 +1,301 @@
+/* ============================================
+   FLOATING WIDGETS CONTAINER
+   ============================================ */
+.floating-widgets-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: var(--z-modal, 1000);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+/* ============================================
+   FLOATING MUSIC WIDGET
+   ============================================ */
+.floating-music-widget {
+  position: relative;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floating-music-widget.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.floating-music-widget.retracted {
+  transform: translateX(calc(100% - 24px));
+}
+
+.floating-music-widget.retracted .fmw-arrow {
+  transform: rotate(180deg);
+}
+
+.fmw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fmw-title {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--color-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 12px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.floating-music-widget.retracted .fmw-title {
+  opacity: 0;
+}
+
+.fmw-toggle-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+}
+
+.fmw-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.fmw-arrow {
+  transition: transform 0.3s ease;
+}
+
+.fmw-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.floating-music-widget.retracted .fmw-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fmw-art {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.fmw-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 150px;
+}
+
+.fmw-track {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fmw-artist {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================
+   FLOATING HEART RATE WIDGET
+   ============================================ */
+.floating-heart-rate-widget {
+  position: relative;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floating-heart-rate-widget.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.floating-heart-rate-widget.retracted {
+  transform: translateX(calc(100% - 24px));
+}
+
+.floating-heart-rate-widget.retracted .fhr-arrow {
+  transform: rotate(180deg);
+}
+
+.fhr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fhr-title {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #ff3b30;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 12px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.floating-heart-rate-widget.retracted .fhr-title {
+  opacity: 0;
+}
+
+.fhr-toggle-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+}
+
+.fhr-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.fhr-arrow {
+  transition: transform 0.3s ease;
+}
+
+.fhr-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.3s ease;
+}
+
+.floating-heart-rate-widget.retracted .fhr-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fhr-art-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.fhr-icon {
+  display: inline-block;
+}
+
+.fhr-icon.pulse {
+  animation: fhr-beat 0.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes fhr-beat {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.18);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fhr-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 120px;
+}
+
+.fhr-bpm-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.fhr-bpm {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.fhr-unit {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fhr-meta {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}

@@ -1,0 +1,103 @@
+/* ============================================
+   HOVER CARD COMPONENT
+   Context-aware blur follower effect
+   ============================================ */
+
+/* --- Base Card --- */
+.hover-card {
+  --hover-card-radius: 16px;
+  position: relative;
+  container-type: size;
+  cursor: pointer;
+}
+
+/* --- Content Wrapper --- */
+.hover-card > .hover-card-content {
+  clip-path: inset(0 round var(--hover-card-radius));
+  overflow: hidden;
+
+  /* FIX: Use Flexbox instead of Grid for better text wrapping */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+
+  /* CRITICAL FIX: Changed from absolute to relative to restore card sizing */
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  border-radius: var(--hover-card-radius);
+  z-index: 1;
+}
+
+/* --- Border --- */
+/* Common properties for both base and tracking borders */
+.hover-card::before,
+.hover-card::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  inset: -1px; /* Expands by 1px to neatly cover the parent's native border */
+  border-radius: inherit;
+  padding: calc(var(--hc-border-width) * 1px);
+  
+  /* Mask trick to render only the padding area (creating a hollow border) */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  
+  transform: translateZ(0); /* Hardware acceleration */
+}
+
+/* 1. Base static border */
+.hover-card::before {
+  background: rgba(255, 255, 255, 0.06);
+  z-index: 2;
+}
+
+/* 2. Tracking gradient border */
+.hover-card::after {
+  background: radial-gradient(
+    circle 250px at calc(50% + var(--pointer-x, 0) * 50%) calc(50% + var(--pointer-y, 0) * 50%),
+    var(--hc-color, rgba(162, 155, 254, 0.8)) 0%,
+    transparent 100%
+  );
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* On hover: show the tracking border */
+.hover-card:is(:hover, :focus-within)::after {
+  opacity: 1;
+}
+
+
+
+/* --- Blurred Background Follower --- */
+.hover-card-bg-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform: translateZ(0);
+  /* Use a radial gradient from the per-card --hc-color */
+  background: radial-gradient(circle,
+      var(--hc-color, rgba(162, 155, 254, 0.8)),
+      transparent 70%);
+  filter:
+    blur(calc(var(--hc-blur) * 1px)) saturate(var(--hc-saturate)) brightness(var(--hc-brightness));
+  translate:
+    calc(var(--pointer-x, -10) * 50cqi) calc(var(--pointer-y, -10) * 50cqh);
+  scale: var(--hc-scale);
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  will-change: transform, filter;
+  pointer-events: none;
+}
+
+.hover-card:is(:hover, :focus-within) .hover-card-bg-layer {
+  opacity: var(--hc-opacity);
+}

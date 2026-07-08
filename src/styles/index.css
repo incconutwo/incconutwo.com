@@ -1,0 +1,32 @@
+/* ============================================
+   MAIN STYLESHEET AGGREGATOR
+   Personal Website - incconu_two
+   ============================================ */
+
+/* Base & Typography */
+@import './base/variables.css';
+@import './base/reset.css';
+@import './base/typography.css';
+@import './base/flags.css';
+@import './base/layout.css';
+
+/* Components */
+@import './components/profile-effect.css';
+@import './components/social-icons.css';
+@import './components/scrubber.css';
+@import './components/hover-card.css';
+@import './components/glass-card.css';
+@import './components/floating-widgets.css';
+
+/* Pages & Sections */
+@import './pages/landing.css';
+@import './pages/about.css';
+@import './pages/activities.css';
+@import './pages/tech-arsenal.css';
+@import './pages/connect.css';
+@import './pages/projects.css';
+@import './pages/inspiration.css';
+@import './pages/contact-support.css';
+
+/* Global UI Overlay Elements */
+@import './global-ui.css';

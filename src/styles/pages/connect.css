@@ -1,0 +1,321 @@
+/* ============================================
+   CONNECT SECTION (The Social Ledger)
+   ============================================ */
+
+.connect-section {
+  position: relative;
+  z-index: var(--z-content);
+  padding: var(--space-20) var(--content-padding);
+  background-color: var(--color-bg-secondary);
+  overflow: hidden;
+}
+
+.social-ledger-container {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--space-12);
+  margin-top: var(--space-8);
+}
+
+@media (max-width: 1024px) {
+  .social-ledger-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- The Public Ledger --- */
+
+.social-ledger {
+  display: flex;
+  flex-direction: column;
+}
+
+.ledger-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: calc(var(--element-gap) / 2) 0;
+  /* Was 1.5rem 0 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  transition: padding 0.3s ease;
+  overflow: hidden;
+}
+
+.ledger-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease;
+  z-index: 0;
+}
+
+.ledger-item:hover .ledger-bg,
+.ledger-item.active .ledger-bg {
+  opacity: 0.15;
+  transform: scaleY(1);
+}
+
+.ledger-index {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-right: 2rem;
+  position: relative;
+  z-index: var(--z-base);
+  transition: color 0.3s ease;
+}
+
+.ledger-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+  font-weight: 700;
+  color: #fff;
+  flex: 1;
+  position: relative;
+  z-index: var(--z-base);
+  transition: transform 0.3s ease;
+}
+
+.ledger-status {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  position: relative;
+  z-index: var(--z-base);
+  opacity: 0.6;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+
+.ledger-item:hover {
+  padding-left: 1rem;
+}
+
+.ledger-item:hover .ledger-index {
+  color: var(--color-accent);
+}
+
+.ledger-item:hover .ledger-status {
+  opacity: 1;
+  transform: translateX(0);
+  color: #fff;
+}
+
+.ledger-mini-row {
+  margin-top: var(--element-gap);
+  /* Was 2rem */
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+}
+
+.mini-link {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 5px;
+  position: relative;
+}
+
+.mini-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+.mini-link:hover::after {
+  width: 100%;
+}
+
+/* --- The Private Vault --- */
+
+.private-vault-container {
+  background:
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)),
+    rgba(0, 0, 0, 0.3);
+  background-size: 100% 2px, 3px 100%, 100% 100%;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* The Scanner Bar */
+.vault-scanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #ff3333;
+  box-shadow: 0 0 10px #ff3333;
+  opacity: 0;
+  z-index: var(--z-content);
+  /* Reduced to content layer */
+}
+
+.private-vault-container:hover .vault-scanner {
+  opacity: 1;
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    top: 0%;
+  }
+
+  50% {
+    top: 100%;
+  }
+
+  100% {
+    top: 0%;
+  }
+}
+
+.vault-header {
+  font-family: monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: #555;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.vault-lock {
+  width: 100%;
+  height: 80px;
+  background: #111;
+  border: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--card-padding);
+  /* Was 0 2rem */
+  cursor: not-allowed;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.vault-lock:hover {
+  border-color: #ff3333;
+  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.vault-text-mask {
+  position: relative;
+  font-family: monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.vault-text-glitch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ff3333;
+  opacity: 0;
+  background: #111;
+}
+
+.vault-text-original {
+  transition: opacity 0.2s ease;
+}
+
+.vault-lock:hover .vault-text-original {
+  opacity: 0;
+}
+
+.vault-lock:hover .vault-text-glitch {
+  opacity: 1;
+  animation: glitch-anim 0.3s infinite;
+}
+
+.lock-icon {
+  font-size: 1.5rem;
+}
+
+.vault-message {
+  margin-top: var(--space-4);
+  /* Consistent spacing */
+  color: #ff3333;
+  font-family: monospace;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.private-vault-container:hover .vault-message {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes shake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+@keyframes glitch-anim {
+  0% {
+    transform: translate(0)
+  }
+
+  20% {
+    transform: translate(-2px, 2px)
+  }
+
+  40% {
+    transform: translate(-2px, -2px)
+  }
+
+  60% {
+    transform: translate(2px, 2px)
+  }
+
+  80% {
+    transform: translate(2px, -2px)
+  }
+
+  100% {
+    transform: translate(0)
+  }
+}
