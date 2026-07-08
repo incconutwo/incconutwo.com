@@ -174,6 +174,27 @@
         const dx = e.changedTouches[0].clientX - this._carouselTouchStartX;
         if (Math.abs(dx) > 40) this._carouselGoTo(this._carouselIndex + (dx < 0 ? 1 : -1));
       }, { passive: true });
+
+      // Click screenshot to view fullscreen on mobile
+      viewport.addEventListener('click', (e) => {
+        const img = e.target.closest('.carousel-img');
+        if (!img) return;
+
+        // Check if on mobile/tablet (touch device or small screen)
+        const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+        if (!isMobile) return;
+
+        // Filter out placeholder slides
+        const realScreenshots = this._carouselSlides.filter(s => s !== '__placeholder__');
+        if (realScreenshots.length === 0) return;
+
+        // Find the index of the clicked screenshot in the filtered list
+        const clickedSrc = this._carouselSlides[this._carouselIndex];
+        const realIndex = realScreenshots.indexOf(clickedSrc);
+
+        // Open fullscreen carousel modal
+        this.openFullscreenViewer(realScreenshots, realIndex >= 0 ? realIndex : 0);
+      });
     }
 
     /**
@@ -361,6 +382,127 @@
       }
 
       history.replaceState(null, '', location.pathname);
+    }
+
+    /**
+     * Mobile Fullscreen Screenshot Carousel Modal with Swipe & Keyboard support
+     */
+    openFullscreenViewer(screenshots, initialIndex) {
+      const modal = document.createElement('div');
+      modal.className = 'screenshot-fullscreen-modal';
+      
+      // Setup HTML layout containing slides, arrows, and dots indicators
+      modal.innerHTML = `
+        <div class="fullscreen-close-btn">${ICONS.close}</div>
+        <div class="fullscreen-carousel-track-wrapper">
+          <button class="fullscreen-arrow fullscreen-arrow-prev" aria-label="Previous screenshot">
+            ${ICONS.chevronLeft}
+          </button>
+          <div class="fullscreen-carousel-viewport">
+            <div class="fullscreen-carousel-track">
+              ${screenshots.map((src, i) => `
+                <div class="fullscreen-carousel-slide">
+                  <img src="${src}" alt="Screenshot ${i + 1}" class="fullscreen-img" draggable="false">
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <button class="fullscreen-arrow fullscreen-arrow-next" aria-label="Next screenshot">
+            ${ICONS.chevronRight}
+          </button>
+        </div>
+        <div class="fullscreen-carousel-dots">
+          ${screenshots.map((_, i) => `
+            <span class="fullscreen-carousel-dot${i === initialIndex ? ' active' : ''}" data-index="${i}" role="button"></span>
+          `).join('')}
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Force page-flow animation triggers
+      requestAnimationFrame(() => {
+        modal.classList.add('active');
+      });
+
+      let currentIndex = initialIndex;
+      const track = modal.querySelector('.fullscreen-carousel-track');
+      const dots = modal.querySelectorAll('.fullscreen-carousel-dot');
+
+      const goToSlide = (idx, animate = true) => {
+        idx = ((idx % screenshots.length) + screenshots.length) % screenshots.length;
+        currentIndex = idx;
+        
+        if (animate && typeof gsap !== 'undefined') {
+          gsap.to(track, { x: `-${idx * 100}%`, duration: 0.4, ease: 'power2.out' });
+        } else {
+          track.style.transform = `translateX(-${idx * 100}%)`;
+        }
+
+        // Highlight selected navigation dots
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === idx);
+        });
+      };
+
+      // Set initial slide immediately
+      goToSlide(currentIndex, false);
+
+      // Bind button clicks
+      modal.querySelector('.fullscreen-arrow-prev').addEventListener('click', (e) => {
+        e.stopPropagation();
+        goToSlide(currentIndex - 1);
+      });
+      modal.querySelector('.fullscreen-arrow-next').addEventListener('click', (e) => {
+        e.stopPropagation();
+        goToSlide(currentIndex + 1);
+      });
+
+      dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          goToSlide(+dot.dataset.index);
+        });
+      });
+
+      // Swipe / gesture detection logic
+      let startX = 0;
+      const viewport = modal.querySelector('.fullscreen-carousel-viewport');
+      viewport.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      viewport.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 45) {
+          goToSlide(currentIndex + (dx < 0 ? 1 : -1));
+        }
+      }, { passive: true });
+
+      // Clean cleanup closure functions
+      const closeModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+
+      modal.querySelector('.fullscreen-close-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeModal();
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal || e.target.classList.contains('fullscreen-carousel-slide') || e.target.classList.contains('fullscreen-carousel-viewport')) {
+          closeModal();
+        }
+      });
+
+      // Keyboard listeners
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape')     closeModal();
+        if (e.key === 'ArrowLeft')  goToSlide(currentIndex - 1);
+        if (e.key === 'ArrowRight') goToSlide(currentIndex + 1);
+      };
+      document.addEventListener('keydown', handleKeyDown);
     }
 
     // ============================================
@@ -554,8 +696,21 @@
     }
 
     createCard(project) {
-      const { id, featured, title, shortDescription, links, stats } = project;
+      const { id, featured, title, shortDescription, links, stats, image, screenshots } = project;
       const statsHtml  = stats ? this.createStats(stats) : '';
+      
+      // Background fallback chain matching detail page background selection
+      let bgImageUrl = image || (screenshots && screenshots.length > 0 ? screenshots[0] : null);
+      
+      // Ensure leading slash for absolute path resolution on /projects sub-page
+      if (bgImageUrl && !bgImageUrl.startsWith('/') && !bgImageUrl.startsWith('http')) {
+        bgImageUrl = '/' + bgImageUrl;
+      }
+
+      const hasBg = !!bgImageUrl;
+      const bgStyle = hasBg ? `style="--bg: url('${bgImageUrl}');"` : '';
+      const bgClass = hasBg ? '' : 'no-image';
+
       return `
         <div class="project-card ${featured ? 'featured' : ''}"
              data-id="${id}"
@@ -564,7 +719,7 @@
              role="button"
              aria-label="View details for ${title}">
           <div class="project-card-inner">
-            <div class="project-face project-front no-image">
+            <div class="project-face project-front ${bgClass}" ${bgStyle}>
               <div class="project-overlay"></div>
               
               <div class="project-hint">Click to view</div>
