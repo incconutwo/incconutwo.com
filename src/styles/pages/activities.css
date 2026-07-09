@@ -326,11 +326,6 @@
   .music-card {
     flex-direction: column;
     align-items: stretch;
-    /* Fix: backdrop-filter is silently killed on mobile when children use clip-path+overflow.
-       Provide an explicit solid-ish fallback background so the card is never transparent. */
-    background: rgba(15, 15, 25, 0.70);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
 
   /* When offline, the card spans 2 columns in width and is 135px tall to match hobby card height */
