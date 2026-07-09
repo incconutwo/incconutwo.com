@@ -615,6 +615,17 @@ function initSpotifyWidget() {
       DOM.fmwWidget.classList.toggle('retracted');
     });
   }
+
+  // Prevent scroll wheel and touchmove events from bubbling to Lenis/page scroll
+  const topTracksList = document.getElementById('spotify-top-tracks-list');
+  if (topTracksList) {
+    topTracksList.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+    topTracksList.addEventListener('touchmove', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+  }
   let pollInterval;
   let topTracksCached = null;
 
@@ -663,8 +674,11 @@ function initSpotifyWidget() {
         console.warn('🎵 Music Widget:', data.error);
       }
 
+      const spotifyCard = document.getElementById('spotify-card');
+
       if (data.track && data.isPlaying) {
         // --- HAS TRACK DATA AND ACTIVELY PLAYING ---
+        if (spotifyCard) spotifyCard.classList.remove('is-offline');
         if (offlineState) offlineState.style.display = 'none';
 
         if (liveState) {
@@ -695,6 +709,7 @@ function initSpotifyWidget() {
 
       } else {
         // --- OFFLINE OR NOT PLAYING ---
+        if (spotifyCard) spotifyCard.classList.add('is-offline');
         if (liveState) {
           liveState.classList.remove('active');
           liveState.style.display = 'none';
@@ -713,6 +728,8 @@ function initSpotifyWidget() {
 
     } catch (error) {
       console.warn('🎵 Music Widget Error:', error.message || error);
+      const spotifyCard = document.getElementById('spotify-card');
+      if (spotifyCard) spotifyCard.classList.add('is-offline');
       if (liveState) liveState.style.display = 'none';
       if (offlineState) offlineState.style.display = 'flex';
     }

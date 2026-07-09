@@ -314,27 +314,58 @@
 
 /* Mobile Styling for Music Card */
 @media (max-width: 600px) {
+  .activities-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .activity-chip {
+    min-height: 120px;
+  }
+
   .music-card {
     flex-direction: column;
     align-items: stretch;
   }
 
+  /* When offline, the card spans 2 columns in width and is 135px tall to match hobby card height */
+  .music-card.wide.is-offline {
+    grid-column: span 2 !important;
+    min-height: 135px !important;
+    height: 135px !important;
+  }
+
   .music-card .chip-content {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 1rem;
+    padding: 0.6rem 1rem;
     flex-direction: row;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
+  }
+
+  /* Adjust padding and height when offline to match hobby block profile */
+  .music-card.is-offline .chip-content {
+    padding: 0.4rem 0.8rem;
   }
 
   .activity-icon {
     margin-bottom: 0;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 
   .spotify-widget {
     border-left: none;
-    padding: 1rem 0;
+    padding: 0.6rem 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .music-card.is-offline .spotify-widget {
+    padding: 0.3rem 0;
+  }
+
+  .music-card.is-offline .spotify-top-tracks {
+    max-height: 72px; /* Scrollable list area fitting inside the 135px height */
   }
 }
 
