@@ -384,7 +384,29 @@
   flex-direction: column;
   gap: 0.4rem;
   width: 100%;
-  overflow: hidden;
+  max-height: 108px;
+  overflow-y: auto;
+  padding-right: 4px;
+  box-sizing: border-box;
+}
+
+/* Premium Scrollbar for Top Tracks List */
+.spotify-top-tracks::-webkit-scrollbar {
+  width: 4px;
+}
+
+.spotify-top-tracks::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.spotify-top-tracks::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+.spotify-top-tracks::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .top-track-row {

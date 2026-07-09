@@ -634,7 +634,7 @@ function initSpotifyWidget() {
     const listEl = document.getElementById('spotify-top-tracks-list');
     if (!listEl || !topTracksCached) return;
 
-    const tracksToRender = topTracksCached.slice(0, 3);
+    const tracksToRender = topTracksCached;
     listEl.innerHTML = tracksToRender.map(track => `
       <a href="${track.url || '#'}" target="_blank" class="top-track-row" rel="noopener noreferrer">
         <img src="${track.albumArt || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${track.name}" class="top-track-art">
