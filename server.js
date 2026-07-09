@@ -199,6 +199,47 @@ app.get('/api/spotify/now-playing', async (req, res) => {
   }
 });
 
+/**
+ * Endpoint: /api/spotify/top-tracks
+ * Fetches top tracks this month directly from Spotify.
+ */
+app.get('/api/spotify/top-tracks', async (req, res) => {
+  const cachedData = cache.get('top-tracks');
+  if (cachedData) return res.json(cachedData);
+
+  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
+    return res.status(500).json({ error: "Missing Spotify credentials in .env" });
+  }
+
+  try {
+    const accessToken = await getSpotifyAccessToken();
+    console.log('🎵 Fetching top tracks from Spotify...');
+    const response = await axios.get('https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+
+    const items = response.data?.items;
+    if (!items || items.length === 0) {
+      return res.status(404).json({ error: "No top tracks returned from Spotify API" });
+    }
+
+    const tracks = items.map(item => ({
+      name: item.name,
+      artist: item.artists.map(a => a.name).join(', '),
+      albumArt: item.album.images?.[0]?.url || item.album.images?.[1]?.url || null,
+      url: item.external_urls?.spotify || null
+    }));
+
+    cache.set('top-tracks', tracks, 3600); // 1 hour cache
+    return res.json(tracks);
+  } catch (error) {
+    console.error('❌ Failed to fetch top tracks from Spotify API:', error.message);
+    return res.status(500).json({ error: error.message || "Failed to retrieve top tracks" });
+  }
+});
+
 // Rate Limiter specifically for notifications to prevent spam
 const notifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

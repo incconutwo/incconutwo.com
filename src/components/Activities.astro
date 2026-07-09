@@ -104,10 +104,13 @@
         <div class="spotify-widget">
           <!-- Offline / Loading State -->
           <div class="spotify-state" id="spotify-offline">
-            <div class="spotify-icon-container">
+            <div class="spotify-offline-header">
               <span class="spotify-brand-icon"></span>
-            </div> 
-            <span class="spotify-status-text">Not Playing</span>
+              <span class="spotify-offline-title">Top Tracks This Month</span>
+            </div>
+            <div class="spotify-top-tracks" id="spotify-top-tracks-list">
+              <!-- Dynamically populated top tracks -->
+            </div>
           </div>
 
           <!-- Live Playing State -->

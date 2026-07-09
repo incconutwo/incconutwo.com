@@ -615,8 +615,36 @@ function initSpotifyWidget() {
       DOM.fmwWidget.classList.toggle('retracted');
     });
   }
-
   let pollInterval;
+  let topTracksCached = null;
+
+  async function fetchTopTracks() {
+    try {
+      const response = await fetch(window.location.origin + '/api/spotify/top-tracks');
+      if (response.ok) {
+        topTracksCached = await response.json();
+        renderTopTracks();
+      }
+    } catch (e) {
+      console.warn('🎵 Top Tracks error:', e.message || e);
+    }
+  }
+
+  function renderTopTracks() {
+    const listEl = document.getElementById('spotify-top-tracks-list');
+    if (!listEl || !topTracksCached) return;
+
+    const tracksToRender = topTracksCached.slice(0, 3);
+    listEl.innerHTML = tracksToRender.map(track => `
+      <a href="${track.url || '#'}" target="_blank" class="top-track-row" rel="noopener noreferrer">
+        <img src="${track.albumArt || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}" alt="${track.name}" class="top-track-art">
+        <div class="top-track-info">
+          <span class="top-track-name">${track.name}</span>
+          <span class="top-track-artist">${track.artist}</span>
+        </div>
+      </a>
+    `).join('');
+  }
 
   async function updateWidget() {
     if (document.hidden) return;
@@ -692,6 +720,7 @@ function initSpotifyWidget() {
 
   const poller = new WidgetPoller(updateWidget, 15000);
   poller.start();
+  fetchTopTracks();
 }
 
 /**
