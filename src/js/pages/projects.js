@@ -223,7 +223,7 @@
 
       const hasReal = Array.isArray(project.screenshots) && project.screenshots.length > 0;
       const shots   = hasReal
-        ? project.screenshots
+        ? project.screenshots.map(src => this.resolveImagePath(src))
         : ['__placeholder__', '__placeholder__', '__placeholder__'];
 
       this._carouselSlides = shots;
@@ -313,7 +313,7 @@
       const stats   = overlay.querySelector('.project-detail-stats');
 
       // Background blur layer (use image, fallback to first screenshot, else fallback to CSS gradient)
-      const bgImageUrl = project.image || (project.screenshots && project.screenshots.length > 0 ? project.screenshots[0] : null);
+      const bgImageUrl = this.resolveImagePath(project.image || (project.screenshots && project.screenshots.length > 0 ? project.screenshots[0] : null));
       if (bgImageUrl) {
         bg.style.backgroundImage = `url('${bgImageUrl}')`;
         bg.classList.remove('no-image');
@@ -695,17 +695,20 @@
       this.grid.innerHTML = html;
     }
 
+    resolveImagePath(imgPath) {
+      if (!imgPath) return '';
+      if (imgPath.startsWith('/') || imgPath.startsWith('http') || imgPath.startsWith('data:')) {
+        return imgPath;
+      }
+      return '/' + imgPath;
+    }
+
     createCard(project) {
       const { id, featured, title, shortDescription, links, stats, image, screenshots } = project;
       const statsHtml  = stats ? this.createStats(stats) : '';
       
       // Background fallback chain matching detail page background selection
-      let bgImageUrl = image || (screenshots && screenshots.length > 0 ? screenshots[0] : null);
-      
-      // Ensure leading slash for absolute path resolution on /projects sub-page
-      if (bgImageUrl && !bgImageUrl.startsWith('/') && !bgImageUrl.startsWith('http')) {
-        bgImageUrl = '/' + bgImageUrl;
-      }
+      const bgImageUrl = this.resolveImagePath(image || (screenshots && screenshots.length > 0 ? screenshots[0] : null));
 
       const hasBg = !!bgImageUrl;
       const bgStyle = hasBg ? `style="--bg: url('${bgImageUrl}');"` : '';

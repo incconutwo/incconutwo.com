@@ -96,6 +96,7 @@
   transition: opacity 0.3s ease-out;
   will-change: transform, filter;
   pointer-events: none;
+  clip-path: inset(0 round var(--hover-card-radius, 16px));
 }
 
 .hover-card:is(:hover, :focus-within) .hover-card-bg-layer {

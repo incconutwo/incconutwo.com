@@ -112,6 +112,7 @@ class ApplicationBootstrap {
       setTimeout(() => {
         initSpotifyWidget();
         initHeartRateWidget();
+        initLichessStats();
       }, 2000);
     };
 
@@ -592,6 +593,60 @@ function initMagneticButtons() {
       });
     });
   });
+}
+
+/**
+ * Lichess Stats Widget
+ * Fetches stats via backend proxy to hide the username from search engines and AI crawlers
+ */
+async function initLichessStats() {
+  const blitzEl = document.getElementById('lichess-blitz');
+  const rapidEl = document.getElementById('lichess-rapid');
+  const gamesEl = document.getElementById('lichess-games-count');
+
+  if (!blitzEl || !rapidEl || !gamesEl) return;
+
+  const CACHE_KEY = 'lichess_stats_cache_v2';
+  const CACHE_TIME_KEY = 'lichess_stats_cache_time_v2';
+  const ONE_HOUR = 60 * 60 * 1000;
+
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+
+  const renderStats = (data) => {
+    blitzEl.textContent = data.blitz || '-';
+    rapidEl.textContent = data.rapid || '-';
+    gamesEl.textContent = (data.games || 0).toLocaleString();
+  };
+
+  // Serve from cache if valid
+  if (cachedData && cachedTime && (Date.now() - cachedTime < ONE_HOUR)) {
+    try {
+      renderStats(JSON.parse(cachedData));
+      return;
+    } catch (e) {
+      localStorage.removeItem(CACHE_KEY);
+    }
+  }
+
+  try {
+    const response = await fetch(window.location.origin + '/api/lichess/stats');
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+      renderStats(data);
+    } else {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  } catch (error) {
+    console.warn('♟️ Lichess Stats Widget Error:', error.message || error);
+    if (cachedData) {
+      try {
+        renderStats(JSON.parse(cachedData));
+      } catch (e) {}
+    }
+  }
 }
 
 /**

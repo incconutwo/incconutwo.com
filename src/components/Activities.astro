@@ -72,12 +72,34 @@
           <span class="activity-name">Long-term Investment</span>
         </div>
       </div>
-      <div class="activity-chip hover-card" style="--hc-color: #C9ADA7;" data-tilt>
-        <div class="hover-card-content">
-          <div class="hover-card-bg-layer"></div>
+      <!-- Chess with Live Lichess Stats -->
+      <div class="activity-chip hover-card chess-card wide" id="chess-card" style="--hc-color: #C9ADA7;" data-tilt>
+        <div class="hover-card-bg-layer"></div>
+        
+        <!-- Left content (Label) -->
+        <div class="chip-content">
           <span class="activity-icon">♟️</span>
           <span class="activity-name">Chess</span>
           <span class="activity-detail">2-3 years of learning</span>
+        </div>
+        
+        <!-- Right content (Lichess Widget) -->
+        <div class="lichess-widget">
+          <div class="lichess-stats-container" id="lichess-stats">
+            <div class="lichess-ratings">
+              <div class="lichess-rating-item">
+                <span class="lichess-label">Blitz</span>
+                <span class="lichess-val" id="lichess-blitz">-</span>
+              </div>
+              <div class="lichess-rating-item">
+                <span class="lichess-label">Rapid</span>
+                <span class="lichess-val" id="lichess-rapid">-</span>
+              </div>
+            </div>
+            <div class="lichess-games">
+              <span id="lichess-games-count">0</span> games on lichess.org
+            </div>
+          </div>
         </div>
       </div>
 
