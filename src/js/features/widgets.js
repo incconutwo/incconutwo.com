@@ -284,3 +284,88 @@ export async function initLichessStats() {
     }
   }
 }
+
+/**
+ * Steam Status Widget
+ * Fetches status via backend proxy to hide the username from search engines and AI crawlers
+ */
+export async function initSteamWidget() {
+  const cardEl = document.getElementById('steam-card');
+  const statusEl = document.getElementById('steam-status');
+  const gameEl = document.getElementById('steam-game');
+  const iconEl = document.getElementById('steam-icon');
+
+  if (!cardEl || !statusEl || !gameEl) return;
+
+  const CACHE_KEY = 'steam_status_cache';
+  const CACHE_TIME_KEY = 'steam_status_cache_time';
+  const FIVE_MINUTES = 5 * 60 * 1000;
+
+  const renderStatus = (data) => {
+    // 1. Reset classes
+    statusEl.className = 'steam-badge';
+    cardEl.classList.remove('in-game-active');
+
+    // 2. Set Status Badge
+    statusEl.textContent = data.status || 'Offline';
+    if (data.status === 'In-Game' || data.isPlaying) {
+      statusEl.classList.add('in-game');
+      cardEl.classList.add('in-game-active');
+      if (iconEl) iconEl.textContent = '🎮';
+      gameEl.innerHTML = `<span style="color:#66c0f4; font-weight:700;">Playing ${data.game}</span>`;
+    } else if (data.status === 'Online') {
+      statusEl.classList.add('online');
+      if (iconEl) iconEl.textContent = '🟢';
+      gameEl.textContent = `Online - Last played: ${data.game}`;
+    } else {
+      statusEl.classList.add('offline');
+      if (iconEl) iconEl.textContent = '🎮';
+      gameEl.textContent = `Offline - Last played: ${data.game}`;
+    }
+
+    // 3. Playtime info
+    if (data.playtime && !data.isPlaying) {
+      gameEl.textContent += ` (${data.playtime})`;
+    }
+  };
+
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+
+  // Serve from cache if valid
+  if (cachedData && cachedTime && (Date.now() - cachedTime < FIVE_MINUTES)) {
+    try {
+      renderStatus(JSON.parse(cachedData));
+      return;
+    } catch (e) {
+      localStorage.removeItem(CACHE_KEY);
+    }
+  }
+
+  async function fetchStatus() {
+    try {
+      const response = await fetch(window.location.origin + '/api/steam/status');
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+        renderStatus(data);
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
+    } catch (error) {
+      console.warn('🎮 Steam Status Widget Error:', error.message || error);
+      if (cachedData) {
+        try {
+          renderStatus(JSON.parse(cachedData));
+        } catch (e) {}
+      }
+    }
+  }
+
+  // Poll steam status every 30 seconds
+  const poller = new WidgetPoller(fetchStatus, 30000);
+  poller.start();
+  fetchStatus();
+}
+

@@ -19,6 +19,8 @@
 @import './components/floating-widgets.css';
 @import './components/spotify-widget.css';
 @import './components/lichess-widget.css';
+@import './components/steam-widget.css';
+
 
 /* Pages & Sections */
 @import './pages/landing.css';

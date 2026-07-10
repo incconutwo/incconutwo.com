@@ -7,7 +7,8 @@
 import { initSmoothScroll } from './features/smooth-scroll.js';
 import { initCustomCursor } from './features/cursor.js';
 import { initHackerScramble } from './features/scramble.js';
-import { initSpotifyWidget, initHeartRateWidget, initLichessStats } from './features/widgets.js';
+import { initSpotifyWidget, initHeartRateWidget, initLichessStats, initSteamWidget } from './features/widgets.js';
+
 import { initSocialLedger, initNotificationForm } from './features/social.js';
 
 // 2. Import layouts & scroll animations
@@ -100,8 +101,10 @@ class ApplicationBootstrap {
         initSpotifyWidget();
         initHeartRateWidget();
         initLichessStats();
+        initSteamWidget();
       }, 2000);
     };
+
 
     if (document.readyState === 'complete') {
       // Shorter timeout on page navigation since page is already loaded

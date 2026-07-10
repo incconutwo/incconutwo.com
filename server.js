@@ -44,11 +44,14 @@ const spotifyRouter = require('./server/routes/spotify');
 const lichessRouter = require('./server/routes/lichess');
 const githubRouter = require('./server/routes/github');
 const notifyRouter = require('./server/routes/notify');
+const steamRouter = require('./server/routes/steam');
 
 app.use('/api/spotify', spotifyRouter);
 app.use('/api/lichess', lichessRouter);
 app.use('/api/github', githubRouter);
 app.use('/api/notify', notifyRouter);
+app.use('/api/steam', steamRouter);
+
 
 // Start listeners if local development
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
