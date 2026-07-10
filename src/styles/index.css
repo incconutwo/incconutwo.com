@@ -17,6 +17,8 @@
 @import './components/hover-card.css';
 @import './components/glass-card.css';
 @import './components/floating-widgets.css';
+@import './components/spotify-widget.css';
+@import './components/lichess-widget.css';
 
 /* Pages & Sections */
 @import './pages/landing.css';
