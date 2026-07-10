@@ -5,6 +5,8 @@
  * ============================================
  */
 
+import debounce from '../utils/debounce.js';
+
 // TouchTexture class - Handles the water ripple effect
 class TouchTexture {
   constructor() {
@@ -521,20 +523,11 @@ class LiquidGradientApp {
     this.currentScheme = 1;
 
     // Event binding
-    this.onResize = this.debounce(this.onResize.bind(this), 200); // Debounced!
+    this.onResize = debounce(this.onResize.bind(this), 200); // Debounced!
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     
     this.init();
-  }
-
-  // Helper: Debounce function
-  debounce(func, wait) {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
   }
 
   init() {

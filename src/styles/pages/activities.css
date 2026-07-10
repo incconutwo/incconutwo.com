@@ -1,17 +1,4 @@
 /* ============================================
-   HOVER CARD COMPONENT DEPENDENCY (Blur Follower)
-   ============================================ */
-:root {
-  --hc-blur: 28;
-  --hc-saturate: 5;
-  --hc-brightness: 1.3;
-  --hc-scale: 3.4;
-  --hc-opacity: 0.25;
-  --hc-border-width: 3;
-}
-
-
-/* ============================================
    ACTIVITIES PAGE STYLES
    ============================================ */
 .activities-page {

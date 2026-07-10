@@ -5,6 +5,8 @@
  * ============================================
  */
 
+import debounce from '../utils/debounce.js';
+
 class ScrubberController {
   constructor(element, options = {}) {
     if (!element) {
@@ -297,7 +299,7 @@ class ScrubberController {
     document.addEventListener('touchend', this.handleMouseUp);
 
     // Debounced resize handler for performance
-    const debouncedResize = this.debounce(this.handleResize, 150);
+    const debouncedResize = debounce(this.handleResize, 150);
     window.addEventListener('resize', debouncedResize);
 
     // Use Lenis scroll listener if available for smoother updates
@@ -320,14 +322,6 @@ class ScrubberController {
         }
       }, { passive: true });
     }
-  }
-
-  debounce(func, wait = 150) {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
   }
 
   handleResize() {
