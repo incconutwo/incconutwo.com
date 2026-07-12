@@ -37,8 +37,12 @@
       }
     ],
     "stats": null,
-    "image": null,
-    "screenshots": [],
+    "image": "assets/images/projects/snap-hg/screenshot1.jpg",
+    "screenshots": [
+      "assets/images/projects/snap-hg/screenshot1.jpg",
+      "assets/images/projects/snap-hg/screenshot2.jpg",
+      "assets/images/projects/snap-hg/screenshot3.jpg"
+    ],
     "group": "Jihawi Apps"
   },
   {
@@ -128,8 +132,10 @@
       }
     ],
     "stats": null,
-    "image": null,
-    "screenshots": [],
+    "image": "assets/images/projects/google-ai-overview-disabler/screenshot1.png",
+    "screenshots": [
+      "assets/images/projects/google-ai-overview-disabler/screenshot1.png"
+    ],
     "group": "Others"
   },
   {
@@ -151,10 +157,10 @@
       }
     ],
     "stats": null,
-    "image": "assets/images/projects/MY MATH EXPLORER/screenshot1.webp",
+    "image": "assets/images/projects/my-math-explorer/screenshot1.webp",
     "screenshots": [
-      "assets/images/projects/MY MATH EXPLORER/screenshot1.webp",
-      "assets/images/projects/MY MATH EXPLORER/screenshot2.webp"
+      "assets/images/projects/my-math-explorer/screenshot1.webp",
+      "assets/images/projects/my-math-explorer/screenshot2.webp"
     ],
     "group": "Others"
   },
