@@ -600,13 +600,13 @@
               return;
             }
 
-            const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+            const response = await fetch(window.location.origin + `/api/github/stars/${owner}/${repo}`);
             if (response.ok) {
               const data = await response.json();
-              if (data.stargazers_count !== undefined) {
-                cache[repoKey] = data.stargazers_count;
+              if (data.stars >= 0) {
+                cache[repoKey] = data.stars;
                 cacheUpdated = true;
-                project.stats = { ...project.stats, stars: data.stargazers_count };
+                project.stats = { ...project.stats, stars: data.stars };
                 this.updateCardStats(project.id, project.stats);
               }
             }
@@ -760,7 +760,7 @@
         <div class="project-stats">
           ${stats.weeklyUsers ? `<span class="project-stat">${ICONS.users} ${stats.weeklyUsers} weekly</span>` : ''}
           ${stats.dailyUsers  ? `<span class="project-stat">${ICONS.users} ${stats.dailyUsers} daily</span>`  : ''}
-          ${stats.stars !== undefined ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
+          ${stats.stars       ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
         </div>
       `;
     }

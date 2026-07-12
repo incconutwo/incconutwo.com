@@ -37,11 +37,11 @@
       }
     ],
     "stats": null,
-    "image": "assets/images/projects/snap-hg/screenshot1.webp",
+    "image": "assets/images/projects/snap-hg/screenshot1.jpg",
     "screenshots": [
-      "assets/images/projects/snap-hg/screenshot1.webp",
-      "assets/images/projects/snap-hg/screenshot2.webp",
-      "assets/images/projects/snap-hg/screenshot3.webp"
+      "assets/images/projects/snap-hg/screenshot1.jpg",
+      "assets/images/projects/snap-hg/screenshot2.jpg",
+      "assets/images/projects/snap-hg/screenshot3.jpg"
     ],
     "group": "Jihawi Apps"
   },
@@ -132,9 +132,9 @@
       }
     ],
     "stats": null,
-    "image": "assets/images/projects/google-ai-overview-disabler/screenshot1.webp",
+    "image": "assets/images/projects/google-ai-overview-disabler/screenshot1.png",
     "screenshots": [
-      "assets/images/projects/google-ai-overview-disabler/screenshot1.webp"
+      "assets/images/projects/google-ai-overview-disabler/screenshot1.png"
     ],
     "group": "Others"
   },

@@ -42,11 +42,13 @@ app.use(express.static(path.join(__dirname, 'dist')));
 // 3. Mount Modular API Routers
 const spotifyRouter = require('./server/routes/spotify');
 const lichessRouter = require('./server/routes/lichess');
+const githubRouter = require('./server/routes/github');
 const notifyRouter = require('./server/routes/notify');
 const steamRouter = require('./server/routes/steam');
 
 app.use('/api/spotify', spotifyRouter);
 app.use('/api/lichess', lichessRouter);
+app.use('/api/github', githubRouter);
 app.use('/api/notify', notifyRouter);
 app.use('/api/steam', steamRouter);
 

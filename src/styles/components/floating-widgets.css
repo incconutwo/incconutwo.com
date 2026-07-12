@@ -18,7 +18,7 @@
    ============================================ */
 .floating-music-widget {
   position: relative;
-  background: rgba(20, 20, 20, 0.6);
+  background: rgba(31, 31, 49, 0);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -298,4 +298,41 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 2px;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE FIXES
+   Resolves backdrop-filter rendering on mobile GPUs
+   ============================================ */
+@media (max-width: 768px) {
+  .floating-widgets-container {
+    top: 16px;
+    right: 16px;
+    gap: 10px;
+  }
+
+  .floating-music-widget,
+  .floating-heart-rate-widget {
+    /* 1. Force hardware composite layer for Safari/Chrome mobile */
+    transform: translate3d(0, 0, 0);
+    will-change: transform, opacity;
+
+    /* 2. Slightly higher background density as a fail-safe fallback */
+    background: rgba(31, 31, 49, 0);
+
+    /* 3. Re-apply smooth backdrop-blur on the new composite layer */
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* 4. Keep 3D transform active when retracted to prevent flickering */
+  .floating-music-widget.retracted {
+    transform: translate3d(calc(100% - 24px), 0, 0);
+  }
+
+  .floating-heart-rate-widget.retracted {
+    transform: translate3d(calc(100% - 24px), 0, 0);
+  }
 }
