@@ -5,7 +5,7 @@
  * ============================================
  */
 
-(function() {
+(function () {
   'use strict';
 
   // SVG Icons
@@ -87,9 +87,29 @@
         const response = await fetch(window.location.origin + '/data/projects.json?v=' + Date.now());
         if (response.ok) {
           const freshProjects = await response.json();
-          if (JSON.stringify(freshProjects) !== JSON.stringify(this.projects)) {
-            this.projects = freshProjects;
-            sessionStorage.setItem('portfolio_projects', JSON.stringify(freshProjects));
+
+          const cleanForComparison = (projects) => {
+            return projects.map(p => {
+              const cleanP = { ...p };
+              if (cleanP.stats) {
+                cleanP.stats = { ...cleanP.stats };
+                delete cleanP.stats.stars;
+              }
+              return cleanP;
+            });
+          };
+
+          if (JSON.stringify(cleanForComparison(freshProjects)) !== JSON.stringify(cleanForComparison(this.projects))) {
+            // Keep stars from current projects if they exist
+            this.projects = freshProjects.map(freshP => {
+              const currentP = this.projects.find(p => p.id === freshP.id);
+              if (currentP && currentP.stats && currentP.stats.stars !== undefined) {
+                freshP.stats = { ...freshP.stats, stars: currentP.stats.stars };
+              }
+              return freshP;
+            });
+
+            sessionStorage.setItem('portfolio_projects', JSON.stringify(this.projects));
             this.renderCards();
             this.initTilt();
           }
@@ -216,18 +236,18 @@
      * ──────────────────────────────────────────────────────────
      */
     _buildCarousel(project) {
-      const track    = this.detailOverlay.querySelector('.carousel-track');
-      const dotsEl   = this.detailOverlay.querySelector('.carousel-dots');
-      const prevBtn  = this.detailOverlay.querySelector('.carousel-arrow-prev');
-      const nextBtn  = this.detailOverlay.querySelector('.carousel-arrow-next');
+      const track = this.detailOverlay.querySelector('.carousel-track');
+      const dotsEl = this.detailOverlay.querySelector('.carousel-dots');
+      const prevBtn = this.detailOverlay.querySelector('.carousel-arrow-prev');
+      const nextBtn = this.detailOverlay.querySelector('.carousel-arrow-next');
 
       const hasReal = Array.isArray(project.screenshots) && project.screenshots.length > 0;
-      const shots   = hasReal
+      const shots = hasReal
         ? project.screenshots.map(src => this.resolveImagePath(src))
         : ['__placeholder__', '__placeholder__', '__placeholder__'];
 
       this._carouselSlides = shots;
-      this._carouselIndex  = 0;
+      this._carouselIndex = 0;
 
       // Render slides as a horizontal strip inside the track
       track.innerHTML = shots.map((src, i) => {
@@ -275,14 +295,14 @@
       index = ((index % count) + count) % count;
       this._carouselIndex = index;
 
-      const track  = this.detailOverlay.querySelector('.carousel-track');
+      const track = this.detailOverlay.querySelector('.carousel-track');
       const dotsEl = this.detailOverlay.querySelector('.carousel-dots');
 
       if (animate && typeof gsap !== 'undefined') {
         gsap.to(track, { x: `-${index * 100}%`, duration: 0.6, ease: 'power4.out' });
       } else {
         track.style.transition = 'none';
-        track.style.transform  = `translateX(-${index * 100}%)`;
+        track.style.transform = `translateX(-${index * 100}%)`;
         requestAnimationFrame(() => { track.style.transition = ''; });
       }
 
@@ -306,11 +326,11 @@
       if (!project) return;
 
       const overlay = this.detailOverlay;
-      const bg      = overlay.querySelector('.project-detail-bg');
-      const title   = overlay.querySelector('.project-detail-title');
-      const desc    = overlay.querySelector('.project-detail-desc');
+      const bg = overlay.querySelector('.project-detail-bg');
+      const title = overlay.querySelector('.project-detail-title');
+      const desc = overlay.querySelector('.project-detail-desc');
       const buttons = overlay.querySelector('.project-detail-buttons');
-      const stats   = overlay.querySelector('.project-detail-stats');
+      const stats = overlay.querySelector('.project-detail-stats');
 
       // Background blur layer (use image, fallback to first screenshot, else fallback to CSS gradient)
       const bgImageUrl = this.resolveImagePath(project.image || (project.screenshots && project.screenshots.length > 0 ? project.screenshots[0] : null));
@@ -324,9 +344,9 @@
 
       // Text content
       title.textContent = project.title;
-      desc.textContent  = project.longDescription || project.shortDescription;
+      desc.textContent = project.longDescription || project.shortDescription;
       buttons.innerHTML = this.createButtons(project.links);
-      stats.innerHTML   = project.stats ? this.createStats(project.stats) : '';
+      stats.innerHTML = project.stats ? this.createStats(project.stats) : '';
 
 
 
@@ -390,7 +410,7 @@
     openFullscreenViewer(screenshots, initialIndex) {
       const modal = document.createElement('div');
       modal.className = 'screenshot-fullscreen-modal';
-      
+
       // Setup HTML layout containing slides, arrows, and dots indicators
       modal.innerHTML = `
         <div class="fullscreen-close-btn">${ICONS.close}</div>
@@ -431,7 +451,7 @@
       const goToSlide = (idx, animate = true) => {
         idx = ((idx % screenshots.length) + screenshots.length) % screenshots.length;
         currentIndex = idx;
-        
+
         if (animate && typeof gsap !== 'undefined') {
           gsap.to(track, { x: `-${idx * 100}%`, duration: 0.4, ease: 'power2.out' });
         } else {
@@ -470,7 +490,7 @@
       viewport.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
       }, { passive: true });
-      
+
       viewport.addEventListener('touchend', (e) => {
         const dx = e.changedTouches[0].clientX - startX;
         if (Math.abs(dx) > 45) {
@@ -498,8 +518,8 @@
 
       // Keyboard listeners
       const handleKeyDown = (e) => {
-        if (e.key === 'Escape')     closeModal();
-        if (e.key === 'ArrowLeft')  goToSlide(currentIndex - 1);
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowLeft') goToSlide(currentIndex - 1);
         if (e.key === 'ArrowRight') goToSlide(currentIndex + 1);
       };
       document.addEventListener('keydown', handleKeyDown);
@@ -629,9 +649,9 @@
     updateCardStats(id, stats) {
       const card = this.grid?.querySelector(`.project-card[data-id="${id}"]`);
       if (card) {
-        const frontContent  = card.querySelector('.project-front .project-content');
+        const frontContent = card.querySelector('.project-front .project-content');
         const existingStats = frontContent.querySelector('.project-stats');
-        const newStatsHtml  = this.createStats(stats);
+        const newStatsHtml = this.createStats(stats);
         if (existingStats) {
           existingStats.outerHTML = newStatsHtml;
         } else {
@@ -648,27 +668,74 @@
       if (!this.grid) return;
 
       // Group projects
+      const extensionProjects = this.projects.filter(p => p.group === 'chrome/firefox extensions');
+      const websiteProjects = this.projects.filter(p => p.group === 'websites');
+      const windhawkProjects = this.projects.filter(p => p.group === 'windhawk/windows mod');
       const jihawiProjects = this.projects.filter(p => p.group === 'Jihawi Apps');
       const sharedProjects = this.projects.filter(p => p.group === 'Aurora Ecosystem');
-      const soloProjects = this.projects.filter(p => p.group === 'Others');
 
       // Sort each group (featured first)
       const sortByFeatured = (arr) => [...arr].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 
+      const sortedExtensions = sortByFeatured(extensionProjects);
+      const sortedWebsites = sortByFeatured(websiteProjects);
+      const sortedWindhawk = sortByFeatured(windhawkProjects);
       const sortedJihawi = sortByFeatured(jihawiProjects);
-      const sortedSolo = sortByFeatured(soloProjects);
       const sortedShared = sortByFeatured(sharedProjects);
 
       let html = '';
 
-      // 1. Solo Projects
-      if (sortedSolo.length > 0) {
-        sortedSolo.forEach(project => {
+      // 1. chrome/firefox extensions
+      if (sortedExtensions.length > 0) {
+        html += `
+          <div class="projects-group-header subgroup-header">
+            <span class="group-title">chrome/firefox extensions</span>
+          </div>
+        `;
+        sortedExtensions.forEach(project => {
           html += this.createCard(project);
         });
       }
 
-      // 2. Jihawi Projects
+      // 2. websites
+      if (sortedWebsites.length > 0) {
+        html += `
+          <div class="projects-group-header subgroup-header">
+            <span class="group-title">websites</span>
+          </div>
+        `;
+        sortedWebsites.forEach(project => {
+          html += this.createCard(project);
+        });
+      }
+
+      // 3. windhawk/windows mod
+      html += `
+        <div class="projects-group-header subgroup-header">
+          <span class="group-title">windhawk/windows mod</span>
+        </div>
+      `;
+      if (sortedWindhawk.length > 0) {
+        sortedWindhawk.forEach(project => {
+          html += this.createCard(project);
+        });
+      } else {
+        html += `
+          <div class="project-card coming-soon-card" tabindex="-1" role="presentation">
+            <div class="project-card-inner">
+              <div class="project-face project-front no-image">
+                <div class="project-overlay"></div>
+                <div class="project-content">
+                  <h3>Coming Soon</h3>
+                  <p class="project-desc">A new project will be added here soon. Stay tuned!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. Jihawi Projects
       if (sortedJihawi.length > 0) {
         html += `
           <div class="projects-group-header">
@@ -680,7 +747,7 @@
         });
       }
 
-      // 3. Shared Projects
+      // 5. Shared Projects
       if (sortedShared.length > 0) {
         html += `
           <div class="projects-group-header">
@@ -705,8 +772,8 @@
 
     createCard(project) {
       const { id, featured, title, shortDescription, links, stats, image, screenshots } = project;
-      const statsHtml  = stats ? this.createStats(stats) : '';
-      
+      const statsHtml = stats ? this.createStats(stats) : '';
+
       // Background fallback chain matching detail page background selection
       const bgImageUrl = this.resolveImagePath(image || (screenshots && screenshots.length > 0 ? screenshots[0] : null));
 
@@ -740,7 +807,7 @@
     createButtons(links) {
       if (!links || !links.length) return '';
       return links.map((link, i) => {
-        const icon      = ICONS[link.kind] || ICONS.external;
+        const icon = ICONS[link.kind] || ICONS.external;
         const isPrimary = i === 0 && link.kind === 'chrome';
         return `
           <a href="${link.url}"
@@ -759,8 +826,8 @@
       return `
         <div class="project-stats">
           ${stats.weeklyUsers ? `<span class="project-stat">${ICONS.users} ${stats.weeklyUsers} weekly</span>` : ''}
-          ${stats.dailyUsers  ? `<span class="project-stat">${ICONS.users} ${stats.dailyUsers} daily</span>`  : ''}
-          ${stats.stars       ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
+          ${stats.dailyUsers ? `<span class="project-stat">${ICONS.users} ${stats.dailyUsers} daily</span>` : ''}
+          ${stats.stars ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
         </div>
       `;
     }
@@ -796,8 +863,8 @@
       // Escape key + carousel left/right arrows
       document.addEventListener('keydown', (e) => {
         if (!this.isDetailOpen) return;
-        if (e.key === 'Escape')     this.closeDetail();
-        if (e.key === 'ArrowLeft')  this._carouselGoTo(this._carouselIndex - 1);
+        if (e.key === 'Escape') this.closeDetail();
+        if (e.key === 'ArrowLeft') this._carouselGoTo(this._carouselIndex - 1);
         if (e.key === 'ArrowRight') this._carouselGoTo(this._carouselIndex + 1);
       });
 
@@ -822,17 +889,18 @@
 
     initTilt() {
       if ('ontouchstart' in window ||
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       document.querySelectorAll('.project-card[data-tilt]').forEach(card => {
         card.addEventListener('mousemove', (e) => {
-          const rect      = card.getBoundingClientRect();
-          const x         = e.clientX - rect.left;
-          const y         = e.clientY - rect.top;
-          const mult      = 5;
-          const xRotate   = mult * ((y - rect.height / 2) / rect.height);
-          const yRotate   = -mult * ((x - rect.width  / 2) / rect.width);
-          card.style.transform = `perspective(1200px) rotateX(${xRotate}deg) rotateY(${yRotate}deg) scale(1.02)`;
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const isFeatured = card.classList.contains('featured');
+          const mult = isFeatured ? 1.5 : 3;
+          const xRotate = mult * ((y - rect.height / 2) / rect.height);
+          const yRotate = -mult * ((x - rect.width / 2) / rect.width);
+          card.style.transform = `perspective(1200px) rotateX(${xRotate}deg) rotateY(${yRotate}deg) scale(0.95)`;
         });
 
         card.addEventListener('mouseleave', () => {

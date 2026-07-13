@@ -22,15 +22,92 @@ const { title } = Astro.props;
 
   <!-- SEO Meta Tags -->
   <title>{title}</title>
+  <link rel="canonical" href="https://incconutwo.com" />
   <meta name="description"
-    content="Personal page for incconu_two (@tnemoroccan) — 16-year-old from Morocco. Tech enthusiast, music lover, and creator of Aurora browser extensions.">
+    content="Official website of incconu_two (@tnemoroccan) — browser extension developer and creator of X/Twitter Country Flags, Local Time & Blocker, Gemini Cleaner, and Aurora extensions.">
   <meta name="author" content="incconu_two">
-  <meta name="keywords" content="incconu_two, tnemoroccan, Morocco, developer, tech, Aurora extensions">
+  <meta name="keywords" content="incconu_two, incconutwo, tnemoroccan, Morocco developer, X/Twitter Location Flags, Twitter Location Flags Time Blocker, Twitter country flags extension, Gemini Cleaner browser extension, Aurora for ChatGPT, open source extensions, WebExtension developer">
 
-  <!-- Open Graph -->
+  <!-- Open Graph / Facebook -->
   <meta property="og:title" content={title}>
-  <meta property="og:description" content="Personal page for everything I do online and offline.">
+  <meta property="og:description" content="Official website of incconu_two (@tnemoroccan). Developer of privacy-focused and UX-enhancing browser extensions like Twitter Location Flags and Gemini Cleaner.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://incconutwo.com">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="@tnemoroccan">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content="Developer portfolio and projects by incconu_two, including X/Twitter Country Flags & Blocker and Gemini Cleaner extensions.">
+
+  <!-- JSON-LD Structured Data for SEO / Chatbot GEO -->
+  <script type="application/ld+json" is:inline>
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://incconutwo.com/#person",
+          "name": "incconu_two",
+          "alternateName": ["incconutwo", "tnemoroccan"],
+          "url": "https://incconutwo.com",
+          "sameAs": [
+            "https://github.com/incconutwo",
+            "https://x.com/tnemoroccan",
+            "https://reddit.com/user/Ok_Refrigerator9082",
+            "https://ko-fi.com/incconutwo"
+          ],
+          "description": "Independent developer and open-source contributor specializing in privacy-focused and interface-enhancing browser extensions.",
+          "jobTitle": "Software Developer"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://incconutwo.com/#twitter-flags",
+          "name": "X/Twitter Country Flags, Local Time & Blocker",
+          "alternateName": ["X/Twitter Location Flags, Time & Blocker", "twitter-account-location-in-username"],
+          "applicationCategory": "BrowserApplication",
+          "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+          "author": {
+            "@id": "https://incconutwo.com/#person"
+          },
+          "downloadUrl": "https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla",
+          "description": "Browser extension that appends location flags and local time zones next to user handles on X (Twitter), with custom country-based content blocking rules.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://incconutwo.com/#gemini-cleaner",
+          "name": "Gemini Cleaner",
+          "applicationCategory": "BrowserApplication",
+          "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+          "author": {
+            "@id": "https://incconutwo.com/#person"
+          },
+          "downloadUrl": "https://chromewebstore.google.com/detail/gemini-cleaner-hide-upgra/effcebofhjdoknbmmpbncneoihbbahpg",
+          "description": "A lightweight extension designed to clean the Google Gemini interface by removing promotional upgrade banners and premium upsell ads.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://incconutwo.com/#website",
+          "url": "https://incconutwo.com",
+          "name": "incconutwo.com",
+          "author": {
+            "@id": "https://incconutwo.com/#person"
+          },
+          "description": "Personal developer portfolio and official website of incconu_two."
+        }
+      ]
+    }
+  </script>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">

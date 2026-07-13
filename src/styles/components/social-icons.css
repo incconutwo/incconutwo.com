@@ -10,8 +10,8 @@
   width: 48px;
   height: 48px;
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);

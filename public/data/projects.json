@@ -37,11 +37,11 @@
       }
     ],
     "stats": null,
-    "image": "assets/images/projects/snap-hg/screenshot1.jpg",
+    "image": "assets/images/projects/snap-hg/screenshot1.webp",
     "screenshots": [
-      "assets/images/projects/snap-hg/screenshot1.jpg",
-      "assets/images/projects/snap-hg/screenshot2.jpg",
-      "assets/images/projects/snap-hg/screenshot3.jpg"
+      "assets/images/projects/snap-hg/screenshot1.webp",
+      "assets/images/projects/snap-hg/screenshot2.webp",
+      "assets/images/projects/snap-hg/screenshot3.webp"
     ],
     "group": "Jihawi Apps"
   },
@@ -91,7 +91,7 @@
       "assets/images/projects/twitter-flags/screenshot2.webp",
       "assets/images/projects/twitter-flags/screenshot3.webp"
     ],
-    "group": "Others"
+    "group": "chrome/firefox extensions"
   },
   {
     "id": "personal-website",
@@ -101,7 +101,7 @@
     "links": [
       {
         "label": "Link",
-        "url": "https://temp.com",
+        "url": "https://incconutwo.com",
         "kind": "external"
       }
     ],
@@ -111,7 +111,7 @@
       "assets/images/projects/incconutwo.com/screenshot1.webp",
       "assets/images/projects/incconutwo.com/screenshot2.webp"
     ],
-    "group": "Others"
+    "group": "websites"
   },
   {
     "id": "ai-overview-disabler",
@@ -132,11 +132,11 @@
       }
     ],
     "stats": null,
-    "image": "assets/images/projects/google-ai-overview-disabler/screenshot1.png",
+    "image": "assets/images/projects/google-ai-overview-disabler/screenshot1.webp",
     "screenshots": [
-      "assets/images/projects/google-ai-overview-disabler/screenshot1.png"
+      "assets/images/projects/google-ai-overview-disabler/screenshot1.webp"
     ],
-    "group": "Others"
+    "group": "chrome/firefox extensions"
   },
   {
     "id": "math-explorer",
@@ -162,7 +162,7 @@
       "assets/images/projects/my-math-explorer/screenshot1.webp",
       "assets/images/projects/my-math-explorer/screenshot2.webp"
     ],
-    "group": "Others"
+    "group": "websites"
   },
   {
     "id": "gemini-cleaner",
@@ -188,7 +188,7 @@
       "assets/images/projects/gemini-cleaner/screenshot1.webp",
       "assets/images/projects/gemini-cleaner/screenshot2.webp"
     ],
-    "group": "Others"
+    "group": "chrome/firefox extensions"
   },
   {
     "id": "aurora-chatgpt",

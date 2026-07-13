@@ -1,11 +1,9 @@
 /**
  * ============================================
  * SCRUBBER CONTROLLER - Robust Implementation
- * Works with Lenis & Anime.js v4
+ * Works with Lenis & GSAP
  * ============================================
  */
-
-import debounce from '../utils/debounce.js';
 
 class ScrubberController {
   constructor(element, options = {}) {
@@ -13,6 +11,11 @@ class ScrubberController {
       console.warn('[Scrubber] No element provided');
       return;
     }
+
+    if (element.dataset.initialized === 'true') {
+      return;
+    }
+    element.dataset.initialized = 'true';
 
     this.config = {
       majorTickInterval: 10,
@@ -71,59 +74,6 @@ class ScrubberController {
     }
   }
 
-  /**
-   * Safe anime wrapper - handles both v4 IIFE and missing anime gracefully
-   */
-  safeAnimate(target, props) {
-    if (!target) return Promise.resolve();
-    
-    // Check for Anime.js v4 IIFE global
-    if (typeof anime !== 'undefined' && typeof anime.animate === 'function') {
-      try {
-        return anime.animate(target, props);
-      } catch (e) {
-        console.warn('[Scrubber] Animation error:', e);
-        // Fallback: apply end values directly
-        this.applyFallback(target, props);
-        return Promise.resolve();
-      }
-    }
-    
-    // Fallback: apply properties directly without animation
-    this.applyFallback(target, props);
-    return Promise.resolve();
-  }
-
-  /**
-   * Apply properties directly as fallback when anime isn't available
-   */
-  applyFallback(target, props) {
-    const el = typeof target === 'string' ? document.querySelector(target) : target;
-    if (!el) return;
-
-    // Handle common properties
-    if (props.opacity !== undefined) {
-      const val = Array.isArray(props.opacity) ? props.opacity[1] : props.opacity;
-      el.style.opacity = val;
-    }
-    if (props.scale !== undefined) {
-      const val = Array.isArray(props.scale) ? props.scale[1] : props.scale;
-      el.style.transform = `scale(${val})`;
-    }
-    if (props.scaleY !== undefined) {
-      const val = Array.isArray(props.scaleY) ? props.scaleY[1] : props.scaleY;
-      el.style.transform = `scaleY(${val})`;
-    }
-    if (props.left !== undefined) {
-      const val = Array.isArray(props.left) ? props.left[1] : props.left;
-      el.style.left = typeof val === 'number' ? `${val}px` : val;
-    }
-    if (props.width !== undefined) {
-      const val = Array.isArray(props.width) ? props.width[1] : props.width;
-      el.style.width = typeof val === 'number' ? `${val}px` : val;
-    }
-  }
-
   init() {
     // Use requestAnimationFrame to ensure DOM is painted
     requestAnimationFrame(() => {
@@ -131,10 +81,24 @@ class ScrubberController {
       this.generateTicks();
       this.attachEventListeners();
       
-      // Delay entrance animation slightly to ensure layout is stable
-      setTimeout(() => {
-        this.playEntranceAnimation();
-      }, 100);
+      const startAnimation = () => {
+        setTimeout(() => {
+          this.playEntranceAnimation();
+        }, 100);
+      };
+
+      if (document.body.classList.contains('loaded')) {
+        startAnimation();
+      } else {
+        // Wait for the curtain to lift (body to get 'loaded' class)
+        const observer = new MutationObserver(() => {
+          if (document.body.classList.contains('loaded')) {
+            startAnimation();
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      }
     });
   }
 
@@ -144,15 +108,6 @@ class ScrubberController {
     this.state.tickWidth = parseInt(styles.getPropertyValue('--tick-width')) || 2;
     this.state.padding = parseInt(styles.getPropertyValue('--container-padding')) || 24;
     this.state.containerWidth = this.el.container.offsetWidth || 300;
-    this.updateCachedHeights();
-  }
-
-  updateCachedHeights() {
-    const h = document.documentElement;
-    const b = document.body;
-    this.state.cachedScrollHeight = Math.max(h.scrollHeight || 0, b.scrollHeight || 0);
-    this.state.cachedInnerHeight = window.innerHeight;
-    this.state.cachedClientHeight = h.clientHeight;
   }
 
   generateTicks() {
@@ -168,6 +123,13 @@ class ScrubberController {
       const tick = document.createElement('div');
       tick.className = 'tick';
       if (i % this.config.majorTickInterval === 0) tick.classList.add('major');
+      if (this.state.isReady) {
+        tick.style.transform = 'scaleY(1)';
+        tick.style.opacity = '1';
+      } else {
+        tick.style.transform = 'scaleY(0)';
+        tick.style.opacity = '0';
+      }
       this.el.ticksContainer.appendChild(tick);
     }
   }
@@ -193,79 +155,30 @@ class ScrubberController {
   playEntranceAnimation() {
     this.calculatePositions();
 
-    // Check for Anime.js v4 IIFE
-    const hasAnime = typeof anime !== 'undefined' && typeof anime.createTimeline === 'function';
-    
-    if (hasAnime) {
-      try {
-        const timeline = anime.createTimeline({ 
-          defaults: { ease: 'outExpo' }
-        });
-
-        // Container fade in
-        timeline.add(this.el.container, { 
-          opacity: [0, 1], 
-          duration: 500 
-        }, 0);
-
-        // Ticks stagger animation
-        const ticks = this.el.ticksContainer.querySelectorAll('.tick');
-        if (ticks.length > 0) {
-          timeline.add(ticks, {
-            scaleY: [0, 1],
-            opacity: [0, 1],
-            delay: anime.stagger(8, { from: 'center' }),
-            duration: 300
-          }, 150);
-        }
-
-        // Get initial scroll value
-        const scrollVal = this.getScrollPercent();
-        const startTick = this.findTickByValue(scrollVal);
-
-        // White ticker grow
-        timeline.add(this.el.whiteTicker, {
-          width: startTick ? startTick.x : 0,
-          duration: 600
-        }, 400);
-
-        // Primary marker pop
-        timeline.add(this.el.markerPrimary, {
-          scale: [0, 1],
-          duration: 500,
-          ease: 'outElastic(1, 0.6)'
-        }, 500);
-
-        // Complete handler
-        timeline.then(() => {
-          this.onEntranceComplete(scrollVal);
-        });
-
-        timeline.play();
-      } catch (e) {
-        console.warn('[Scrubber] Timeline error, using fallback:', e);
-        this.fallbackEntrance();
-      }
-    } else {
-      // Fallback for non-anime environments
-      this.fallbackEntrance();
+    if (typeof gsap === 'undefined') {
+      console.warn('[Scrubber] GSAP not found, skipping animation');
+      this.onEntranceComplete(this.getScrollPercent());
+      return;
     }
-  }
 
-  fallbackEntrance() {
-    // Simple CSS-based entrance
-    if (this.el.container) this.el.container.style.opacity = '1';
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    tl.to(this.el.container, { opacity: 1, duration: 0.5 }, 0);
     
-    const ticks = this.el.ticksContainer?.querySelectorAll('.tick') || [];
-    ticks.forEach(tick => {
-      tick.style.transform = 'scaleY(1)';
-      tick.style.opacity = '1';
-    });
-    
-    if (this.el.markerPrimary) this.el.markerPrimary.style.transform = 'scale(1)';
+    const ticks = this.el.ticksContainer.querySelectorAll('.tick');
+    if (ticks.length > 0) {
+      tl.to(ticks, { 
+        scaleY: 1, opacity: 1, duration: 0.3, stagger: { amount: 0.4, from: "center" } 
+      }, 0.15);
+    }
     
     const scrollVal = this.getScrollPercent();
-    this.onEntranceComplete(scrollVal);
+    const startTick = this.findTickByValue(scrollVal);
+    
+    tl.to(this.el.whiteTicker, { width: startTick ? startTick.x : 0, duration: 0.6 }, 0.4);
+    tl.to(this.el.markerPrimary, { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.6)" }, 0.5);
+    
+    tl.then(() => this.onEntranceComplete(scrollVal));
   }
 
   onEntranceComplete(scrollVal) {
@@ -287,7 +200,6 @@ class ScrubberController {
     });
     document.addEventListener('mouseup', this.handleMouseUp);
     
-
     // Touch support
     this.el.container.addEventListener('touchstart', (e) => { 
       e.preventDefault(); 
@@ -298,9 +210,12 @@ class ScrubberController {
     }, { passive: false });
     document.addEventListener('touchend', this.handleMouseUp);
 
-    // Debounced resize handler for performance
-    const debouncedResize = debounce(this.handleResize, 150);
-    window.addEventListener('resize', debouncedResize);
+    // Throttled resize handler
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(this.handleResize, 150);
+    });
 
     // Use Lenis scroll listener if available for smoother updates
     if (window.lenis) {
@@ -325,7 +240,6 @@ class ScrubberController {
   }
 
   handleResize() {
-    this.state.containerRect = null;
     this.measureDimensions();
     this.generateTicks();
     requestAnimationFrame(() => {
@@ -339,21 +253,25 @@ class ScrubberController {
   }
 
   getScrollPercent() {
-    if (!this.state.cachedScrollHeight) {
-      this.updateCachedHeights();
+    const h = document.documentElement;
+    const b = document.body;
+    
+    // Use Lenis scroll value if available for precision
+    if (window.lenis) {
+      const scrollTop = window.lenis.scroll;
+      const scrollHeight = (h.scrollHeight || b.scrollHeight) - window.innerHeight;
+      return scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
     }
-    const scrollTop = window.lenis ? window.lenis.scroll : (document.documentElement.scrollTop || document.body.scrollTop);
-    const scrollHeight = window.lenis 
-      ? (this.state.cachedScrollHeight - this.state.cachedInnerHeight)
-      : (this.state.cachedScrollHeight - this.state.cachedClientHeight);
+    
+    const scrollTop = h.scrollTop || b.scrollTop;
+    const scrollHeight = (h.scrollHeight || b.scrollHeight) - h.clientHeight;
     return scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
   }
 
   setPageScroll(value) {
-    if (!this.state.cachedScrollHeight) {
-      this.updateCachedHeights();
-    }
-    const maxScroll = this.state.cachedScrollHeight - this.state.cachedInnerHeight;
+    const h = document.documentElement;
+    const b = document.body;
+    const maxScroll = (h.scrollHeight || b.scrollHeight) - window.innerHeight;
     const scrollDest = (value / 100) * maxScroll;
 
     // Use Lenis if available for instant non-smoothed update (critical for drag)
@@ -366,43 +284,55 @@ class ScrubberController {
 
   handleMouseEnter() {
     if (!this.state.isReady || this.state.isDragging) return;
-    this.state.containerRect = this.el.container.getBoundingClientRect();
-    this.updateCachedHeights();
-    this.safeAnimate(this.el.markerGhost, { opacity: [0, 1], duration: 200, ease: 'outQuad' });
+    if (typeof gsap !== 'undefined') {
+      gsap.fromTo(this.el.markerGhost, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' });
+    } else {
+      this.el.markerGhost.style.opacity = '1';
+    }
   }
 
   handleMouseMove(e) {
     if (!this.state.isReady || this.state.isDragging) return;
-    const rect = this.state.containerRect || this.el.container.getBoundingClientRect();
+    const rect = this.el.container.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const tick = this.findNearestTick(x);
     if (tick && this.el.markerGhost) {
-      this.safeAnimate(this.el.markerGhost, {
-        left: tick.x - 1,
-        opacity: 1,
-        duration: 100,
-        ease: 'outExpo'
-      });
+      if (typeof gsap !== 'undefined') {
+        gsap.to(this.el.markerGhost, {
+          left: tick.x - 1,
+          opacity: 1,
+          duration: 0.1,
+          ease: 'expo.out'
+        });
+      } else {
+        this.el.markerGhost.style.left = (tick.x - 1) + 'px';
+        this.el.markerGhost.style.opacity = '1';
+      }
     }
   }
 
   handleMouseLeave() {
     if (this.state.isDragging) return;
-    this.state.containerRect = null;
-    this.safeAnimate(this.el.markerGhost, { opacity: 0, duration: 200, ease: 'outQuad' });
+    if (typeof gsap !== 'undefined') {
+      gsap.to(this.el.markerGhost, { opacity: 0, duration: 0.2, ease: 'power2.out' });
+    } else {
+      this.el.markerGhost.style.opacity = '0';
+    }
   }
 
   handleMouseDown(e) {
     if (!this.state.isReady) return;
     this.state.isDragging = true;
     this.el.container?.classList.add('dragging', 'show-tooltip');
-    this.safeAnimate(this.el.markerGhost, { opacity: 0, duration: 80 });
     
-    this.state.containerRect = this.el.container.getBoundingClientRect();
-    this.updateCachedHeights();
+    if (typeof gsap !== 'undefined') {
+      gsap.to(this.el.markerGhost, { opacity: 0, duration: 0.08 });
+    } else {
+      this.el.markerGhost.style.opacity = '0';
+    }
     
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const rect = this.state.containerRect;
+    const rect = this.el.container.getBoundingClientRect();
     const tick = this.findNearestTick(clientX - rect.left);
     if (tick) {
       this.applyValue(tick, true);
@@ -413,7 +343,7 @@ class ScrubberController {
   handleDragMove(e) {
     if (!this.state.isDragging) return;
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const rect = this.state.containerRect || this.el.container.getBoundingClientRect();
+    const rect = this.el.container.getBoundingClientRect();
     const tick = this.findNearestTick(clientX - rect.left);
     if (tick) {
       this.applyValue(tick, false);
@@ -434,11 +364,15 @@ class ScrubberController {
     
     const tick = this.findTickByValue(this.state.currentValue);
     if (tick) {
-      this.safeAnimate(this.el.markerPrimary, {
-        left: tick.x - 1.5,
-        duration: 350,
-        ease: 'outElastic(1, 0.5)'
-      });
+      if (typeof gsap !== 'undefined') {
+        gsap.to(this.el.markerPrimary, {
+          left: tick.x - 1.5,
+          duration: 0.35,
+          ease: 'elastic.out(1, 0.5)'
+        });
+      } else {
+        this.el.markerPrimary.style.left = (tick.x - 1.5) + 'px';
+      }
     }
   }
 
@@ -447,9 +381,9 @@ class ScrubberController {
     
     this.state.currentValue = tick.value;
     
-    if (animate) {
-      this.safeAnimate(this.el.markerPrimary, { left: tick.x - 1.5, duration: 250, ease: 'outExpo' });
-      this.safeAnimate(this.el.whiteTicker, { width: tick.x, duration: 180, ease: 'outQuad' });
+    if (animate && typeof gsap !== 'undefined') {
+      gsap.to(this.el.markerPrimary, { left: tick.x - 1.5, duration: 0.25, ease: 'expo.out' });
+      gsap.to(this.el.whiteTicker, { width: tick.x, duration: 0.18, ease: 'power2.out' });
     } else {
       if (this.el.markerPrimary) this.el.markerPrimary.style.left = (tick.x - 1.5) + 'px';
       if (this.el.whiteTicker) this.el.whiteTicker.style.width = tick.x + 'px';
@@ -483,7 +417,10 @@ class ScrubberController {
   }
 }
 
-// Auto-initialize if element exists (for standalone usage)
+// Expose ScrubberController globally for reveal.js layout animations
+window.ScrubberController = ScrubberController;
+
+// Auto-initialize if element exists (for standalone/astro usage)
 const initScrubber = () => {
   const scrubberEl = document.getElementById('pageScrubber');
   if (scrubberEl && !scrubberEl.dataset.initialized) {
@@ -497,4 +434,4 @@ document.addEventListener('astro:page-load', initScrubber);
 
 if (document.readyState !== 'loading') {
   initScrubber();
-} 
+}
