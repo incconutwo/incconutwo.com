@@ -9,7 +9,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('../fonts/inter.woff2') format('woff2');
+  src: url('/fonts/inter.woff2') format('woff2');
 }
 
 /* Syne Font (Extra Bold 800) */
@@ -18,7 +18,7 @@
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url('../fonts/syne.woff2') format('woff2');
+  src: url('/fonts/syne.woff2') format('woff2');
 }
 
 /* Base Typography */
