@@ -241,5 +241,31 @@
     "image": null,
     "screenshots": [],
     "group": "Aurora Ecosystem"
+  },
+  {
+    "id": "taskbar-dock-animation-plus",
+    "featured": true,
+    "hideStars": true,
+    "title": "Taskbar Dock Animation Plus",
+    "shortDescription": "A Windhawk/Windows mod that brings the iconic macOS icon taskbar animation to Windows.",
+    "longDescription": "Taskbar Dock Animation Plus is a Windhawk/Windows mod that brings the iconic macOS icon taskbar animation to Windows. Originally built by Ph0en1x-dev, it was forked and updated to support the latest Windows 11 versions (including 26300), offering smoother physics, multi-monitor setups, and vertical taskbar support.",
+    "links": [
+      {
+        "label": "Windhawk Mod",
+        "url": "https://windhawk.net/mods/taskbar-dock-animation-plus",
+        "kind": "external"
+      },
+      {
+        "label": "GitHub Commits",
+        "url": "https://github.com/ramensoftware/windhawk-mods/commits/main/?author=incconutwo",
+        "kind": "github"
+      }
+    ],
+    "stats": null,
+    "image": "assets/images/projects/taskbar-dock-animation-plus/preview.webp",
+    "screenshots": [
+      "assets/images/projects/taskbar-dock-animation-plus/preview.webp"
+    ],
+    "group": "windhawk/windows mod"
   }
 ]

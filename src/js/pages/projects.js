@@ -606,6 +606,7 @@
       let cacheUpdated = false;
 
       const starPromises = this.projects.map(async (project) => {
+        if (project.hideStars) return;
         const githubLink = project.links?.find(l => l.kind === 'github' || l.url.includes('github.com'));
         if (!githubLink) return;
         try {
@@ -712,7 +713,7 @@
       // 3. windhawk/windows mod
       html += `
         <div class="projects-group-header subgroup-header">
-          <span class="group-title">windhawk/windows mod</span>
+          <span class="group-title"><span style="display: inline-block;">windhawk/</span><span style="display: inline-block;">windows</span> mod</span>
         </div>
       `;
       if (sortedWindhawk.length > 0) {
