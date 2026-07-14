@@ -36,10 +36,16 @@
 /* Story Grid Layout */
 .story-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   margin-bottom: var(--section-gap-v);
   /* Was 6rem */
+}
+
+@media (max-width: 768px) {
+  .story-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 
@@ -166,4 +172,38 @@
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Public Contribution Card Styles */
+.story-card:has(.contribution-list) .card-title {
+  margin-bottom: 1rem;
+}
+
+.info-list.contribution-list li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-list.contribution-list li:last-child {
+  border-bottom: none;
+}
+
+.info-list.contribution-list .label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.info-list.contribution-list .value {
+  font-size: 0.92rem;
+  color: #fff;
+  font-weight: 500;
+  text-align: left;
+  white-space: normal;
+  display: block;
 }
