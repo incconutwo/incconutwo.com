@@ -42,9 +42,8 @@ router.get('/status', async (req, res) => {
     const isPlaying = !!player.gameextrainfo;
     const currentGame = player.gameextrainfo || null;
     
-    // Convert personaState (0 = Offline, 1 = Online, 2 = Busy, 3 = Away, etc.)
+    // Convert status: only show as "In-Game" when playing, otherwise treat as Offline (since client is open 24/7)
     let personaStatus = 'Offline';
-    if (player.personastate > 0) personaStatus = 'Online';
     if (isPlaying) personaStatus = 'In-Game';
 
     // 2. Get Recently Played Games (checks playtime of last played game in the past 2 weeks)
