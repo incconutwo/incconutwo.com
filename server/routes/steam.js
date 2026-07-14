@@ -73,7 +73,7 @@ router.get('/status', async (req, res) => {
       isMock: false
     };
 
-    cache.set(cacheKey, payload, 300); // Cache for 5 minutes
+    cache.set(cacheKey, payload, 60); // Cache for 1 minute
     return res.json(payload);
 
   } catch (error) {
