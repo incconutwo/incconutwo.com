@@ -261,7 +261,9 @@
         "kind": "github"
       }
     ],
-    "stats": null,
+    "stats": {
+      "users": 450
+    },
     "image": "assets/images/projects/taskbar-dock-animation-plus/preview.webp",
     "screenshots": [
       "assets/images/projects/taskbar-dock-animation-plus/preview.webp"

@@ -45,12 +45,14 @@ const lichessRouter = require('./server/routes/lichess');
 const githubRouter = require('./server/routes/github');
 const notifyRouter = require('./server/routes/notify');
 const steamRouter = require('./server/routes/steam');
+const windhawkRouter = require('./server/routes/windhawk');
 
 app.use('/api/spotify', spotifyRouter);
 app.use('/api/lichess', lichessRouter);
 app.use('/api/github', githubRouter);
 app.use('/api/notify', notifyRouter);
 app.use('/api/steam', steamRouter);
+app.use('/api/windhawk', windhawkRouter);
 
 
 // Start listeners if local development

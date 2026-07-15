@@ -49,6 +49,7 @@
 
       // Fetch stats in background
       this.fetchGitHubStars();
+      this.fetchWindhawkUsers();
 
       this.attachEventListeners();
       this.handleDeepLink();
@@ -94,17 +95,21 @@
               if (cleanP.stats) {
                 cleanP.stats = { ...cleanP.stats };
                 delete cleanP.stats.stars;
+                delete cleanP.stats.users;
               }
               return cleanP;
             });
           };
 
           if (JSON.stringify(cleanForComparison(freshProjects)) !== JSON.stringify(cleanForComparison(this.projects))) {
-            // Keep stars from current projects if they exist
+            // Keep stars and users from current projects if they exist
             this.projects = freshProjects.map(freshP => {
               const currentP = this.projects.find(p => p.id === freshP.id);
-              if (currentP && currentP.stats && currentP.stats.stars !== undefined) {
-                freshP.stats = { ...freshP.stats, stars: currentP.stats.stars };
+              if (currentP && currentP.stats) {
+                const currentStats = {};
+                if (currentP.stats.stars !== undefined) currentStats.stars = currentP.stats.stars;
+                if (currentP.stats.users !== undefined) currentStats.users = currentP.stats.users;
+                freshP.stats = { ...freshP.stats, ...currentStats };
               }
               return freshP;
             });
@@ -647,6 +652,56 @@
       }
     }
 
+    async fetchWindhawkUsers() {
+      const windhawkProjects = this.projects.filter(p => p.group === 'windhawk/windows mod');
+      if (!windhawkProjects.length) return;
+
+      let cache = {};
+      try {
+        const cached = sessionStorage.getItem('windhawk_users_cache');
+        if (cached) {
+          cache = JSON.parse(cached);
+        }
+      } catch (e) {
+        console.warn('[Projects] Failed to read Windhawk cache:', e);
+      }
+
+      let cacheUpdated = false;
+
+      const userPromises = windhawkProjects.map(async (project) => {
+        const modId = project.id;
+        try {
+          if (cache[modId] !== undefined) {
+            project.stats = { ...project.stats, users: cache[modId] };
+            this.updateCardStats(project.id, project.stats);
+            return;
+          }
+
+          const response = await fetch(window.location.origin + `/api/windhawk/users/${modId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.users >= 0) {
+              cache[modId] = data.users;
+              cacheUpdated = true;
+              project.stats = { ...project.stats, users: data.users };
+              this.updateCardStats(project.id, project.stats);
+            }
+          }
+        } catch (e) {
+          console.warn(`[Projects] Failed to fetch Windhawk users for ${project.title}:`, e);
+        }
+      });
+      await Promise.all(userPromises);
+
+      if (cacheUpdated) {
+        try {
+          sessionStorage.setItem('windhawk_users_cache', JSON.stringify(cache));
+        } catch (e) {
+          console.warn('[Projects] Failed to save Windhawk cache:', e);
+        }
+      }
+    }
+
     updateCardStats(id, stats) {
       const card = this.grid?.querySelector(`.project-card[data-id="${id}"]`);
       if (card) {
@@ -826,6 +881,7 @@
     createStats(stats) {
       return `
         <div class="project-stats">
+          ${stats.users ? `<span class="project-stat">${ICONS.users} ${stats.users} active users</span>` : ''}
           ${stats.weeklyUsers ? `<span class="project-stat">${ICONS.users} ${stats.weeklyUsers} weekly</span>` : ''}
           ${stats.dailyUsers ? `<span class="project-stat">${ICONS.users} ${stats.dailyUsers} daily</span>` : ''}
           ${stats.stars ? `<span class="project-stat is-star">${ICONS.star} ${stats.stars} stars</span>` : ''}
