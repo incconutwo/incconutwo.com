@@ -282,3 +282,97 @@
   display: block;
   color: var(--color-text-muted);
 }
+
+/* Copy Email Button & Copy Badges */
+.copy-email-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed var(--color-accent);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.copy-email-btn:hover {
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  border-color: var(--color-accent-hover);
+  color: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.copy-hint-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  margin-left: 4px;
+}
+
+.contact-link-item:hover .copy-hint-badge {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Glassmorphic Toast Notification */
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: rgba(20, 20, 25, 0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.92rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.toast-card.show {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.toast-card.hide {
+  transform: translateY(-10px) scale(0.95);
+  opacity: 0;
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(45, 198, 83, 0.15);
+  border-radius: 50%;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.toast-message strong {
+  color: var(--color-accent, #4ECDC4);
+}
+

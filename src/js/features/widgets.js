@@ -9,6 +9,72 @@ export function initSpotifyWidget() {
   const offlineState = document.getElementById('spotify-offline');
   const liveState = document.getElementById('spotify-live');
 
+  let lastAlbumArt = null;
+
+  function extractAverageColor(imgElement) {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const sampleSize = 10;
+      canvas.width = sampleSize;
+      canvas.height = sampleSize;
+      ctx.drawImage(imgElement, 0, 0, sampleSize, sampleSize);
+
+      const imgData = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+
+      let bestColor = null;
+      let maxVibrancy = -1;
+
+      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+
+      for (let i = 0; i < imgData.length; i += 4) {
+        const r = imgData[i];
+        const g = imgData[i + 1];
+        const b = imgData[i + 2];
+        const a = imgData[i + 3];
+
+        if (a < 200) continue;
+
+        rSum += r;
+        gSum += g;
+        bSum += b;
+        count++;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const vibrancy = max - min;
+        const brightness = (r + g + b) / 3;
+
+        // Skip extremely dark (near black) or extremely bright (near white) colors
+        if (brightness < 30 || brightness > 235) continue;
+
+        if (vibrancy > maxVibrancy) {
+          maxVibrancy = vibrancy;
+          bestColor = { r, g, b };
+        }
+      }
+
+      // If we found a color with a decent amount of saturation/vibrancy, use it!
+      if (bestColor && maxVibrancy > 30) {
+        return bestColor;
+      }
+
+      // Fallback to average color if the image is mostly gray/monochrome
+      if (count > 0) {
+        return {
+          r: Math.round(rSum / count),
+          g: Math.round(gSum / count),
+          b: Math.round(bSum / count)
+        };
+      }
+
+      return null;
+    } catch (e) {
+      console.warn('[Spotify Widget] Color extraction failed:', e);
+      return null;
+    }
+  }
+
   // Elements to update
   const elArt = document.getElementById('spotify-art');
   const elTrack = document.getElementById('spotify-track');
@@ -103,7 +169,23 @@ export function initSpotifyWidget() {
           liveState.href = data.spotifyUrl;
         }
 
-        if (elArt && data.albumArt) elArt.src = data.albumArt;
+        if (elArt && data.albumArt) {
+          if (lastAlbumArt !== data.albumArt) {
+            lastAlbumArt = data.albumArt;
+            elArt.crossOrigin = "Anonymous";
+            elArt.src = data.albumArt;
+            elArt.onload = () => {
+              try {
+                const color = extractAverageColor(elArt);
+                if (color && window.gradientApp && typeof window.gradientApp.setDynamicSpotifyColor === 'function') {
+                  window.gradientApp.setDynamicSpotifyColor(color.r, color.g, color.b);
+                }
+              } catch (err) {
+                console.warn('[Spotify Widget] Error extracting color:', err);
+              }
+            };
+          }
+        }
         if (elTrack) elTrack.textContent = data.track;
         if (elArtist) elArtist.textContent = data.artist;
 
@@ -137,6 +219,13 @@ export function initSpotifyWidget() {
         if (fmwWidget) {
           fmwWidget.classList.remove('visible');
         }
+
+        if (lastAlbumArt !== null) {
+          lastAlbumArt = null;
+          if (window.gradientApp && typeof window.gradientApp.setColorScheme === 'function') {
+            window.gradientApp.setColorScheme(5); // Reset back to default Scheme 5
+          }
+        }
       }
 
     } catch (error) {
@@ -145,6 +234,12 @@ export function initSpotifyWidget() {
       if (spotifyCard) spotifyCard.classList.add('is-offline');
       if (liveState) liveState.style.display = 'none';
       if (offlineState) offlineState.style.display = 'flex';
+      if (lastAlbumArt !== null) {
+        lastAlbumArt = null;
+        if (window.gradientApp && typeof window.gradientApp.setColorScheme === 'function') {
+          window.gradientApp.setColorScheme(5);
+        }
+      }
     }
   }
 
@@ -280,7 +375,7 @@ export async function initLichessStats() {
     if (cachedData) {
       try {
         renderStats(JSON.parse(cachedData));
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 }
@@ -311,15 +406,12 @@ export async function initSteamWidget() {
     if (data.status === 'In-Game' || data.isPlaying) {
       statusEl.classList.add('in-game');
       cardEl.classList.add('in-game-active');
-      if (iconEl) iconEl.textContent = '🎮';
       gameEl.innerHTML = `<span style="color:#66c0f4; font-weight:700;">Playing ${data.game}</span>`;
     } else if (data.status === 'Online') {
       statusEl.classList.add('online');
-      if (iconEl) iconEl.textContent = '🟢';
       gameEl.textContent = `Online - Last played: ${data.game}`;
     } else {
       statusEl.classList.add('offline');
-      if (iconEl) iconEl.textContent = '🎮';
       gameEl.textContent = `Offline - Last played: ${data.game}`;
     }
 
@@ -358,7 +450,7 @@ export async function initSteamWidget() {
       if (cachedData) {
         try {
           renderStatus(JSON.parse(cachedData));
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }

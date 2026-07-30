@@ -10,6 +10,7 @@ import { initHackerScramble } from './features/scramble.js';
 import { initSpotifyWidget, initHeartRateWidget, initLichessStats, initSteamWidget } from './features/widgets.js';
 
 import { initSocialLedger, initNotificationForm } from './features/social.js';
+import { initClipboardCopy } from './features/clipboard.js';
 
 // 2. Import layouts & scroll animations
 import {
@@ -31,6 +32,7 @@ class ApplicationBootstrap {
     initCustomCursor();
     initClickExplosions();
     initNotificationForm();
+    initClipboardCopy();
 
     // B. Staggered Progressive Boot to eliminate Long Tasks (TBT)
     const runBootTasks = (offset = 0) => {
