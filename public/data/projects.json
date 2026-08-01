@@ -262,12 +262,79 @@
       }
     ],
     "stats": {
-      "users": 450
+      "users": 2734,
+      "rating": 9,
+      "ratingUsers": 40
     },
     "image": "assets/images/projects/taskbar-dock-animation-plus/preview.webp",
     "screenshots": [
       "assets/images/projects/taskbar-dock-animation-plus/preview.webp"
     ],
     "group": "windhawk/windows mod"
+  },
+  {
+    "id": "transit-timetables-peak",
+    "featured": false,
+    "title": "TransitTimetables",
+    "shortDescription": "Added custom line peak scheduling and UI integrations to support bypassing global peak settings.",
+    "links": [
+      {
+        "label": "GitHub PR",
+        "url": "https://github.com/AmicusDeus/TransitTimetables/pull/5",
+        "kind": "github"
+      },
+      {
+        "label": "GitHub Commits",
+        "url": "https://github.com/AmicusDeus/TransitTimetables/commits/main/?author=incconutwo",
+        "kind": "github"
+      }
+    ],
+    "stats": null,
+    "image": "assets/images/projects/transit-timetables-peak/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/transit-timetables-peak/screenshot1.webp"
+    ],
+    "group": "1 time commit"
+  },
+  {
+    "id": "windhawk-taskbar-ai-quota",
+    "featured": false,
+    "title": "windhawk-taskbar-ai-quota",
+    "shortDescription": "Added Antigravity (Gemini) provider quota support, enabling tracking of local Gemini quota alongside cloud APIs.",
+    "links": [
+      {
+        "label": "GitHub Commit",
+        "url": "https://github.com/Cleroth/windhawk-taskbar-ai-quota/commit/436608157678da20d11e25b34d3fb8f2d10a3e5a",
+        "kind": "github"
+      }
+    ],
+    "stats": null,
+    "image": "assets/images/projects/windhawk-taskbar-ai-quota/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/windhawk-taskbar-ai-quota/screenshot1.webp"
+    ],
+    "group": "1 time commit"
+  },
+  {
+    "id": "nexus-cities-skylines-mods",
+    "featured": true,
+    "title": "Cities: Skylines Mod Collection",
+    "shortDescription": "Repackaged and maintained essential Cities: Skylines utility mods on Nexus Mods to enable access and compatibility for non-Steam and Epic Games players.",
+    "longDescription": "A collection of essential Cities: Skylines utility mods (including Loading Screen Mod Revisited, Rebalanced Industries Revisited, FPS Booster, and Picker4.0) mirrored on Nexus Mods. Re-packaged to allow non-Steam and Epic Games Store players to install and use community utilities seamlessly.",
+    "links": [
+      {
+        "label": "Nexus Mods Profile",
+        "url": "https://www.nexusmods.com/profile/incconutwo/mods",
+        "kind": "nexus"
+      }
+    ],
+    "stats": {
+      "usersText": "55,000+ Unique Downloads"
+    },
+    "image": "assets/images/projects/nexus-cities-skylines-mods/screenshot1.webp",
+    "screenshots": [
+      "assets/images/projects/nexus-cities-skylines-mods/screenshot1.webp"
+    ],
+    "group": "Mod Distribution & Mirrors"
   }
 ]

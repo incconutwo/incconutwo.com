@@ -5,6 +5,7 @@
 
 :root {
   /* -------- COLOR SYSTEM -------- */
+  color-scheme: dark;
 
   /* Background (matches scheme 5) */
   --color-bg-primary: #0a0e27;
@@ -15,9 +16,10 @@
   --color-text-secondary: rgba(255, 255, 255, 0.85);
   --color-text-muted: rgba(255, 255, 255, 0.6);
 
-  /* Accent (matches hero accent in reference image) */
-  --color-accent: #b14cff;
-  --color-accent-hover: #c873ff;
+  /* Accent (Emerald / Forest Green) */
+  --color-accent: #1f8a5f;
+  --color-accent-hover: #2aa473;
+  --color-accent-glow: rgba(31, 138, 95, 0.3);
 
   /* Glass Effects */
   --glass-bg: rgba(59, 57, 84, 0.349);

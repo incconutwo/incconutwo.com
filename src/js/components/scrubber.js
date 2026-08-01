@@ -63,6 +63,13 @@ class ScrubberController {
   }
 
   ensureStructure(container) {
+    container.setAttribute('role', 'slider');
+    container.setAttribute('aria-valuemin', '0');
+    container.setAttribute('aria-valuemax', '100');
+    container.setAttribute('aria-valuenow', '0');
+    container.setAttribute('aria-label', 'Page scroll position');
+    container.setAttribute('tabindex', '0');
+
     if (!container.querySelector('.ticks-container')) {
       container.innerHTML = `
         <div class="value-tooltip">0</div>
@@ -380,6 +387,9 @@ class ScrubberController {
     if (!tick) return;
     
     this.state.currentValue = tick.value;
+    if (this.el.container) {
+      this.el.container.setAttribute('aria-valuenow', Math.round(tick.value).toString());
+    }
     
     if (animate && typeof gsap !== 'undefined') {
       gsap.to(this.el.markerPrimary, { left: tick.x - 1.5, duration: 0.25, ease: 'expo.out' });

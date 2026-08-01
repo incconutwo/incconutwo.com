@@ -4,6 +4,7 @@
  */
 export function initCustomCursor() {
   const cursor = document.getElementById('custom-cursor');
+  if (cursor) cursor.setAttribute('aria-hidden', 'true');
   if (!cursor || 'ontouchstart' in window || navigator.maxTouchPoints > 0) {
     if (cursor) cursor.style.display = 'none';
     return;

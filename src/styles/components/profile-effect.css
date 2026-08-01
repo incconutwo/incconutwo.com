@@ -21,6 +21,23 @@
   overflow: visible;
 }
 
+/* Glassmorphism Frosted Backdrop inside Blob */
+.profile-effect-container .profile-glass-backdrop {
+  fill: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+}
+
+/* Semi-transparent Image Layer to reveal background animation */
+.profile-effect-container .profile-image-transparent {
+  opacity: 0.65;
+  transition: opacity 0.3s ease;
+}
+
+.profile-effect-container svg:hover .profile-image-transparent {
+  opacity: 0.92;
+}
+
 /* Interaction: Blob Animation */
 .profile-effect-container #pe-blob-clip {
   transform-origin: center;
@@ -52,8 +69,8 @@
 /* Mobile Adjustments */
 @media (max-width: 640px) {
   .profile-effect-container {
-    max-width: 70%;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
-    overflow: hidden;
   }
 }

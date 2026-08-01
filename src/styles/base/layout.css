@@ -119,9 +119,22 @@ body {
     padding: var(--space-8) var(--content-padding);
   }
 
+  .hero-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
   .hero-profile {
-    margin-top: -10rem;
-    margin-bottom: var(--space-4);
+    order: 1;
+    margin-top: 0;
+    margin-bottom: 0;
+    width: 100%;
+    max-width: min(300px, 75vw);
+  }
+
+  .hero-content {
+    order: 2;
   }
 
   :root {

@@ -1,5 +1,9 @@
 import { WidgetPoller } from '../utils/poller.js';
 
+// Reuse canvas across calls to optimize performance and memory
+const sharedCanvas = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+const sharedCtx = sharedCanvas ? sharedCanvas.getContext('2d', { willReadFrequently: true }) : null;
+
 /**
  * Spotify Widget Logic
  * Polls the backend for current track info
@@ -11,21 +15,25 @@ export function initSpotifyWidget() {
 
   let lastAlbumArt = null;
 
-  function extractAverageColor(imgElement) {
+  function updateThemeColorMeta(hexColor) {
+    const meta = document.getElementById('themeColorMeta') || document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content', hexColor || '#252423');
+    }
+  }
+
+  function extractDominantColor(imgElement) {
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const sampleSize = 10;
-      canvas.width = sampleSize;
-      canvas.height = sampleSize;
-      ctx.drawImage(imgElement, 0, 0, sampleSize, sampleSize);
+      if (!sharedCanvas || !sharedCtx) return null;
+      const sampleSize = 16;
+      sharedCanvas.width = sampleSize;
+      sharedCanvas.height = sampleSize;
+      sharedCtx.drawImage(imgElement, 0, 0, sampleSize, sampleSize);
 
-      const imgData = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
-
-      let bestColor = null;
-      let maxVibrancy = -1;
-
-      let rSum = 0, gSum = 0, bSum = 0, count = 0;
+      const imgData = sharedCtx.getImageData(0, 0, sampleSize, sampleSize).data;
+      const colorCounts = {};
+      let maxCount = 0;
+      let dominantKey = null;
 
       for (let i = 0; i < imgData.length; i += 4) {
         const r = imgData[i];
@@ -35,42 +43,32 @@ export function initSpotifyWidget() {
 
         if (a < 200) continue;
 
-        rSum += r;
-        gSum += g;
-        bSum += b;
-        count++;
-
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const vibrancy = max - min;
+        // Skip extreme dark/bright pixels to focus on true background hue
         const brightness = (r + g + b) / 3;
+        if (brightness < 15 || brightness > 245) continue;
 
-        // Skip extremely dark (near black) or extremely bright (near white) colors
-        if (brightness < 30 || brightness > 235) continue;
+        // Quantize RGB into 24-step color buckets for histogram grouping
+        const bucketR = Math.floor(r / 24) * 24;
+        const bucketG = Math.floor(g / 24) * 24;
+        const bucketB = Math.floor(b / 24) * 24;
 
-        if (vibrancy > maxVibrancy) {
-          maxVibrancy = vibrancy;
-          bestColor = { r, g, b };
+        const key = `${bucketR},${bucketG},${bucketB}`;
+        colorCounts[key] = (colorCounts[key] || 0) + 1;
+
+        if (colorCounts[key] > maxCount) {
+          maxCount = colorCounts[key];
+          dominantKey = key;
         }
       }
 
-      // If we found a color with a decent amount of saturation/vibrancy, use it!
-      if (bestColor && maxVibrancy > 30) {
-        return bestColor;
-      }
-
-      // Fallback to average color if the image is mostly gray/monochrome
-      if (count > 0) {
-        return {
-          r: Math.round(rSum / count),
-          g: Math.round(gSum / count),
-          b: Math.round(bSum / count)
-        };
+      if (dominantKey) {
+        const [r, g, b] = dominantKey.split(',').map(Number);
+        return { r, g, b };
       }
 
       return null;
     } catch (e) {
-      console.warn('[Spotify Widget] Color extraction failed:', e);
+      console.warn('[Spotify Widget] Dominant color extraction failed:', e);
       return null;
     }
   }
@@ -92,7 +90,8 @@ export function initSpotifyWidget() {
   // Floating widget toggle listener
   if (fmwToggle && fmwWidget) {
     fmwToggle.addEventListener('click', () => {
-      fmwWidget.classList.toggle('retracted');
+      const isRetracted = fmwWidget.classList.toggle('retracted');
+      fmwToggle.setAttribute('aria-expanded', (!isRetracted).toString());
     });
   }
 
@@ -176,9 +175,14 @@ export function initSpotifyWidget() {
             elArt.src = data.albumArt;
             elArt.onload = () => {
               try {
-                const color = extractAverageColor(elArt);
-                if (color && window.gradientApp && typeof window.gradientApp.setDynamicSpotifyColor === 'function') {
-                  window.gradientApp.setDynamicSpotifyColor(color.r, color.g, color.b);
+                const color = extractDominantColor(elArt);
+                if (color) {
+                  if (window.gradientApp && typeof window.gradientApp.setDynamicSpotifyColor === 'function') {
+                    window.gradientApp.setDynamicSpotifyColor(color.r, color.g, color.b);
+                  } else {
+                    const hexColor = '#' + [color.r, color.g, color.b].map(x => x.toString(16).padStart(2, '0')).join('');
+                    updateThemeColorMeta(hexColor);
+                  }
                 }
               } catch (err) {
                 console.warn('[Spotify Widget] Error extracting color:', err);
@@ -225,6 +229,7 @@ export function initSpotifyWidget() {
           if (window.gradientApp && typeof window.gradientApp.setColorScheme === 'function') {
             window.gradientApp.setColorScheme(5); // Reset back to default Scheme 5
           }
+          updateThemeColorMeta('#252423');
         }
       }
 
@@ -239,6 +244,7 @@ export function initSpotifyWidget() {
         if (window.gradientApp && typeof window.gradientApp.setColorScheme === 'function') {
           window.gradientApp.setColorScheme(5);
         }
+        updateThemeColorMeta('#252423');
       }
     }
   }
@@ -262,14 +268,15 @@ export function initHeartRateWidget() {
 
   if (toggleEl && widgetEl) {
     toggleEl.addEventListener('click', () => {
-      widgetEl.classList.toggle('retracted');
+      const isRetracted = widgetEl.classList.toggle('retracted');
+      toggleEl.setAttribute('aria-expanded', (!isRetracted).toString());
     });
   }
 
   async function updateWidget() {
     if (document.hidden) return;
 
-    const API_URL = "https://hr-dashboard.tnemoroccan.workers.dev/api/hr";
+    const API_URL = window.location.origin + "/api/heart-rate";
     const REQUEST_TIMEOUT_MS = 3000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

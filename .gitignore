@@ -1,7 +1,8 @@
-# Astro / Node
+# Astro / Node / Vercel
 node_modules/
 dist/
 .astro/
+.vercel/
 
 # Environment variables
 .env
@@ -12,3 +13,4 @@ dist/
 # Temp / helper files
 combined_website_code.txt
 combine_code.cmd
+scratch/

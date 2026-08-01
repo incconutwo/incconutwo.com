@@ -312,7 +312,7 @@ export function initScrubber() {
 export function init3DTilt() {
   if ('ontouchstart' in window) return; // Skip on touch
 
-  const tiltElements = document.querySelectorAll('[data-tilt]');
+  const tiltElements = document.querySelectorAll('[data-tilt]:not(.project-card)');
 
   tiltElements.forEach(el => {
     let rect = null;

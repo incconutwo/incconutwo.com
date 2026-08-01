@@ -89,9 +89,8 @@ class TouchTexture {
     intensity *= point.force;
 
     const radius = this.radius;
-    let color = `${((point.vx + 1) / 2) * 255}, ${
-      ((point.vy + 1) / 2) * 255
-    }, ${intensity * 255}`;
+    let color = `${((point.vx + 1) / 2) * 255}, ${((point.vy + 1) / 2) * 255
+      }, ${intensity * 255}`;
     let offset = this.size * 5;
     this.ctx.shadowOffsetX = offset;
     this.ctx.shadowOffsetY = offset;
@@ -127,7 +126,7 @@ class GradientBackground {
       uGrainIntensity: { value: 0.08 },
       uZoom: { value: 1.0 }, // Zoom/scale control - lower = less zoomed (more visible)
       uDarkNavy: { value: new THREE.Vector3(0.039, 0.055, 0.153) }, // #0a0e27 - Dark navy base color
-      uGradientSize: { value: 1.0 }, // Control gradient size (smaller = more gradients)
+      uGradientSize: { value: 0.01 }, // Control gradient size (smaller = more gradients)
       uGradientCount: { value: 6.0 }, // Number of gradient centers
       uColor1Weight: { value: 1.0 }, // Weight for color1 (orange) - reduce for more navy
       uColor2Weight: { value: 1.0 } // Weight for color2 (navy) - increase for more navy
@@ -322,6 +321,8 @@ class GradientBackground {
               float luminance = dot(color, vec3(0.299, 0.587, 0.114));
               color = mix(vec3(luminance), color, 1.35);
               
+              // Fix NaN black circles by preventing negative values before pow
+              color = max(color, vec3(0.0));
               color = pow(color, vec3(0.92)); // Slight gamma adjustment for better contrast
               
               // Ensure minimum brightness (navy blue base instead of grey/black)
@@ -424,7 +425,7 @@ class GradientBackground {
 class LiquidGradientApp {
   constructor(domElement = document.body) {
     this.domElement = domElement;
-    
+
     // Create canvas container if targeting body, or use element directly if it's a div
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -436,7 +437,7 @@ class LiquidGradientApp {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setAnimationLoop(null);
-    
+
     // Append rendering canvas
     this.renderer.domElement.id = "webGLApp";
     // Check if domElement is body or a container
@@ -466,7 +467,7 @@ class LiquidGradientApp {
         rootMargin: "0px",
         threshold: 0.01 // Trigger as soon as 1% is visible
       });
-      
+
       // Observe the element containing the canvas (or body)
       // For personal website, usually we want to pause when scrolling past Hero section
       // If attached to body, we might need a specific element to track (like #hero)
@@ -526,7 +527,7 @@ class LiquidGradientApp {
     this.onResize = debounce(this.onResize.bind(this), 200); // Debounced!
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
-    
+
     this.init();
   }
 
@@ -539,12 +540,17 @@ class LiquidGradientApp {
     window.addEventListener("mousemove", this.onMouseMove);
     window.addEventListener("touchmove", this.onTouchMove);
 
+    this.onScroll = () => {
+      this.updateThemeColorOnScroll();
+    };
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+
     // PERFORMANCE FIX: Pause rendering when tab is hidden
     this.onVisibilityChange = () => {
       if (document.hidden) {
         this.renderer.setAnimationLoop(null);
       } else {
-        this.clock.start(); 
+        this.clock.start();
         this.start();
       }
     };
@@ -554,14 +560,14 @@ class LiquidGradientApp {
   setColorScheme(scheme) {
     if (!this.colorSchemes[scheme] && scheme !== 6 && scheme !== 7 && scheme !== 8) return;
     this.currentScheme = scheme;
-    
+
     // For simplicity, reusing the existing logic logic, but normally would optimize lookup
     const uniforms = this.gradientBackground.uniforms;
     const colors = this.colorSchemes[scheme] || this.colorSchemes[1]; // Fallback
 
     // ... (Color setting logic as in original, simplified for export)
     // IMPORTANT: Copied logic from original file to maintain exact appearance
-    
+
     if (scheme === 3) {
       uniforms.uColor1.value.copy(colors.color1);
       uniforms.uColor2.value.copy(colors.color2);
@@ -584,25 +590,23 @@ class LiquidGradientApp {
       uniforms.uColor5.value.copy(colors.color5);
       uniforms.uColor6.value.copy(colors.color6);
     } else {
-       // Scheme 1, 2, 6, 7, 8 etc map to basic or specific overrides
-       if (this.colorSchemes[scheme]) {
-           uniforms.uColor1.value.copy(colors.color1);
-           uniforms.uColor2.value.copy(colors.color2);
-           uniforms.uColor3.value.copy(colors.color1);
-           uniforms.uColor4.value.copy(colors.color2);
-           uniforms.uColor5.value.copy(colors.color1);
-           uniforms.uColor6.value.copy(colors.color2);
-       }
+      // Scheme 1, 2, 6, 7, 8 etc map to basic or specific overrides
+      if (this.colorSchemes[scheme]) {
+        uniforms.uColor1.value.copy(colors.color1);
+        uniforms.uColor2.value.copy(colors.color2);
+        uniforms.uColor3.value.copy(colors.color1);
+        uniforms.uColor4.value.copy(colors.color2);
+        uniforms.uColor5.value.copy(colors.color1);
+        uniforms.uColor6.value.copy(colors.color2);
+      }
     }
 
-    const isMobile = window.innerWidth <= 768; // basic mobile check
-    
-    // Background and base settings (simplified for export)
+    // Background and base settings (identical on all screen sizes)
     if (scheme === 1 || scheme === 5 || scheme === 6 || scheme === 7 || scheme === 8) {
       this.scene.background = new THREE.Color(0x0a0e27);
       uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
       uniforms.uGradientSize.value = 0.45;
-      uniforms.uGradientCount.value = isMobile ? 6.0 : 12.0; // Cut in half for mobile phones
+      uniforms.uGradientCount.value = 12.0; // Same full count on mobile as desktop
       uniforms.uSpeed.value = 1.5;
       uniforms.uColor1Weight.value = 0.5;
       uniforms.uColor2Weight.value = 1.8;
@@ -614,7 +618,7 @@ class LiquidGradientApp {
       this.scene.background = new THREE.Color(0x0a0e27);
       uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
       uniforms.uGradientSize.value = 1.0;
-      uniforms.uGradientCount.value = isMobile ? 3.0 : 6.0; // Reduced for default schemes
+      uniforms.uGradientCount.value = 6.0; // Same full count on mobile as desktop
       uniforms.uSpeed.value = 1.2;
       uniforms.uColor1Weight.value = 1.0;
       uniforms.uColor2Weight.value = 1.0;
@@ -638,6 +642,83 @@ class LiquidGradientApp {
     this.touchTexture.addTouch(this.mouse);
   }
 
+  updateThemeColorOnScroll() {
+    const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+    const heroHeight = window.innerHeight * 0.65;
+    const themeMeta = document.getElementById('themeColorMeta') || document.querySelector('meta[name="theme-color"]');
+    if (!themeMeta) return;
+
+    if (scrollY > heroHeight) {
+      themeMeta.setAttribute('content', '#252423');
+    } else {
+      const activeColor = this.activeThemeColorHex || '#' + (this.scene && this.scene.background ? this.scene.background.getHexString() : '252423');
+      themeMeta.setAttribute('content', activeColor);
+    }
+  }
+
+  setDynamicSpotifyColor(r, g, b, targetSize = 0.40) {
+    const uniforms = this.gradientBackground.uniforms;
+
+    // --- CONTROL CIRCLE SIZE HERE ---
+    // Smoothly animate gradient size when music is playing
+    if (typeof gsap !== 'undefined') {
+      gsap.to(uniforms.uGradientSize, { value: targetSize, duration: 2.5, ease: "power2.out" });
+    } else {
+      uniforms.uGradientSize.value = targetSize;
+    }
+
+    const targetColor = new THREE.Vector3(r / 255, g / 255, b / 255);
+    const baseNavy = new THREE.Vector3(0.039, 0.055, 0.153); // #0a0e27 dark navy
+    const targetBase = baseNavy.clone().add(targetColor.clone().multiplyScalar(0.12));
+    const targetBaseBackground = new THREE.Color(targetBase.x, targetBase.y, targetBase.z);
+
+    const targetColorHex = '#' + [
+      Math.round(r).toString(16).padStart(2, '0'),
+      Math.round(g).toString(16).padStart(2, '0'),
+      Math.round(b).toString(16).padStart(2, '0')
+    ].join('');
+
+    // Set active dynamic color to the liquid circle accent color
+    this.activeThemeColorHex = targetColorHex;
+
+    // Let's transition these values using GSAP if available, otherwise write directly
+    if (typeof gsap !== 'undefined') {
+      // Animate uniforms
+      gsap.to(uniforms.uColor1.value, { x: targetColor.x, y: targetColor.y, z: targetColor.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor3.value, { x: targetColor.x, y: targetColor.y, z: targetColor.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor5.value, { x: targetColor.x, y: targetColor.y, z: targetColor.z, duration: 2.5, ease: "power2.out" });
+
+      // Animate even colors to match target base instead of leaving them black
+      gsap.to(uniforms.uColor2.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor4.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor6.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 2.5, ease: "power2.out" });
+
+      gsap.to(uniforms.uDarkNavy.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 3.0, ease: "power2.out" });
+
+      // Animate WebGL scene background color and sync status bar theme-color with scroll awareness
+      gsap.to(this.scene.background, { 
+        r: targetBaseBackground.r, 
+        g: targetBaseBackground.g, 
+        b: targetBaseBackground.b, 
+        duration: 3.0, 
+        ease: "power2.out",
+        onUpdate: () => {
+          this.updateThemeColorOnScroll();
+        }
+      });
+    } else {
+      uniforms.uColor1.value.copy(targetColor);
+      uniforms.uColor3.value.copy(targetColor);
+      uniforms.uColor5.value.copy(targetColor);
+      uniforms.uColor2.value.copy(targetBase);
+      uniforms.uColor4.value.copy(targetBase);
+      uniforms.uColor6.value.copy(targetBase);
+      uniforms.uDarkNavy.value.copy(targetBase);
+      this.scene.background.copy(targetBaseBackground);
+      this.updateThemeColorOnScroll();
+    }
+  }
+
   getViewSize() {
     const fovInRadians = (this.camera.fov * Math.PI) / 180;
     const height = Math.abs(
@@ -655,12 +736,12 @@ class LiquidGradientApp {
     this.renderer.setAnimationLoop((time) => {
       // Pause if tab is hidden or canvas is not intersecting
       if (document.hidden || !this.isIntersecting) return;
-      
+
       const delta = this.clock.getDelta();
-      
+
       // Safety cap on delta time to prevent physics explosions after long pause
-      const clampedDelta = Math.min(delta, 0.1); 
-      
+      const clampedDelta = Math.min(delta, 0.1);
+
       this.update(clampedDelta);
       this.render();
     });

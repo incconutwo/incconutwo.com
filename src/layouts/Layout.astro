@@ -16,9 +16,16 @@ const { title } = Astro.props;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <ClientRouter />
 
+  <!-- Favicon & Theme Color -->
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg" />
+  <link rel="alternate icon" href="/assets/icons/favicon.svg" />
+
+  <!-- Theme Color Meta Tag -->
+  <meta name="theme-color" content="#252423" id="themeColorMeta" />
+
   <!-- Tightened CSP for maximum security and local-first asset speed -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https://cdn.jsdelivr.net https://i.scdn.co https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self'; connect-src 'self' https://vitals.vercel-insights.com https://hr-dashboard.tnemoroccan.workers.dev;">
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; worker-src blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https://cdn.jsdelivr.net https://i.scdn.co https://github-readme-stats-nine-liart-90.vercel.app; font-src 'self'; connect-src 'self' https://vitals.vercel-insights.com;">
 
   <!-- SEO Meta Tags -->
   <title>{title}</title>
@@ -28,17 +35,22 @@ const { title } = Astro.props;
   <meta name="author" content="incconu_two">
   <meta name="keywords" content="incconu_two, incconutwo, tnemoroccan, Morocco developer, X/Twitter Location Flags, Twitter Location Flags Time Blocker, Twitter country flags extension, Gemini Cleaner browser extension, Aurora for ChatGPT, open source extensions, WebExtension developer">
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:title" content={title}>
   <meta property="og:description" content="Official website of incconu_two (@tnemoroccan). Developer of privacy-focused and UX-enhancing browser extensions like Twitter Location Flags and Gemini Cleaner.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://incconutwo.com">
+  <meta property="og:image" content="https://incconutwo.com/assets/images/profile.webp">
+  <meta property="og:image:width" content="500">
+  <meta property="og:image:height" content="500">
+  <meta property="og:image:type" content="image/webp">
 
-  <!-- Twitter -->
+  <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@tnemoroccan">
   <meta name="twitter:title" content={title}>
   <meta name="twitter:description" content="Developer portfolio and projects by incconu_two, including X/Twitter Country Flags & Blocker and Gemini Cleaner extensions.">
+  <meta name="twitter:image" content="https://incconutwo.com/assets/images/profile.webp">
 
   <!-- JSON-LD Structured Data for SEO / Chatbot GEO -->
   <script type="application/ld+json" is:inline>

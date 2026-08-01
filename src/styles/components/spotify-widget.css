@@ -171,6 +171,7 @@
 }
 
 @keyframes equalize {
+
   0%,
   100% {
     height: 30%;
@@ -188,11 +189,11 @@
     align-items: stretch;
   }
 
-  /* When offline, the card spans 2 columns in width and is 135px tall to match hobby card height */
+  /* When offline, the card spans 2 columns in width with fluid height to prevent vertical clipping */
   .activity-chip.music-card.wide.is-offline {
     grid-column: span 2 !important;
     min-height: 230px !important;
-    height: 230px !important;
+    height: auto !important;
   }
 
   .activity-chip.music-card .chip-content {
@@ -225,7 +226,7 @@
   }
 
   .activity-chip.music-card.is-offline .spotify-top-tracks {
-    max-height: 130px;
+    max-height: 110px;
   }
 }
 
