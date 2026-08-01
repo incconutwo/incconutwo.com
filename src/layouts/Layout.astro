@@ -1,6 +1,7 @@
 ---
 import '../styles/index.css';
 import { ClientRouter } from 'astro:transitions';
+import SpeedInsights from '@vercel/speed-insights/astro';
 
 interface Props {
   title: string;
@@ -177,6 +178,7 @@ const { title } = Astro.props;
 </head>
 <body class="page-landing">
   <slot />
+  <SpeedInsights />
 
 <!-- Vite Bundled Scripts -->
   <script>
