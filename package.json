@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "auth-spotify": "node scripts/setup-spotify-tokens.js",
-    "dev": "astro dev",
+    "dev": "astro dev --host 0.0.0.0",
     "start": "astro dev",
     "preview": "astro preview",
     "build": "astro build",
@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.4",
-    "@vercel/analytics": "^1.6.1",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "animejs": "^3.2.2",
-    "astro": "^7.0.3",
+    "astro": "^7.1.6",
     "canvas-confetti": "^1.9.4",
     "dotenv": "^16.6.1",
     "gsap": "^3.15.0",

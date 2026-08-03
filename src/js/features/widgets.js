@@ -318,76 +318,8 @@ export function initSpotifyWidget() {
  */
 export function initHeartRateWidget() {
   const widgetEl = document.getElementById('fhr-widget');
-  const toggleEl = document.getElementById('fhr-toggle');
-  const iconEl = document.getElementById('fhr-icon');
-  const bpmEl = document.getElementById('fhr-bpm');
-  const metaEl = document.getElementById('fhr-meta');
-
-  if (toggleEl && widgetEl) {
-    toggleEl.addEventListener('click', () => {
-      const isRetracted = widgetEl.classList.toggle('retracted');
-      toggleEl.setAttribute('aria-expanded', (!isRetracted).toString());
-    });
-  }
-
-  async function updateWidget() {
-    if (document.hidden) return;
-
-    const API_URL = window.location.origin + "/api/heart-rate";
-    const REQUEST_TIMEOUT_MS = 3000;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-    try {
-      const response = await fetch(API_URL, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data && data.hr > 0) {
-        const now = Date.now();
-        const recordTime = data.ts > 9999999999 ? data.ts : data.ts * 1000;
-        const diffSeconds = Math.floor((now - recordTime) / 1000);
-
-        // Actively updated: within 5 minutes (300 seconds) (Temporarily 10000 for testing)
-        if (diffSeconds <= 10000) {
-          if (widgetEl) widgetEl.classList.add('visible');
-          if (bpmEl) bpmEl.textContent = data.hr;
-
-          let timeString = `${diffSeconds}s ago`;
-          if (diffSeconds > 60) timeString = `${Math.floor(diffSeconds / 60)}m ${diffSeconds % 60}s ago`;
-          if (diffSeconds < 5) timeString = "Just now";
-
-          if (metaEl) metaEl.textContent = `Updated: ${timeString}`;
-
-          // Micro-animation: adjust heartbeat animation speed based on BPM
-          if (iconEl) {
-            iconEl.classList.add('pulse');
-            iconEl.style.animationDuration = `${60 / data.hr}s`;
-          }
-        } else {
-          // Stale data (> 5 mins) -> hide widget
-          if (widgetEl) widgetEl.classList.remove('visible');
-          if (iconEl) iconEl.classList.remove('pulse');
-        }
-      } else {
-        // Invalid HR data
-        if (widgetEl) widgetEl.classList.remove('visible');
-        if (iconEl) iconEl.classList.remove('pulse');
-      }
-    } catch (error) {
-      console.warn("❤️ Heart Rate Widget Fetch failed:", error.message || error);
-      if (widgetEl) widgetEl.classList.remove('visible');
-      if (iconEl) iconEl.classList.remove('pulse');
-    }
-  }
-
-  const poller = new WidgetPoller(updateWidget, 5000);
-  poller.start();
+  if (widgetEl) widgetEl.classList.remove('visible');
+  return;
 }
 
 /**

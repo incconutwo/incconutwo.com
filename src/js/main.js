@@ -101,7 +101,6 @@ class ApplicationBootstrap {
     const runDeferredTasks = () => {
       setTimeout(() => {
         initSpotifyWidget();
-        initHeartRateWidget();
         initLichessStats();
         initSteamWidget();
       }, 2000);
