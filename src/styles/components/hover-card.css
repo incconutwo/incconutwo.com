@@ -69,8 +69,8 @@
   transition: opacity 0.3s ease;
 }
 
-/* On hover: show the tracking border */
-.hover-card:is(:hover, :focus-within)::after {
+/* On hover, focus-within, or touch active: show the tracking border */
+.hover-card:is(:hover, :focus-within, .is-touch-active)::after {
   opacity: 1;
 }
 
@@ -99,6 +99,6 @@
   clip-path: inset(0 round var(--hover-card-radius, 16px));
 }
 
-.hover-card:is(:hover, :focus-within) .hover-card-bg-layer {
+.hover-card:is(:hover, :focus-within, .is-touch-active) .hover-card-bg-layer {
   opacity: var(--hc-opacity);
 }

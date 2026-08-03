@@ -22,18 +22,16 @@ export function initSpotifyWidget() {
     }
   }
 
-  function extractDominantColor(imgElement) {
+  function extractColorPalette(imgElement, maxColors = 3) {
     try {
-      if (!sharedCanvas || !sharedCtx) return null;
-      const sampleSize = 16;
+      if (!sharedCanvas || !sharedCtx) return [];
+      const sampleSize = 40;
       sharedCanvas.width = sampleSize;
       sharedCanvas.height = sampleSize;
       sharedCtx.drawImage(imgElement, 0, 0, sampleSize, sampleSize);
 
       const imgData = sharedCtx.getImageData(0, 0, sampleSize, sampleSize).data;
-      const colorCounts = {};
-      let maxCount = 0;
-      let dominantKey = null;
+      const colorBuckets = {};
 
       for (let i = 0; i < imgData.length; i += 4) {
         const r = imgData[i];
@@ -41,35 +39,67 @@ export function initSpotifyWidget() {
         const b = imgData[i + 2];
         const a = imgData[i + 3];
 
-        if (a < 200) continue;
+        if (a < 200) continue; // Skip transparent pixels
 
-        // Skip extreme dark/bright pixels to focus on true background hue
-        const brightness = (r + g + b) / 3;
-        if (brightness < 15 || brightness > 245) continue;
-
-        // Quantize RGB into 24-step color buckets for histogram grouping
-        const bucketR = Math.floor(r / 24) * 24;
-        const bucketG = Math.floor(g / 24) * 24;
-        const bucketB = Math.floor(b / 24) * 24;
+        // Quantize RGB into 24-step buckets
+        const bucketR = Math.floor(r / 24) * 24 + 12;
+        const bucketG = Math.floor(g / 24) * 24 + 12;
+        const bucketB = Math.floor(b / 24) * 24 + 12;
 
         const key = `${bucketR},${bucketG},${bucketB}`;
-        colorCounts[key] = (colorCounts[key] || 0) + 1;
+        if (!colorBuckets[key]) {
+          // Calculate HSL Saturation and Lightness
+          const max = Math.max(r, g, b) / 255;
+          const min = Math.min(r, g, b) / 255;
+          const lightness = (max + min) / 2;
+          const d = max - min;
+          const saturation = (max === min || lightness === 0 || lightness === 1)
+            ? 0
+            : (lightness > 0.5 ? d / (2 - max - min) : d / (max + min));
 
-        if (colorCounts[key] > maxCount) {
-          maxCount = colorCounts[key];
-          dominantKey = key;
+          colorBuckets[key] = { r: bucketR, g: bucketG, b: bucketB, count: 0, saturation, lightness };
         }
+        colorBuckets[key].count++;
       }
 
-      if (dominantKey) {
-        const [r, g, b] = dominantKey.split(',').map(Number);
-        return { r, g, b };
+      // HYBRID SCORING FORMULA:
+      // Combines pixel count with saturation & lightness weight.
+      // - High-saturation pixels (neon/vibrant text/nebulae) get a boost over dark space.
+      // - Near-zero lightness (pure black) and near-1.0 lightness (pure white) are penalized gently.
+      const scoredColors = Object.values(colorBuckets).map(item => {
+        // Bell-curve weight favoring mid-tone lightness (0.2 - 0.8)
+        const lightnessWeight = Math.max(0.08, 1.0 - Math.abs(item.lightness - 0.5) * 1.6);
+        
+        // Saturation multiplier: 1.0 for greyscale up to 4.0 for max saturation
+        const saturationMultiplier = 1.0 + 3.0 * Math.pow(item.saturation, 2);
+        
+        const score = item.count * saturationMultiplier * lightnessWeight;
+        return { ...item, score };
+      });
+
+      scoredColors.sort((a, b) => b.score - a.score);
+
+      if (scoredColors.length === 0) return [{ r: 180, g: 190, b: 210 }];
+
+      // Pick top distinct colors (minimizing color overlap)
+      const palette = [];
+      for (const color of scoredColors) {
+        const isDistinct = palette.every(c => {
+          const dist = Math.sqrt((c.r - color.r) ** 2 + (c.g - color.g) ** 2 + (c.b - color.b) ** 2);
+          return dist > 45; // Euclidean color distance threshold
+        });
+
+        if (isDistinct || palette.length === 0) {
+          palette.push({ r: color.r, g: color.g, b: color.b });
+        }
+
+        if (palette.length >= maxColors) break;
       }
 
-      return null;
+      return palette;
     } catch (e) {
-      console.warn('[Spotify Widget] Dominant color extraction failed:', e);
-      return null;
+      console.warn('[Spotify Widget] Palette extraction failed:', e);
+      return [];
     }
   }
 
@@ -106,6 +136,7 @@ export function initSpotifyWidget() {
     }, { passive: true });
   }
   let topTracksCached = null;
+  let revertWebsiteColorTimeout = null;
 
   async function fetchTopTracks() {
     try {
@@ -156,6 +187,10 @@ export function initSpotifyWidget() {
 
       if (data.track && data.isPlaying) {
         // --- HAS TRACK DATA AND ACTIVELY PLAYING ---
+        if (revertWebsiteColorTimeout) {
+          clearTimeout(revertWebsiteColorTimeout);
+          revertWebsiteColorTimeout = null;
+        }
         if (spotifyCard) spotifyCard.classList.remove('is-offline');
         if (offlineState) offlineState.style.display = 'none';
 
@@ -175,12 +210,29 @@ export function initSpotifyWidget() {
             elArt.src = data.albumArt;
             elArt.onload = () => {
               try {
-                const color = extractDominantColor(elArt);
-                if (color) {
+                const palette = extractColorPalette(elArt, 3);
+                if (palette && palette.length > 0) {
+                  const c1 = palette[0];
+                  const c2 = palette[1] || null; // Let shader handle smart fallbacks if 2nd/3rd color is missing
+                  const c3 = palette[2] || null;
+
                   if (window.gradientApp && typeof window.gradientApp.setDynamicSpotifyColor === 'function') {
-                    window.gradientApp.setDynamicSpotifyColor(color.r, color.g, color.b);
+                    if (c2 && c3) {
+                      window.gradientApp.setDynamicSpotifyColor(
+                        c1.r, c1.g, c1.b,
+                        c2.r, c2.g, c2.b,
+                        c3.r, c3.g, c3.b
+                      );
+                    } else if (c2) {
+                      window.gradientApp.setDynamicSpotifyColor(
+                        c1.r, c1.g, c1.b,
+                        c2.r, c2.g, c2.b
+                      );
+                    } else {
+                      window.gradientApp.setDynamicSpotifyColor(c1.r, c1.g, c1.b);
+                    }
                   } else {
-                    const hexColor = '#' + [color.r, color.g, color.b].map(x => x.toString(16).padStart(2, '0')).join('');
+                    const hexColor = '#' + [c1.r, c1.g, c1.b].map(x => x.toString(16).padStart(2, '0')).join('');
                     updateThemeColorMeta(hexColor);
                   }
                 }
@@ -225,11 +277,16 @@ export function initSpotifyWidget() {
         }
 
         if (lastAlbumArt !== null) {
-          lastAlbumArt = null;
-          if (window.gradientApp && typeof window.gradientApp.setColorScheme === 'function') {
-            window.gradientApp.setColorScheme(5); // Reset back to default Scheme 5
+          if (!revertWebsiteColorTimeout) {
+            revertWebsiteColorTimeout = setTimeout(() => {
+              lastAlbumArt = null;
+              if (window.gradientApp && typeof window.gradientApp.setDynamicSpotifyColor === 'function') {
+                window.gradientApp.setDynamicSpotifyColor(241, 90, 34); // Reset to website default signature orange
+              }
+              updateThemeColorMeta('#252423');
+              revertWebsiteColorTimeout = null;
+            }, 10000); // Wait 10 seconds before resetting
           }
-          updateThemeColorMeta('#252423');
         }
       }
 

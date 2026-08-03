@@ -1,0 +1,133 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/pages/links.css';
+---
+
+<Layout title="Links | incconutwo">
+<script is:inline>
+  // Prevent any scrolling on the links page
+  document.documentElement.classList.add('page-links');
+  document.body.classList.add('page-links');
+</script>
+<style is:inline>
+  html.page-links,
+  body.page-links {
+    overflow: hidden !important;
+    height: 100dvh !important;
+  }
+</style>
+  <main class="links-container">
+    
+    <!-- Profile Header -->
+    <header class="links-header">
+      <div class="profile-avatar-wrapper">
+        <img src="/assets/images/profile.webp" alt="incconu_two" class="profile-avatar" />
+      </div>
+      <h1 class="profile-name">@incconu_two</h1>
+      <p class="profile-bio">Builder of open-source extensions, desktop utilities, and ambient UI mods.</p>
+    </header>
+
+    <!-- Socials Row -->
+    <div class="socials-row">
+      <a href="https://github.com/incconutwo" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57C20.565 21.795 24 17.31 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <a href="https://x.com/tnemoroccan" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="X / Twitter">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://ko-fi.com/incconutwo" target="_blank" rel="noopener noreferrer" class="social-icon ko-fi-icon" aria-label="Ko-Fi">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
+      </a>
+    </div>
+
+    <!-- Links List -->
+    <div class="links-list">
+      
+      <a href="https://incconutwo.com" class="link-card main-site-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+        </div>
+        <div class="link-content">
+          <h3>incconutwo.com</h3>
+          <p>Main Portfolio Website</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+
+      <a href="https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+        <div class="link-content">
+          <h3>X/Twitter Country Flags</h3>
+          <p>1,400+ weekly users | Chrome & Firefox</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+
+      <a href="https://chromewebstore.google.com/detail/gemini-cleaner-hide-upgra/effcebofhjdoknbmmpbncneoihbbahpg" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="link-content">
+          <h3>Gemini Cleaner</h3>
+          <p>Hide "Upgrade to Ultra" ads</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+
+      <a href="https://github.com/incconutwo/mouse-battery-tray" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/></svg>
+        </div>
+        <div class="link-content">
+          <h3>Mouse Battery Tray</h3>
+          <p>Live battery indicator for OEM mice</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+
+      <a href="https://windhawk.net/mods/taskbar-dock-animation-plus" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="link-content">
+          <h3>Taskbar Dock Animation</h3>
+          <p>macOS dock physics for Windows 11</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+      
+      <a href="https://www.nexusmods.com/profile/incconutwo/mods" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18" />
+            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+            <path d="M10 6h4" />
+            <path d="M10 10h4" />
+            <path d="M10 14h4" />
+            <path d="M10 18h4" />
+          </svg>
+        </div>
+        <div class="link-content">
+          <h3>Cities: Skylines Mods</h3>
+          <p>55,000+ Downloads on Nexus</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+
+      <a href="https://ko-fi.com/incconutwo" target="_blank" rel="noopener noreferrer" class="link-card support-card">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div class="link-content">
+          <h3>Support My Work</h3>
+          <p>Buy a coffee or pizza slice to help development</p>
+        </div>
+        <div class="link-arrow">→</div>
+      </a>
+
+    </div>
+  </main>
+</Layout>

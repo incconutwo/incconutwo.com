@@ -1,11 +1,13 @@
 ---
 interface Props {
   isPage?: boolean;
+  mode?: 'featured' | 'full';
 }
-const { isPage = false } = Astro.props;
+const { isPage = false, mode = 'full' } = Astro.props;
+const isFeatured = mode === 'featured';
 ---
 
-<section class="projects-section" id="projects-section">
+<section class="projects-section" id="projects-section" data-mode={mode}>
   <div class="content-container">
     <header class="projects-header">
       <div class="projects-title-wrapper">
@@ -29,7 +31,7 @@ const { isPage = false } = Astro.props;
     </header>
 
     <!-- Filter & Search Controls -->
-    <div class="projects-controls glass-dock">
+    <div class="projects-controls glass-dock" id="projectsControls">
       <!-- Search Bar -->
       <div class="projects-search-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -90,6 +92,27 @@ const { isPage = false } = Astro.props;
     <!-- Projects Grid (populated by JS) -->
     <div class="projects-grid" id="projectsGrid">
       <!-- Cards rendered dynamically -->
+    </div>
+
+    {isFeatured && (
+      <div class="projects-expand-wrapper" id="projectsExpandWrapper">
+        <button class="projects-expand-btn" id="projectsExpandBtn" type="button">
+          <span class="expand-btn-text">Explore & Search full <span id="expandProjectCount">15+</span> Projects</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="expand-arrow"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+    )}
+
+    <!-- Direct Contact Bridge Banner -->
+    <div class="projects-contact-banner">
+      <span class="banner-text">Interested in a website, Python script, or extension?</span>
+      <a href="#contact-support" class="banner-btn">
+        <span>Get in Touch</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m22 2-7 20-4-9-9-4Z"/>
+          <path d="M22 2 11 13"/>
+        </svg>
+      </a>
     </div>
   </div>
 </section>

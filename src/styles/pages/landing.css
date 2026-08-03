@@ -64,6 +64,15 @@
   z-index: var(--z-content);
 }
 
+@media (max-width: 640px) {
+  .hero-projects-btn {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 10;
+  }
+}
+
 .hero-projects-btn:hover {
   background: rgba(177, 76, 255, 0.28);
   border-color: var(--color-accent);

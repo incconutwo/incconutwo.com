@@ -67,7 +67,7 @@
     "featured": true,
     "title": "X/Twitter Country Flags & Blocker",
     "shortDescription": "One of my biggest project yet, with about 1400 weekly users and 1083 daily.",
-    "longDescription": "This extension adds a country flag emoji next to usernames on your timeline, letting you instantly see the account's location context. It also features a powerful \"Block by Country\" mode to automatically hide tweets from specific regions.\"",
+    "longDescription": "This extension adds a country flag emoji next to usernames on your timeline, letting you instantly see the account's location context. It also features a powerful \"Block by Country\" mode to automatically hide tweets from specific regions.",
     "links": [
       {
         "label": "Chrome Store",
@@ -96,12 +96,13 @@
   {
     "id": "personal-website",
     "featured": false,
-    "title": "incconutwo.com",
-    "shortDescription": "This website (＾∀＾)",
+    "title": "incconutwo.com (Personal Portfolio)",
+    "shortDescription": "My main personal website and portfolio showcasing all my projects, extensions, and mods.",
+    "longDescription": "The official personal site of incconu_two, built with Astro, Lenis smooth scrolling, GSAP cinematic animations, and custom WebGL backgrounds. Features dynamic project showcases, live status widgets, and responsive UI components.",
     "links": [
       {
-        "label": "Link",
-        "url": "https://incconutwo.com",
+        "label": "website",
+        "url": "https://incconutwo.com/",
         "kind": "external"
       }
     ],
@@ -117,8 +118,8 @@
     "id": "ai-overview-disabler",
     "featured": false,
     "title": "Google AI Overview Disabler",
-    "shortDescription": "A smaller, unsuccessful project, but they say a winner is just a loser that tried one more time (*^ω^).",
-    "longDescription": "Project description: Automatically switches to Google Web results to disable AI Overview.\"",
+    "shortDescription": "A lightweight browser extension that automatically switches Google search queries to Web mode, disabling AI Overview panels for a cleaner search layout.",
+    "longDescription": "Automatically switches Google search queries to Web mode to disable AI Overview panels.",
     "links": [
       {
         "label": "Chrome Store",
@@ -275,6 +276,7 @@
   {
     "id": "transit-timetables-peak",
     "featured": false,
+    "hideStars": true,
     "title": "TransitTimetables",
     "shortDescription": "Added custom line peak scheduling and UI integrations to support bypassing global peak settings.",
     "links": [
@@ -299,6 +301,7 @@
   {
     "id": "windhawk-taskbar-ai-quota",
     "featured": false,
+    "hideStars": true,
     "title": "windhawk-taskbar-ai-quota",
     "shortDescription": "Added Antigravity (Gemini) provider quota support, enabling tracking of local Gemini quota alongside cloud APIs.",
     "links": [

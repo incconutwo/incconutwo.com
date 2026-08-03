@@ -15,7 +15,7 @@
     external: `<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.3 9.29 1.42 1.42L19 6.41V10h2V3h-7zM5 5v14h14v-7h-2v5H7V7h5V5H5z"/></svg>`,
     arrow: `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`,
     users: `<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`,
-    star: `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`,
+    star: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>`,
     close: `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`,
     back: `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`,
     chevronLeft: `<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>`,
@@ -37,12 +37,22 @@
       this.currentFilter = 'All';
       this.searchQuery = '';
 
+      // Featured/Expand State
+      this.FEATURED_IDS = ['twitter-flags', 'taskbar-dock-animation-plus', 'aurora-chatgpt'];
+      this.isFeaturedMode = false;
+      this.isExpanded = false;
+
       this.init();
     }
 
     async init() {
       await this.loadProjects();
       this.createDetailOverlay();
+
+      // Detect featured mode from the section's data-mode attribute
+      const section = document.getElementById('projects-section');
+      this.isFeaturedMode = section?.dataset.mode === 'featured';
+
       this.renderCards();
 
       // Register ScrollTrigger plugin for entrance animation
@@ -61,6 +71,11 @@
       this.attachFilterListeners();
       this.handleDeepLink();
       this.initTilt();
+
+      // Setup expand button for featured mode
+      if (this.isFeaturedMode) {
+        this.setupExpandButton();
+      }
     }
 
     async loadProjects() {
@@ -803,6 +818,9 @@
       // 4. Search Input Handling
       if (searchInput) {
         searchInput.addEventListener('input', (e) => {
+          if (this.isFeaturedMode) {
+            this.expandAllProjects(false);
+          }
           this.searchQuery = e.target.value.toLowerCase().trim();
           if (clearBtn) clearBtn.style.display = this.searchQuery ? 'flex' : 'none';
           this.updateGridWithAnimation();
@@ -825,6 +843,9 @@
       // 6. Category Filter Buttons
       filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
+          if (this.isFeaturedMode) {
+            this.expandAllProjects(false);
+          }
           filterBtns.forEach(b => {
             b.classList.remove('active');
             b.setAttribute('aria-selected', 'false');
@@ -906,6 +927,84 @@
     }
 
     // ============================================
+    // FEATURED MODE: EXPAND IN PLACE
+    // ============================================
+
+    setupExpandButton() {
+      const expandBtn = document.getElementById('projectsExpandBtn');
+      const countEl = document.getElementById('expandProjectCount');
+      if (!expandBtn) return;
+
+      // Dynamically update the remaining project count
+      const remainingCount = this.projects.length - this.FEATURED_IDS.length;
+      if (countEl) {
+        countEl.textContent = `${remainingCount}+`;
+      }
+
+      expandBtn.addEventListener('click', () => this.expandAllProjects(true));
+    }
+
+    async expandAllProjects(scrollToTop = false) {
+      if (this.isExpanded) return;
+      this.isExpanded = true;
+      this.isFeaturedMode = false;
+
+      const expandWrapper = document.getElementById('projectsExpandWrapper');
+
+      // 1. Fade out the expand button
+      if (typeof gsap !== 'undefined' && expandWrapper) {
+        await gsap.to(expandWrapper, {
+          opacity: 0,
+          y: -10,
+          duration: 0.3,
+          ease: 'power2.in'
+        });
+        expandWrapper.remove();
+      } else if (expandWrapper) {
+        expandWrapper.remove();
+      }
+
+      // 2. Smooth scroll to top of projects section if requested
+      if (scrollToTop) {
+        const section = document.getElementById('projects-section');
+        if (section) {
+          if (window.lenis) {
+            window.lenis.scrollTo(section, { duration: 1.2 });
+          } else {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }
+
+      // 3. Re-render all projects (full mode)
+      this.renderCards();
+      this.initTilt();
+
+      // 4. Animate the newly revealed project cards
+      if (typeof gsap !== 'undefined') {
+        const allCards = this.grid.querySelectorAll('.project-card, .projects-group-header');
+        const newElements = Array.from(allCards);
+
+        gsap.fromTo(newElements,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.04,
+            duration: 0.45,
+            ease: 'power2.out',
+            overwrite: true
+          }
+        );
+      }
+
+      // 5. Recalculate scroll heights
+      if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.refresh();
+      }
+    }
+
+    // ============================================
     // RENDERING
     // ============================================
 
@@ -914,6 +1013,11 @@
 
       // 1. Apply Search and Filter
       let visibleProjects = this.projects.filter(p => {
+        // In featured mode, only show the 3 flagship projects
+        if (this.isFeaturedMode) {
+          return this.FEATURED_IDS.includes(p.id);
+        }
+
         // Match Filter
         let matchesFilter = false;
         if (this.currentFilter === 'All') {
@@ -934,6 +1038,12 @@
 
         return matchesFilter && matchesSearch;
       });
+
+      // In featured mode, maintain the specific order of FEATURED_IDS
+      if (this.isFeaturedMode) {
+        const idOrder = this.FEATURED_IDS;
+        visibleProjects.sort((a, b) => idOrder.indexOf(a.id) - idOrder.indexOf(b.id));
+      }
 
       if (visibleProjects.length === 0) {
         this.grid.innerHTML = `
@@ -957,6 +1067,13 @@
       const sortByFeatured = (arr) => [...arr].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 
       let html = '';
+
+      // In featured mode, render cards flat without group headers
+      if (this.isFeaturedMode) {
+        visibleProjects.forEach(project => html += this.createCard(project));
+        this.grid.innerHTML = html;
+        return;
+      }
 
       // 1. chrome/firefox extensions
       if (extensionProjects.length > 0) {
@@ -1050,21 +1167,34 @@
     }
 
     createButtons(links) {
-      if (!links || !links.length) return '';
-      return links.map((link, i) => {
-        const icon = ICONS[link.kind] || ICONS.external;
-        const isPrimary = i === 0 && link.kind === 'chrome';
-        return `
-          <a href="${link.url}"
-             target="_blank"
-             rel="noopener noreferrer"
-             class="project-btn ${isPrimary ? 'primary' : ''}"
-             onclick="event.stopPropagation()">
-            ${icon}
-            <span>${link.label}</span>
-          </a>
-        `;
-      }).join('');
+      let html = '';
+      if (links && links.length) {
+        html = links.map((link, i) => {
+          const icon = ICONS[link.kind] || ICONS.external;
+          const isPrimary = i === 0 && link.kind === 'chrome';
+          const isInternalSection = link.url && link.url.includes('#projects-section');
+          const targetAttr = isInternalSection ? '' : 'target="_blank" rel="noopener noreferrer"';
+          return `
+            <a href="${link.url}"
+               ${targetAttr}
+               class="project-btn ${isPrimary ? 'primary' : ''}"
+               onclick="event.stopPropagation()">
+              ${icon}
+              <span>${link.label}</span>
+            </a>
+          `;
+        }).join('');
+      }
+
+      // Always append a direct contact action button in the detail modal
+      html += `
+        <button type="button" class="project-btn contact-project-btn" id="modalContactBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <span>Get in Touch</span>
+        </button>
+      `;
+
+      return html;
     }
 
     createStats(stats) {
@@ -1128,6 +1258,30 @@
       // Prevent link clicks from bubbling to close
       this.detailOverlay?.addEventListener('click', (e) => {
         if (e.target.closest('.project-btn')) e.stopPropagation();
+      });
+
+      // Delegate click on contact button inside detail overlay
+      this.detailOverlay?.addEventListener('click', (e) => {
+        const contactBtn = e.target.closest('#modalContactBtn');
+        if (contactBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // 1. Close overlay
+          this.closeDetail();
+
+          // 2. Smooth-scroll to contact section on homepage
+          setTimeout(() => {
+            const contactSection = document.getElementById('contact-support');
+            if (contactSection) {
+              if (window.lenis) {
+                window.lenis.scrollTo(contactSection, { duration: 1.2 });
+              } else {
+                contactSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }
+          }, 380);
+        }
       });
     }
 

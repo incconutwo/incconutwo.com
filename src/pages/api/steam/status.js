@@ -28,22 +28,29 @@ export async function GET() {
 
   try {
     const summaryUrl = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${STEAM_USER_ID}`;
-    const recentUrl = `https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=${STEAM_API_KEY}&steamid=${STEAM_USER_ID}&count=1`;
+    const ownedUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${STEAM_API_KEY}&steamid=${STEAM_USER_ID}&format=json&include_appinfo=true&include_played_free_games=true`;
 
-    const [summaryRes, recentRes] = await Promise.all([
+    const [summaryRes, ownedRes] = await Promise.all([
       fetch(summaryUrl),
-      fetch(recentUrl)
+      fetch(ownedUrl)
     ]);
     
-    if (!summaryRes.ok || !recentRes.ok) {
+    if (!summaryRes.ok || !ownedRes.ok) {
         throw new Error('Steam API requests failed');
     }
 
     const summaryData = await summaryRes.json();
-    const recentData = await recentRes.json();
+    const ownedData = await ownedRes.json();
 
     const player = summaryData.response?.players?.[0];
-    const recentGame = recentData.response?.games?.[0];
+    const games = ownedData.response?.games || [];
+
+    // Sort by rtime_last_played timestamp descending to get the true most recently played game
+    if (games.length > 0) {
+      games.sort((a, b) => (b.rtime_last_played || 0) - (a.rtime_last_played || 0));
+    }
+
+    const recentGame = games[0];
 
     let isPlaying = false;
     let status = "Offline";
@@ -61,7 +68,11 @@ export async function GET() {
         status = "Offline";
         if (recentGame) {
           game = recentGame.name;
-          playtime = `${(recentGame.playtime_2weeks / 60).toFixed(1)} hrs past 2 weeks`;
+          if (recentGame.playtime_2weeks) {
+            playtime = `${(recentGame.playtime_2weeks / 60).toFixed(1)} hrs past 2 weeks`;
+          } else {
+            playtime = `${(recentGame.playtime_forever / 60).toFixed(1)} hrs total`;
+          }
         }
       }
     }

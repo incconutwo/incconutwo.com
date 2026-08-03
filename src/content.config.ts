@@ -13,7 +13,7 @@ const projects = defineCollection({
     links: z.array(
       z.object({
         label: z.string(),
-        url: z.string().url('Link URL must be a valid URL (e.g. https://...)'),
+        url: z.string(),
         kind: z.string()
       })
     ).default([]),

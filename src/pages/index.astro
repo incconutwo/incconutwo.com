@@ -32,6 +32,9 @@ import Layout from '../layouts/Layout.astro';
     <!-- Hero Section -->
     <Hero />
 
+    <!-- Featured Projects Showcase (Top 3, expand-in-place) -->
+    <Projects mode="featured" />
+
     <!-- Cinematic About Me Section -->
     <About />
 
@@ -44,9 +47,6 @@ import Layout from '../layouts/Layout.astro';
     <!-- Connect / Profiles Section -->
     <Connect />
 
-    <!-- Projects Section (Merged) -->
-    <Projects />
-
     <!-- Inspiration / Philosophy Section -->
     <Inspiration />
 
@@ -55,10 +55,6 @@ import Layout from '../layouts/Layout.astro';
     
     <!-- Floating Widgets Container -->
     <FloatingWidgets />
-
-    <div class="scroll-scrubber">
-      <div class="scrubber" id="pageScrubber"></div>
-    </div>
 
   </main>
 </Layout>

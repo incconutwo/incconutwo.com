@@ -20,6 +20,7 @@
   margin-top: 0;
   /* Reset since it's on own page */
   max-width: 900px;
+  width: 100%;
 }
 
 /* ============================================
@@ -71,34 +72,72 @@
   color: rgba(255, 255, 255, 0.9);
   font-weight: 800;
   letter-spacing: -0.03em;
-  /* Ensure it doesn't wrap "The cool things" into two lines */
   white-space: normal;
 }
 
-@media (max-width: 640px) {
-  .subsection-title {
-    font-size: 1.8rem;
-    /* Slightly smaller on mobile to ensure it fits */
-    white-space: nowrap;
-    /* Force 1-line for the parts separated by <br> */
-  }
-
-  .subsection-title .text-accent {
-    display: inline-block !important;
-    /* Keep on same line as <br> flow */
-  }
-}
-
 .tech-text-content {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
   letter-spacing: -0.01em;
   border-left: 2px solid var(--color-accent, #a29bfe);
-  padding-left: var(--element-gap);
-  /* Was 2rem */
+  padding-left: 1.5rem;
+  text-align: left;
   animation: blurIn 1.2s ease forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.tech-item {
+  margin: 0;
+}
+
+.tech-item strong {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (max-width: 768px) {
+  .third-page {
+    padding: 0 1rem;
+  }
+
+  .third-page .content-container {
+    width: 100%;
+    max-width: 100%;
+    align-items: flex-start;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tech-arsenal {
+    width: 100%;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+  }
+
+  .subsection-title {
+    font-size: 1.6rem;
+    text-align: left;
+    white-space: normal;
+    margin-bottom: 1.25rem;
+  }
+
+  .subsection-title .text-accent {
+    display: inline-block !important;
+  }
+
+  .tech-text-content {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    padding-left: 0.85rem;
+    text-align: left;
+    margin-left: 0;
+    gap: 0.9rem;
+  }
 }
 
 @keyframes blurIn {

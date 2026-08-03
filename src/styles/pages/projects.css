@@ -10,9 +10,20 @@
   min-height: 100vh;
   padding: var(--section-gap-v) var(--content-padding);
   background-color: var(--color-bg-secondary);
-  overflow-x: hidden;
   max-width: 100vw;
   box-sizing: border-box;
+}
+
+/* Transition Blend Overlay from Hero */
+.projects-section::before {
+  content: "";
+  position: absolute;
+  top: -200px;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg-secondary));
+  pointer-events: none;
 }
 
 /* Section Header */
@@ -113,7 +124,8 @@
   overflow-y: hidden;
   white-space: nowrap;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Hide scrollbars */
+  scrollbar-width: none;
+  /* Hide scrollbars */
   padding: 2px 0;
   width: 100%;
 }
@@ -144,8 +156,13 @@
   transform: scale(1.1);
 }
 
-.filter-nav-btn.prev { margin-right: 6px; }
-.filter-nav-btn.next { margin-left: 6px; }
+.filter-nav-btn.prev {
+  margin-right: 6px;
+}
+
+.filter-nav-btn.next {
+  margin-left: 6px;
+}
 
 /* Filter Buttons Inside Dock */
 .filter-btn {
@@ -187,7 +204,7 @@
     border-radius: 16px;
     padding: 10px;
   }
-  
+
   .projects-search-wrapper {
     width: 100%;
   }
@@ -199,7 +216,8 @@
   }
 
   .filter-nav-btn {
-    display: none !important; /* Touch handles swipe natively on mobile */
+    display: none !important;
+    /* Touch handles swipe natively on mobile */
   }
 }
 
@@ -538,7 +556,9 @@
 }
 
 .project-stat.is-star svg {
+  color: #FFD700;
   fill: #FFD700;
+  stroke: #FFD700;
   filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
 }
 
@@ -1270,5 +1290,167 @@ html.no-scroll {
 @media (max-width: 768px) {
   .fullscreen-arrow {
     display: none;
+  }
+}
+
+/* ============================================
+   EXPAND BUTTON (Featured → Full Transition)
+   ============================================ */
+
+.projects-expand-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-8) 0 var(--space-4);
+}
+
+.projects-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-8);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background: rgba(31, 138, 95, 0.25);
+  border: 1px solid rgba(31, 138, 95, 0.7);
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 14px rgba(31, 138, 95, 0.25);
+}
+
+.projects-expand-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(31, 138, 95, 0.3), rgba(255, 255, 255, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.projects-expand-btn:hover {
+  background: rgba(31, 138, 95, 0.4);
+  border-color: rgba(31, 138, 95, 0.95);
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(31, 138, 95, 0.45);
+  transform: translateY(-2px);
+}
+
+.projects-expand-btn:hover::before {
+  opacity: 1;
+}
+
+.projects-expand-btn:active {
+  transform: translateY(0);
+}
+
+.expand-btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+.expand-arrow {
+  position: relative;
+  z-index: 1;
+  animation: expandArrowBounce 2s ease-in-out infinite;
+}
+
+@keyframes expandArrowBounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@media (max-width: 768px) {
+  .projects-expand-btn {
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-sm);
+  }
+}
+
+/* Contact Button inside Detail Modal */
+.contact-project-btn {
+  background: rgba(31, 138, 95, 0.2) !important;
+  border-color: rgba(31, 138, 95, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.contact-project-btn:hover {
+  background: rgba(31, 138, 95, 0.4) !important;
+  border-color: #2aa473 !important;
+  box-shadow: 0 0 20px rgba(31, 138, 95, 0.3) !important;
+}
+
+/* Projects Section Bottom Contact Banner */
+.projects-contact-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 900px;
+  margin: var(--space-8) auto 0 auto;
+  padding: 1.25rem 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.banner-text {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(177, 76, 255, 0.15);
+  border: 1px solid rgba(177, 76, 255, 0.4);
+  border-radius: var(--radius-full);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.banner-btn:hover {
+  background: rgba(177, 76, 255, 0.3);
+  border-color: #b14cff;
+  box-shadow: 0 0 15px rgba(177, 76, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.banner-btn svg {
+  transition: transform 0.25s ease;
+}
+
+.banner-btn:hover svg {
+  transform: translateX(4px);
+}
+
+@media (max-width: 640px) {
+  .projects-contact-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.25rem;
   }
 }

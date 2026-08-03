@@ -1,0 +1,211 @@
+---
+/* KofiModal.astro - Universal Glassmorphic Ko-fi Modal */
+---
+
+<div id="kofi-modal-backdrop" class="kofi-modal-backdrop" aria-hidden="true">
+  <div class="kofi-modal-card" role="dialog" aria-modal="true" aria-labelledby="kofi-modal-title">
+    
+    <!-- Modal Header -->
+    <header class="kofi-modal-header">
+      <div class="kofi-modal-title-wrapper">
+        <svg class="kofi-header-icon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+          <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/>
+        </svg>
+        <span id="kofi-modal-title" class="kofi-modal-title">Support @incconu_two</span>
+      </div>
+      <button id="kofi-modal-close" class="kofi-modal-close-btn" aria-label="Close modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Iframe Container -->
+    <div class="kofi-iframe-container">
+      <iframe 
+        id="kofi-embed-iframe"
+        title="Support incconu_two on Ko-fi"
+        src="" 
+        style="border:none;width:100%;height:100%;"
+      ></iframe>
+    </div>
+
+    <!-- Modal Footer fallback -->
+    <footer class="kofi-modal-footer">
+      <a href="https://ko-fi.com/incconutwo" target="_blank" rel="noopener noreferrer" class="kofi-fallback-link">
+        Open directly on Ko-fi.com ↗
+      </a>
+    </footer>
+  </div>
+</div>
+
+<style>
+  .kofi-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(10, 14, 39, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .kofi-modal-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .kofi-modal-card {
+    width: 100%;
+    max-width: 460px;
+    height: min(680px, 88dvh);
+    background: #191c2b;
+    border: 1px solid rgba(255, 94, 91, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 94, 91, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.92) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .kofi-modal-backdrop.is-open .kofi-modal-card {
+    transform: scale(1) translateY(0);
+  }
+
+  .kofi-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+  }
+
+  .kofi-modal-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kofi-header-icon {
+    color: #ff5e5b;
+  }
+
+  .kofi-modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .kofi-modal-close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #a0aec0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .kofi-modal-close-btn:hover {
+    background: rgba(255, 94, 91, 0.2);
+    color: #ffffff;
+    transform: scale(1.08);
+  }
+
+  .kofi-iframe-container {
+    flex-grow: 1;
+    width: 100%;
+    background: #ffffff;
+    position: relative;
+  }
+
+  .kofi-modal-footer {
+    padding: 10px 16px;
+    background: #141724;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .kofi-fallback-link {
+    font-size: 0.8rem;
+    color: #ff5e5b;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+  }
+
+  .kofi-fallback-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+</style>
+
+<script is:inline>
+  (function initKofiModal() {
+    function setupModal() {
+      const backdrop = document.getElementById('kofi-modal-backdrop');
+      const closeBtn = document.getElementById('kofi-modal-close');
+      const iframe = document.getElementById('kofi-embed-iframe');
+
+      if (!backdrop || !iframe) return;
+
+      const KOFI_EMBED_URL = 'https://ko-fi.com/incconutwo/?hidefeed=true&widget=true&embed=true';
+
+      function openModal(e) {
+        if (e) e.preventDefault();
+        if (!iframe.src || iframe.src === 'about:blank' || iframe.src !== KOFI_EMBED_URL) {
+          iframe.src = KOFI_EMBED_URL;
+        }
+        backdrop.classList.add('is-open');
+        backdrop.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeModal() {
+        backdrop.classList.remove('is-open');
+        backdrop.setAttribute('aria-hidden', 'true');
+      }
+
+      // Bind to all Ko-fi links across the site except the fallback external link
+      document.querySelectorAll('a[href*="ko-fi.com/incconutwo"]:not(.kofi-fallback-link)').forEach(link => {
+        link.removeEventListener('click', openModal);
+        link.addEventListener('click', openModal);
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupModal);
+    } else {
+      setupModal();
+    }
+  })();
+</script>

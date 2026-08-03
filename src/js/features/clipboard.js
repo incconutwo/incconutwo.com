@@ -44,27 +44,93 @@ export function initClipboardCopy() {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    
+    // Avoid scrolling to bottom or visual disruption on mobile
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.width = '2em';
+    textArea.style.height = '2em';
+    textArea.style.padding = '0';
+    textArea.style.border = 'none';
+    textArea.style.outline = 'none';
+    textArea.style.boxShadow = 'none';
+    textArea.style.background = 'transparent';
+    textArea.setAttribute('readonly', '');
+
+    document.body.appendChild(textArea);
+
+    // iOS Safari selection support
+    if (navigator.userAgent.match(/ipad|iphone/i)) {
+      const range = document.createRange();
+      range.selectNodeContents(textArea);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      textArea.setSelectionRange(0, 999999);
+    } else {
+      textArea.select();
+    }
+
+    let successful = false;
+    try {
+      successful = document.execCommand('copy');
+    } catch (err) {
+      console.error('[Clipboard] ExecCommand fallback failed:', err);
+    }
+
+    document.body.removeChild(textArea);
+    return successful;
+  }
+
+  function performCopy(copyText) {
+    // Check if navigator.clipboard is available and writeText function exists
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(copyText).then(() => {
+        showToast(copyText);
+      }).catch((err) => {
+        console.warn('[Clipboard] Async writeText failed, trying fallback:', err);
+        if (fallbackCopyTextToClipboard(copyText)) {
+          showToast(copyText);
+        }
+      });
+    } else {
+      // Direct fallback for non-HTTPS or unsupported mobile browsers
+      if (fallbackCopyTextToClipboard(copyText)) {
+        showToast(copyText);
+      }
+    }
+  }
+
   // Delegated click handler for any [data-copy] element
   document.addEventListener('click', (e) => {
+    // If the click was directly on a copy badge or copy button inside a link, handle copy exclusively
+    const copyBadge = e.target.closest('.copy-hint-badge, .copy-email-btn');
+    if (copyBadge) {
+      const parentCopy = copyBadge.closest('[data-copy]');
+      if (parentCopy) {
+        e.preventDefault();
+        e.stopPropagation();
+        const copyText = parentCopy.getAttribute('data-copy');
+        if (copyText) performCopy(copyText);
+        return;
+      }
+    }
+
     const copyTarget = e.target.closest('[data-copy]');
     if (!copyTarget) return;
+
+    // If it's a button, prevent default
+    if (copyTarget.tagName === 'BUTTON' || copyTarget.classList.contains('copy-email-btn')) {
+      e.preventDefault();
+    }
 
     const copyText = copyTarget.getAttribute('data-copy');
     if (!copyText) return;
 
-    // Write to clipboard
-    navigator.clipboard.writeText(copyText).then(() => {
-      showToast(copyText);
-    }).catch(err => {
-      console.warn('Clipboard write failed:', err);
-      // Fallback method
-      const textInput = document.createElement('input');
-      textInput.value = copyText;
-      document.body.appendChild(textInput);
-      textInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(textInput);
-      showToast(copyText);
-    });
+    performCopy(copyText);
   });
 }

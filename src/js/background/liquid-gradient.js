@@ -601,12 +601,13 @@ class LiquidGradientApp {
       }
     }
 
-    // Background and base settings (identical on all screen sizes)
+    // Background and base settings (constant circle size & count across all schemes and music)
+    uniforms.uGradientSize.value = 0.45;
+    uniforms.uGradientCount.value = 12.0;
+
     if (scheme === 1 || scheme === 5 || scheme === 6 || scheme === 7 || scheme === 8) {
       this.scene.background = new THREE.Color(0x0a0e27);
       uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
-      uniforms.uGradientSize.value = 0.45;
-      uniforms.uGradientCount.value = 12.0; // Same full count on mobile as desktop
       uniforms.uSpeed.value = 1.5;
       uniforms.uColor1Weight.value = 0.5;
       uniforms.uColor2Weight.value = 1.8;
@@ -617,8 +618,6 @@ class LiquidGradientApp {
       // Defaults
       this.scene.background = new THREE.Color(0x0a0e27);
       uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
-      uniforms.uGradientSize.value = 1.0;
-      uniforms.uGradientCount.value = 6.0; // Same full count on mobile as desktop
       uniforms.uSpeed.value = 1.2;
       uniforms.uColor1Weight.value = 1.0;
       uniforms.uColor2Weight.value = 1.0;
@@ -656,65 +655,119 @@ class LiquidGradientApp {
     }
   }
 
-  setDynamicSpotifyColor(r, g, b, targetSize = 0.40) {
+  setDynamicSpotifyColor(r1, g1, b1, r2, g2, b2, r3, g3, b3) {
     const uniforms = this.gradientBackground.uniforms;
 
-    // --- CONTROL CIRCLE SIZE HERE ---
-    // Smoothly animate gradient size when music is playing
-    if (typeof gsap !== 'undefined') {
-      gsap.to(uniforms.uGradientSize, { value: targetSize, duration: 2.5, ease: "power2.out" });
-    } else {
-      uniforms.uGradientSize.value = targetSize;
+    const processColor = (r, g, b) => new THREE.Vector3(r / 255, g / 255, b / 255);
+
+    // If secondary/tertiary colors are missing, derive lighter/darker shades of the primary hue
+    if (r2 === undefined || g2 === undefined || b2 === undefined) {
+      const rgbToHsl = (r, g, b) => {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) h = s = 0;
+        else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h /= 6;
+        }
+        return [h, s, l];
+      };
+
+      const hslToRgb = (h, s, l) => {
+        let r, g, b;
+        if (s === 0) r = g = b = l;
+        else {
+          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          const p = 2 * l - q;
+          const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1; if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+          r = hue2rgb(p, q, h + 1 / 3);
+          g = hue2rgb(p, q, h);
+          b = hue2rgb(p, q, h - 1 / 3);
+        }
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+      };
+
+      const [h, s, l] = rgbToHsl(r1, g1, b1);
+
+      if (r2 === undefined) {
+        const c2 = hslToRgb(h, s, Math.max(0.15, l * 0.5));
+        r2 = c2[0]; g2 = c2[1]; b2 = c2[2];
+      }
+      if (r3 === undefined) {
+        const c3 = hslToRgb(h, s, Math.min(0.85, l * 1.2));
+        r3 = c3[0]; g3 = c3[1]; b3 = c3[2];
+      }
     }
 
-    const targetColor = new THREE.Vector3(r / 255, g / 255, b / 255);
-    const baseNavy = new THREE.Vector3(0.039, 0.055, 0.153); // #0a0e27 dark navy
-    const targetBase = baseNavy.clone().add(targetColor.clone().multiplyScalar(0.12));
-    const targetBaseBackground = new THREE.Color(targetBase.x, targetBase.y, targetBase.z);
+    const color1 = processColor(r1, g1, b1);
+    const color2 = processColor(r2, g2, b2);
+    const color3 = processColor(r3, g3, b3);
 
-    const targetColorHex = '#' + [
-      Math.round(r).toString(16).padStart(2, '0'),
-      Math.round(g).toString(16).padStart(2, '0'),
-      Math.round(b).toString(16).padStart(2, '0')
+    // Keep the background base locked to dark navy (#0a0e27)
+    // This ensures the fluid circles retain their exact default size and contrast without flooding the screen.
+    const darkNavyBase = new THREE.Vector3(0.039, 0.055, 0.153); // #0a0e27
+    const darkNavyColor = new THREE.Color(0x0a0e27);
+
+    // Maintain default Scheme 5 parameters so circle size and count stay identical to the homepage
+    uniforms.uSpeed.value = 1.5;
+    uniforms.uColor1Weight.value = 0.5;
+    uniforms.uColor2Weight.value = 1.8;
+    uniforms.uGradientSize.value = 0.45;
+    uniforms.uGradientCount.value = 12.0;
+
+    const primaryHex = '#' + [
+      Math.round(r1).toString(16).padStart(2, '0'),
+      Math.round(g1).toString(16).padStart(2, '0'),
+      Math.round(b1).toString(16).padStart(2, '0')
     ].join('');
 
-    // Set active dynamic color to the liquid circle accent color
-    this.activeThemeColorHex = targetColorHex;
+    this.activeThemeColorHex = primaryHex;
 
-    // Let's transition these values using GSAP if available, otherwise write directly
     if (typeof gsap !== 'undefined') {
-      // Animate uniforms
-      gsap.to(uniforms.uColor1.value, { x: targetColor.x, y: targetColor.y, z: targetColor.z, duration: 2.5, ease: "power2.out" });
-      gsap.to(uniforms.uColor3.value, { x: targetColor.x, y: targetColor.y, z: targetColor.z, duration: 2.5, ease: "power2.out" });
-      gsap.to(uniforms.uColor5.value, { x: targetColor.x, y: targetColor.y, z: targetColor.z, duration: 2.5, ease: "power2.out" });
+      // Animate ONLY the fluid circle colors (uColor1, uColor3, uColor5)
+      gsap.to(uniforms.uColor1.value, { x: color1.x, y: color1.y, z: color1.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor3.value, { x: color2.x, y: color2.y, z: color2.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor5.value, { x: color3.x, y: color3.y, z: color3.z, duration: 2.5, ease: "power2.out" });
 
-      // Animate even colors to match target base instead of leaving them black
-      gsap.to(uniforms.uColor2.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 2.5, ease: "power2.out" });
-      gsap.to(uniforms.uColor4.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 2.5, ease: "power2.out" });
-      gsap.to(uniforms.uColor6.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 2.5, ease: "power2.out" });
+      // Keep background spaces (uColor2, uColor4, uColor6, uDarkNavy, scene.background) fixed at dark navy
+      gsap.to(uniforms.uColor2.value, { x: darkNavyBase.x, y: darkNavyBase.y, z: darkNavyBase.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor4.value, { x: darkNavyBase.x, y: darkNavyBase.y, z: darkNavyBase.z, duration: 2.5, ease: "power2.out" });
+      gsap.to(uniforms.uColor6.value, { x: darkNavyBase.x, y: darkNavyBase.y, z: darkNavyBase.z, duration: 2.5, ease: "power2.out" });
 
-      gsap.to(uniforms.uDarkNavy.value, { x: targetBase.x, y: targetBase.y, z: targetBase.z, duration: 3.0, ease: "power2.out" });
+      gsap.to(uniforms.uDarkNavy.value, { x: darkNavyBase.x, y: darkNavyBase.y, z: darkNavyBase.z, duration: 3.0, ease: "power2.out" });
 
-      // Animate WebGL scene background color and sync status bar theme-color with scroll awareness
-      gsap.to(this.scene.background, { 
-        r: targetBaseBackground.r, 
-        g: targetBaseBackground.g, 
-        b: targetBaseBackground.b, 
-        duration: 3.0, 
+      gsap.to(this.scene.background, {
+        r: darkNavyColor.r,
+        g: darkNavyColor.g,
+        b: darkNavyColor.b,
+        duration: 3.0,
         ease: "power2.out",
         onUpdate: () => {
           this.updateThemeColorOnScroll();
         }
       });
     } else {
-      uniforms.uColor1.value.copy(targetColor);
-      uniforms.uColor3.value.copy(targetColor);
-      uniforms.uColor5.value.copy(targetColor);
-      uniforms.uColor2.value.copy(targetBase);
-      uniforms.uColor4.value.copy(targetBase);
-      uniforms.uColor6.value.copy(targetBase);
-      uniforms.uDarkNavy.value.copy(targetBase);
-      this.scene.background.copy(targetBaseBackground);
+      uniforms.uColor1.value.copy(color1);
+      uniforms.uColor3.value.copy(color2);
+      uniforms.uColor5.value.copy(color3);
+      uniforms.uColor2.value.copy(darkNavyBase);
+      uniforms.uColor4.value.copy(darkNavyBase);
+      uniforms.uColor6.value.copy(darkNavyBase);
+      uniforms.uDarkNavy.value.copy(darkNavyBase);
+      this.scene.background.copy(darkNavyColor);
       this.updateThemeColorOnScroll();
     }
   }

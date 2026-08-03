@@ -24,6 +24,20 @@ class ScrubberController {
       ...options
     };
 
+    // Major Homepage Section Landmarks
+    this.sectionsConfig = [
+      { id: 'hero', name: 'Hero', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-3.05 11a22.35 22.35 0 0 1-3.95 2z"/></svg>` },
+      { id: 'projects-section', name: 'Projects', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>` },
+      { id: 'second-page', name: 'About', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>` },
+      { id: 'activities-page', name: 'Activities', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12A10 10 0 1 1 12 2a10 10 0 0 1 10 10z"/><polygon points="12 8 8 16 16 16 12 8"/></svg>` },
+      { id: 'third-page', name: 'Tech Arsenal', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>` },
+      { id: 'connect-section', name: 'Connect', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>` },
+      { id: 'inspiration-section', name: 'Inspiration', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>` },
+      { id: 'contact-support', name: 'Contact', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>` }
+    ];
+
+    this.chapters = [];
+
     // Auto-inject DOM structure
     this.ensureStructure(element);
 
@@ -157,6 +171,50 @@ class ScrubberController {
         : 0;
       this.state.tickPositions.push({ index, x, value, element: tick });
     });
+
+    this.mapSectionChapters();
+  }
+
+  mapSectionChapters() {
+    const h = document.documentElement;
+    const b = document.body;
+    const maxScroll = (h.scrollHeight || b.scrollHeight) - window.innerHeight;
+    if (maxScroll <= 0) return;
+
+    this.chapters = [];
+
+    this.sectionsConfig.forEach(sec => {
+      const el = document.getElementById(sec.id);
+      if (!el) return;
+
+      const top = el.offsetTop;
+      const pct = Math.min(100, Math.max(0, (top / maxScroll) * 100));
+      const tick = this.findTickByValue(pct);
+
+      if (tick && tick.element) {
+        tick.element.classList.add('chapter-marker');
+      }
+
+      this.chapters.push({
+        ...sec,
+        pct,
+        top,
+        tick
+      });
+    });
+  }
+
+  getCurrentChapter(val) {
+    if (!this.chapters || !this.chapters.length) {
+      return { name: 'Page', icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`, pct: val };
+    }
+    let current = this.chapters[0];
+    for (let i = 0; i < this.chapters.length; i++) {
+      if (val >= this.chapters[i].pct - 2) {
+        current = this.chapters[i];
+      }
+    }
+    return current;
   }
 
   playEntranceAnimation() {
@@ -315,6 +373,15 @@ class ScrubberController {
         this.el.markerGhost.style.left = (tick.x - 1) + 'px';
         this.el.markerGhost.style.opacity = '1';
       }
+      
+      const hoverChapter = this.getCurrentChapter(tick.value);
+      if (this.el.tooltip) {
+        this.el.tooltip.innerHTML = `
+          <span class="chapter-icon">${hoverChapter.icon}</span>
+          <span class="chapter-name">${hoverChapter.name}</span>
+          <span class="chapter-pct">${Math.round(tick.value)}%</span>
+        `;
+      }
     }
   }
 
@@ -404,7 +471,14 @@ class ScrubberController {
       p.element?.classList.toggle('active', p.index === tick.index);
     });
     
-    if (this.el.tooltip) this.el.tooltip.textContent = Math.round(tick.value);
+    const chapter = this.getCurrentChapter(tick.value);
+    if (this.el.tooltip) {
+      this.el.tooltip.innerHTML = `
+        <span class="chapter-icon">${chapter.icon}</span>
+        <span class="chapter-name">${chapter.name}</span>
+        <span class="chapter-pct">${Math.round(tick.value)}%</span>
+      `;
+    }
   }
 
   setValue(value, animate = true) {

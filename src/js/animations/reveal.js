@@ -310,8 +310,6 @@ export function initScrubber() {
  * Applies a subtle 3D transform on mousemove
  */
 export function init3DTilt() {
-  if ('ontouchstart' in window) return; // Skip on touch
-
   const tiltElements = document.querySelectorAll('[data-tilt]:not(.project-card)');
 
   tiltElements.forEach(el => {
