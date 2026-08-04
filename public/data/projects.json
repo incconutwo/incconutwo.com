@@ -104,6 +104,11 @@
         "label": "website",
         "url": "https://incconutwo.com/",
         "kind": "external"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/incconutwo/incconutwo.com",
+        "kind": "github"
       }
     ],
     "stats": null,
