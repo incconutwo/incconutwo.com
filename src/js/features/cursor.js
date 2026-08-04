@@ -12,52 +12,53 @@ export function initCustomCursor() {
 
   document.body.classList.add('custom-cursor-active');
 
-  let mouseX = 0, mouseY = 0;
-  let cursorX = 0, cursorY = 0;
-  let isAnimating = false;
+  let prevX = 0;
+  let prevY = 0;
+  let currentScale = 1;
+  let targetScale = 1;
+  let animFrameId = null;
 
+  function updateScale() {
+    currentScale += (targetScale - currentScale) * 0.2;
+    cursor.style.transform = `translate(-50%, -50%) scale(${currentScale.toFixed(3)})`;
+
+    // Gradually decay target scale back to 1 when mouse slows down or stops
+    targetScale += (1 - targetScale) * 0.15;
+
+    if (Math.abs(currentScale - 1) > 0.005 || Math.abs(targetScale - 1) > 0.005) {
+      animFrameId = requestAnimationFrame(updateScale);
+    } else {
+      currentScale = 1;
+      targetScale = 1;
+      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      animFrameId = null;
+    }
+  }
+
+  // Instant 1:1 positioning (0ms lag) + velocity scaling on move/shake
   document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    // 1. Position snaps 1:1 instantly with zero lag
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
 
-    if (!isAnimating) {
-      isAnimating = true;
-      animateCursor();
+    // 2. Velocity scaling calculation for shake/fast movement
+    const dx = e.clientX - prevX;
+    const dy = e.clientY - prevY;
+    const dist = Math.hypot(dx, dy);
+    prevX = e.clientX;
+    prevY = e.clientY;
+
+    const speedScale = 1 + Math.min(dist / 30, 0.6); // Scale up to 1.6x on fast movement/shake
+    if (speedScale > targetScale) {
+      targetScale = speedScale;
+    }
+
+    if (!animFrameId) {
+      animFrameId = requestAnimationFrame(updateScale);
     }
   });
 
-  function animateCursor() {
-    // Smooth interpolation
-    const distX = mouseX - cursorX;
-    const distY = mouseY - cursorY;
-
-    // Optimization: Stop the RAF loop when the cursor catches up to the mouse
-    if (Math.abs(distX) < 0.1 && Math.abs(distY) < 0.1) {
-      isAnimating = false;
-      cursorX = mouseX;
-      cursorY = mouseY;
-      cursor.style.left = cursorX + 'px';
-      cursor.style.top = cursorY + 'px';
-      cursor.style.transform = `translate(-50%, -50%) scale(1)`;
-      return;
-    }
-
-    cursorX += distX * 0.15;
-    cursorY += distY * 0.15;
-
-    cursor.style.left = cursorX + 'px';
-    cursor.style.top = cursorY + 'px';
-
-    // Velocity-based scaling (stretch effect)
-    const vel = Math.sqrt(distX * distX + distY * distY);
-    const scale = 1 + Math.min(vel / 500, 0.5); // Max scale 1.5x
-
-    cursor.style.transform = `translate(-50%, -50%) scale(${scale})`;
-
-    requestAnimationFrame(animateCursor);
-  }
-
-  // Event delegation for hover effects (handles dynamic elements like Spotify widget)
+  // Hover states stay active
   document.addEventListener('mouseover', (e) => {
     if (e.target.closest('a, button, .social-icon, .profile-effect-container, .project-card, .project-btn')) {
       cursor.classList.add('hovering');
