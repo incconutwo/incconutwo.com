@@ -1,37 +1,37 @@
-# incconutwo.com <img src="./public/assets/icons/readme/rocket.svg" width="26" height="26" align="middle" style="vertical-align: middle;" />
+# incconutwo.com 
 
 The official personal portfolio website and project showcase for **incconu_two** ([@tnemoroccan](https://x.com/tnemoroccan)) — developer of privacy-focused browser extensions and tools.
 
-Live Website: [incconutwo.com](https://incconutwo.com)
+Live Website: **[incconutwo.com](https://incconutwo.com)** | Bio Links: **[incconutwo.com/links](https://incconutwo.com/links)**
 
 ---
 
-## <img src="./public/assets/icons/readme/sparkles.svg" width="22" height="22" align="middle" style="vertical-align: middle;" /> Key Features & Architecture
+## <img src="./public/assets/icons/readme/sparkles.svg" width="24" height="24" align="center" alt="Key Features" /> Key Features & Architecture
 
-- **Lightning-Fast Hybrid SSR/Static**: Powered by **Astro 5+** with Vercel serverless integration.
-- **Glassmorphism & Custom Design System**: Built with modern Vanilla CSS, custom HSL color tokens, responsive layouts, and interactive micro-animations.
-- **Live Widgets & Dynamic API Integrations**:
-  - <img src="./public/assets/icons/readme/music.svg" width="16" height="16" align="middle" style="vertical-align: middle;" /> **Spotify Now Playing & Top Tracks**: Live track status with real-time extracted cover palette colors.
-  - <img src="./public/assets/icons/readme/gamepad.svg" width="16" height="16" align="middle" style="vertical-align: middle;" /> **Steam Gaming Activity**: Accurate last played game detection sorted by `rtime_last_played`.
-  - <img src="./public/assets/icons/readme/trophy.svg" width="16" height="16" align="middle" style="vertical-align: middle;" /> **Lichess Stats**: Rating and game count proxy integration.
-  - <img src="./public/assets/icons/readme/bell.svg" width="16" height="16" align="middle" style="vertical-align: middle;" /> **Instant Phone Alerts**: Serverless `ntfy.sh` integration with 30-second rate-limiting cooldown and message truncation.
-- **Zero-Lag Interactive UI**:
+- **Lightning-Fast Hybrid SSR/Static:** Powered by **Astro 5+** with Vercel serverless integration.
+- **Glassmorphism & Custom Design System:** Built with modern Vanilla CSS, custom HSL color tokens, responsive layouts, and interactive micro-animations.
+- **Live Widgets & Dynamic API Integrations:**
+  - <img src="./public/assets/icons/readme/music.svg" width="16" height="16" align="center" alt="Spotify" /> **Spotify Now Playing & Top Tracks:** Live track status with real-time extracted cover palette colors.
+  - <img src="./public/assets/icons/readme/gamepad.svg" width="16" height="16" align="center" alt="Steam" /> **Steam Gaming Activity:** Accurate last played game detection sorted by `rtime_last_played`.
+  - <img src="./public/assets/icons/readme/trophy.svg" width="16" height="16" align="center" alt="Lichess" /> **Lichess Stats:** Rating and game count proxy integration.
+  - <img src="./public/assets/icons/readme/bell.svg" width="16" height="16" align="center" alt="Alerts" /> **Instant Phone Alerts:** Serverless `ntfy.sh` integration with 30-second rate-limiting cooldown and message truncation.
+- **Zero-Lag Interactive UI:**
   - 1:1 instant custom mouse tracking with dynamic velocity-based shake scaling.
   - Smooth inertia scrolling via Lenis.
   - High-performance layout shift (CLS) pre-reserved containers and asset preloading.
 
 ---
 
-## <img src="./public/assets/icons/readme/cpu.svg" width="22" height="22" align="middle" style="vertical-align: middle;" /> Tech Stack
+## <img src="./public/assets/icons/readme/cpu.svg" width="24" height="24" align="center" alt="Tech Stack" /> Tech Stack
 
-- **Framework**: [Astro 5](https://astro.build/)
-- **Styling**: Vanilla CSS (Modular design tokens, glassmorphism, responsive breakpoints)
-- **Deployment**: [Vercel](https://vercel.com/) (Serverless Functions + Analytics + Speed Insights)
-- **APIs**: Spotify Web API, Steam Web API, Lichess API, ntfy.sh
+- **Framework:** [Astro 5](https://astro.build/)
+- **Styling:** Vanilla CSS (Modular design tokens, glassmorphism, responsive breakpoints)
+- **Deployment:** [Vercel](https://vercel.com/) (Serverless Functions + Analytics + Speed Insights)
+- **APIs:** Spotify Web API, Steam Web API, Lichess API, ntfy.sh
 
 ---
 
-## <img src="./public/assets/icons/readme/terminal.svg" width="22" height="22" align="middle" style="vertical-align: middle;" /> Quick Start
+## <img src="./public/assets/icons/readme/terminal.svg" width="24" height="24" align="center" alt="Quick Start" /> Quick Start
 
 ### 1. Prerequisites
 Ensure you have **Node.js 18+** installed.
@@ -73,7 +73,7 @@ npm run build
 
 ---
 
-## <img src="./public/assets/icons/readme/folder.svg" width="22" height="22" align="middle" style="vertical-align: middle;" /> Project Structure
+## <img src="./public/assets/icons/readme/folder.svg" width="24" height="24" align="center" alt="Project Structure" /> Project Structure
 
 ```text
 ├── public/                 # Static assets, fonts, project screenshots
@@ -88,6 +88,6 @@ npm run build
 
 ---
 
-## <img src="./public/assets/icons/readme/file.svg" width="22" height="22" align="middle" style="vertical-align: middle;" /> License
+## <img src="./public/assets/icons/readme/file.svg" width="24" height="24" align="center" alt="License" /> License
 
 Distributed under the MIT License. See `LICENSE` for more details.
