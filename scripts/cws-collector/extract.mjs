@@ -1,4 +1,3 @@
-import { chromium } from 'playwright';
 import { Redis } from '@upstash/redis';
 import { encrypt, decrypt } from '../../src/utils/crypto.js';
 
@@ -15,6 +14,18 @@ const EXTENSIONS = [
   { id: 'aurora-gemini', chromeId: 'gbmlailhpaofpghhgmicmhpjhiihpifk' },
   { id: 'ai-overview-disabler', chromeId: 'oomhgmbdfkjilamcidkljlhcjogjbkeb' }
 ];
+
+const DEFAULT_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Accept-Language': 'en-US,en;q=0.9',
+  'Sec-CH-UA': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+  'Sec-CH-UA-Mobile': '?0',
+  'Sec-CH-UA-Platform': '"Windows"'
+};
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function parseBatchExecute(responseText) {
   const clean = responseText.replace(/^\)]}'\s*/, '');
@@ -149,7 +160,8 @@ function calculatePeriodStats(dailyRecords) {
 }
 
 async function main() {
-  console.log("Starting CWS Collector...");
+  const startTime = Date.now();
+  console.log("Starting Native CWS Collector (Zero-Playwright)...");
   
   let storedCookiesStr = null;
   if (process.env.CWS_COOKIE) {
@@ -165,53 +177,31 @@ async function main() {
     process.exit(1);
   }
 
-  const cookies = [];
-  storedCookiesStr.split(';').forEach(pair => {
-    const idx = pair.indexOf('=');
-    if (idx > 0) {
-      const name = pair.substring(0, idx).trim();
-      const value = pair.substring(idx + 1).trim();
-      if (name && value) {
-        cookies.push({ name, value, domain: '.google.com', path: '/', secure: true });
-      }
-    }
-  });
-
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
-  await context.addCookies(cookies);
-
-  const page = await context.newPage();
-  let devConsoleId = null;
-  let atToken = null;
-
   try {
-    console.log("Navigating to CWS Dev Console...");
-    const res = await page.goto('https://chrome.google.com/webstore/devconsole', { waitUntil: 'domcontentloaded' });
-    
-    if (page.url().includes('accounts.google.com')) {
+    console.log("Fetching CWS Dev Console session token...");
+    const res = await fetch('https://chrome.google.com/webstore/devconsole', {
+      headers: {
+        ...DEFAULT_HEADERS,
+        'Cookie': storedCookiesStr
+      }
+    });
+
+    if (res.url.includes('accounts.google.com')) {
       console.error("❌ Cookie is invalid or expired. Google redirected to login.");
       process.exit(1);
     }
 
-    try {
-      await page.waitForFunction(() => document.documentElement.innerHTML.includes('"SNlM0e":"'), { timeout: 3000 });
-    } catch (e) {
-      console.log("⚠️ Timeout waiting for SNlM0e token, will attempt to extract anyway.");
-    }
-    
-    const html = await page.content();
+    const html = await res.text();
     const atMatch = html.match(/"SNlM0e":"([^"]+)"/);
     const consoleMatch = html.match(/\/webstore\/devconsole\/([a-f0-9\-]+)/i);
 
     if (!atMatch) {
       console.error("❌ Could not extract SNlM0e token. CWS Cookie may have expired.");
-      // Exit with non-zero code so GitHub Actions alerts you via email
       process.exit(1);
     }
 
-    atToken = atMatch[1];
-    devConsoleId = consoleMatch ? consoleMatch[1] : 'fbe2f16e-d60c-40e4-9887-a0774eff9cc6';
+    const atToken = atMatch[1];
+    const devConsoleId = consoleMatch ? consoleMatch[1] : 'fbe2f16e-d60c-40e4-9887-a0774eff9cc6';
     
     console.log(`✅ Session Valid. atToken found. consoleId: ${devConsoleId}`);
 
@@ -223,8 +213,12 @@ async function main() {
 
     let hasError = false;
 
-    for (const ext of EXTENSIONS) {
-      console.log(`\nfetching stats for ${ext.id} (${ext.chromeId})...`);
+    // Fetch extensions with a subtle 150ms delay for human-like request pacing
+    for (let i = 0; i < EXTENSIONS.length; i++) {
+      const ext = EXTENSIONS[i];
+      if (i > 0) await delay(150);
+
+      console.log(`\nFetching stats for ${ext.id} (${ext.chromeId})...`);
       
       const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
       const payload = [
@@ -245,21 +239,22 @@ async function main() {
       const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
         `?rpcids=WlSRsc` +
         `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
-        `&hl=en` +
-        `&soc-app=630` +
-        `&soc-platform=1` +
-        `&soc-device=1` +
-        `&rt=c`;
+        `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
 
-      const apiRes = await page.request.post(googleUrl, {
+      const apiRes = await fetch(googleUrl, {
+        method: 'POST',
         headers: {
+          ...DEFAULT_HEADERS,
+          'Cookie': storedCookiesStr,
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'Origin': 'https://chrome.google.com',
+          'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
         },
-        data: formBody.toString()
+        body: formBody.toString()
       });
 
-      if (!apiRes.ok()) {
-        console.error(`❌ API returned status ${apiRes.status()}`);
+      if (!apiRes.ok) {
+        console.error(`❌ API returned status ${apiRes.status}`);
         hasError = true;
         continue;
       }
@@ -285,28 +280,22 @@ async function main() {
         await redis.set(`cws_stats_${ext.id}`, storedPayload);
         console.log(`✅ Saved stats to Redis for ${ext.id}`);
       } else {
-        console.log(`✅ Fetched stats for ${ext.id} (Redis disabled):`, JSON.stringify(storedPayload).substring(0, 100) + '...');
+        console.log(`✅ Fetched stats for ${ext.id} (Redis disabled):`, JSON.stringify(storedPayload).substring(0, 80) + '...');
       }
     }
 
-    // Note: We intentionally do NOT overwrite cws_cookie in Redis with transient Playwright session tokens (e.g. SIDTS/SIDCC).
-    // Master cookies (SID, HSID, SSID, SAPISID) have a 2-year expiration date. Overwriting them with transient tokens from changing GitHub Actions runner IPs causes Google's anti-hijacking system to revoke the session.
-    console.log('✅ Collection complete. Preserving master authentication cookie.');
+    const durationSeconds = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`\n✅ Collection complete in ${durationSeconds}s. Preserving master authentication cookie.`);
     
     if (hasError) {
       console.error('❌ One or more extensions failed to fetch stats.');
-      process.exitCode = 1;
+      process.exit(1);
     }
 
   } catch (err) {
     console.error("❌ Fatal Error in script:");
     console.error(err);
-    process.exitCode = 1;
-  } finally {
-    try {
-      await browser.close();
-    } catch (e) {}
-    process.exit(process.exitCode || 0);
+    process.exit(1);
   }
 }
 
