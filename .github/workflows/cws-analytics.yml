@@ -1,0 +1,35 @@
+name: CWS Analytics Collector
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: scripts/cws-collector
+        run: npm install
+
+      - name: Install Playwright Browsers
+        working-directory: scripts/cws-collector
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Collector
+        working-directory: scripts/cws-collector
+        env:
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          CWS_COOKIE: ${{ secrets.CWS_COOKIE }}
+        run: node extract.mjs

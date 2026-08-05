@@ -1,0 +1,10 @@
+{
+  "name": "cws-collector",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Autonomous collector for CWS analytics",
+  "dependencies": {
+    "@playwright/test": "^1.42.0",
+    "@upstash/redis": "^1.28.4"
+  }
+}
