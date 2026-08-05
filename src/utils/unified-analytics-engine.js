@@ -1,5 +1,6 @@
 import { cache } from './apiCache.js';
 import { Redis } from '@upstash/redis';
+import { encrypt, decrypt } from './crypto.js';
 
 // Note: updateEnvFile has been removed. Writing to .env during runtime
 // causes Vite's dev server to infinite-loop because it watches .env for changes.
@@ -215,10 +216,10 @@ export class UnifiedExtensionAnalyticsEngine {
     if (redis) {
       try {
         const storedCws = await redis.get('cws_cookie');
-        if (storedCws) this.cwsCookie = storedCws;
+        if (storedCws) this.cwsCookie = decrypt(storedCws) || this.cwsCookie;
         
         const storedAmo = await redis.get('amo_cookie');
-        if (storedAmo) this.amoCookie = storedAmo;
+        if (storedAmo) this.amoCookie = decrypt(storedAmo) || this.amoCookie;
       } catch (err) {
         console.warn('[KV] Failed to load cookies from Redis:', err.message);
       }
@@ -258,7 +259,7 @@ export class UnifiedExtensionAnalyticsEngine {
           amoSessionValid = true;
           if (firefoxStats.updatedCookie && firefoxStats.updatedCookie !== this.amoCookie) {
             this.amoCookie = firefoxStats.updatedCookie;
-            if (redis) await redis.set('amo_cookie', this.amoCookie);
+            if (redis) await redis.set('amo_cookie', encrypt(this.amoCookie));
           }
         } catch (e) {
           console.warn(`[AMO Tier-1 Failed] ${extConfig.name}: ${e.message}`);

@@ -1,5 +1,6 @@
-import { chromium } from '@playwright/test';
+import { chromium } from 'playwright';
 import { Redis } from '@upstash/redis';
+import { encrypt, decrypt } from '../../src/utils/crypto.js';
 
 const redis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   ? new Redis({
@@ -151,11 +152,12 @@ async function main() {
   console.log("Starting CWS Collector...");
   
   let storedCookiesStr = null;
-  if (redis) {
-    storedCookiesStr = await redis.get('cws_cookie');
-  }
-  if (!storedCookiesStr && process.env.CWS_COOKIE) {
+  if (process.env.CWS_COOKIE) {
     storedCookiesStr = process.env.CWS_COOKIE.replace(/^["']|["']$/g, '');
+  }
+  if (!storedCookiesStr && redis) {
+    const rawVal = await redis.get('cws_cookie');
+    storedCookiesStr = rawVal ? decrypt(rawVal) : null;
   }
 
   if (!storedCookiesStr) {
@@ -185,11 +187,17 @@ async function main() {
 
   try {
     console.log("Navigating to CWS Dev Console...");
-    const res = await page.goto('https://chrome.google.com/webstore/devconsole', { waitUntil: 'networkidle' });
+    const res = await page.goto('https://chrome.google.com/webstore/devconsole', { waitUntil: 'domcontentloaded' });
     
     if (page.url().includes('accounts.google.com')) {
       console.error("❌ Cookie is invalid or expired. Google redirected to login.");
       process.exit(1);
+    }
+
+    try {
+      await page.waitForFunction(() => document.body.innerHTML.includes('"SNlM0e":"'), { timeout: 10000 });
+    } catch (e) {
+      console.log("⚠️ Timeout waiting for SNlM0e token, will attempt to extract anyway.");
     }
     
     const html = await page.content();
@@ -212,6 +220,8 @@ async function main() {
     const ONE_DAY = 24 * 60 * 60 * 1000;
     const endDays = Math.floor(endDateMs / ONE_DAY);
     const startDays = endDays - rangeDays;
+
+    let hasError = false;
 
     for (const ext of EXTENSIONS) {
       console.log(`\nfetching stats for ${ext.id} (${ext.chromeId})...`);
@@ -250,6 +260,7 @@ async function main() {
 
       if (!apiRes.ok()) {
         console.error(`❌ API returned status ${apiRes.status()}`);
+        hasError = true;
         continue;
       }
 
@@ -258,6 +269,7 @@ async function main() {
       
       if (parsedData.length === 0) {
         console.error(`⚠️ No data parsed for ${ext.id}.`);
+        hasError = true;
         continue;
       }
 
@@ -277,26 +289,24 @@ async function main() {
       }
     }
 
-    // Save back updated cookies to Redis
-    const newCookies = await context.cookies();
-    const cookieStr = newCookies.map(c => `${c.name}=${c.value}`).join('; ');
-    if (cookieStr && cookieStr !== storedCookiesStr) {
-      if (redis) {
-        await redis.set('cws_cookie', cookieStr);
-        console.log('✅ Saved rotated cookies back to Redis');
-      } else {
-        console.log('✅ Rotated cookies generated (Redis disabled)');
-      }
-    } else {
-      console.log('✅ Cookies unchanged. No rotation needed.');
+    // Note: We intentionally do NOT overwrite cws_cookie in Redis with transient Playwright session tokens (e.g. SIDTS/SIDCC).
+    // Master cookies (SID, HSID, SSID, SAPISID) have a 2-year expiration date. Overwriting them with transient tokens from changing GitHub Actions runner IPs causes Google's anti-hijacking system to revoke the session.
+    console.log('✅ Collection complete. Preserving master authentication cookie.');
+    
+    if (hasError) {
+      console.error('❌ One or more extensions failed to fetch stats.');
+      process.exitCode = 1;
     }
 
   } catch (err) {
     console.error("❌ Fatal Error in script:");
     console.error(err);
+    process.exitCode = 1;
   } finally {
-    await browser.close();
-    process.exit(0);
+    try {
+      await browser.close();
+    } catch (e) {}
+    process.exit(process.exitCode || 0);
   }
 }
 

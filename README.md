@@ -69,6 +69,7 @@ Add these secrets to GitHub Repository Settings / Vercel Environment Variables:
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 - `CWS_COOKIE`
+- `COOKIE_ENCRYPTION_KEY` (Used for AES-256-GCM encryption of cookies at rest)
 
 
 ### 4. Run Development Server
