@@ -197,7 +197,8 @@ async function main() {
     const consoleMatch = html.match(/\/webstore\/devconsole\/([a-f0-9\-]+)/i);
 
     if (!atMatch) {
-      console.error("❌ Could not extract SNlM0e token from HTML.");
+      console.error("❌ Could not extract SNlM0e token. CWS Cookie may have expired.");
+      // Exit with non-zero code so GitHub Actions alerts you via email
       process.exit(1);
     }
 

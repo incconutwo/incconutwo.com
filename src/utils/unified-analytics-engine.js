@@ -1,6 +1,4 @@
 import { cache } from './apiCache.js';
-import fs from 'fs';
-import path from 'path';
 import { Redis } from '@upstash/redis';
 
 // Note: updateEnvFile has been removed. Writing to .env during runtime
@@ -9,12 +7,16 @@ import { Redis } from '@upstash/redis';
 const upstashUrl = import.meta.env.UPSTASH_REDIS_REST_URL || (typeof process !== 'undefined' ? process.env.UPSTASH_REDIS_REST_URL : null);
 const upstashToken = import.meta.env.UPSTASH_REDIS_REST_TOKEN || (typeof process !== 'undefined' ? process.env.UPSTASH_REDIS_REST_TOKEN : null);
 
-const redis = (upstashUrl && upstashToken)
-  ? new Redis({
+let redis = null;
+if (upstashUrl && upstashToken) {
+  if (!globalThis._upstashRedis) {
+    globalThis._upstashRedis = new Redis({
       url: upstashUrl,
       token: upstashToken,
-    })
-  : null;
+    });
+  }
+  redis = globalThis._upstashRedis;
+}
 
 export const EXTENSION_MATRIX = [
   {

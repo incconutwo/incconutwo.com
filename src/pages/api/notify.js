@@ -26,7 +26,11 @@ export async function POST({ request }) {
     // 2. Sanitize & Truncate message length to 500 characters max
     message = message.trim().slice(0, 500);
 
-    const topic = import.meta.env.NTFY_TOPIC || 'my-site-alerts-98x21q';
+    const topic = import.meta.env.NTFY_TOPIC;
+    if (!topic) {
+      console.warn('NTFY_TOPIC environment variable is not set. Notification skipped.');
+      return new Response(JSON.stringify({ error: 'Notification service not configured' }), { status: 500, headers });
+    }
 
     const response = await fetch(`https://ntfy.sh/${topic}`, {
       method: 'POST',

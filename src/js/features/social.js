@@ -50,7 +50,7 @@ export function initSocialLedger() {
       rect = item.getBoundingClientRect();
       item.classList.add('active');
       gsap.to(item, { color: color, duration: 0.3 });
-      gsap.to(bg, { color: color, duration: 0 });
+      gsap.to(bg, { backgroundColor: color, duration: 0 });
     };
 
     const deactivate = () => {
