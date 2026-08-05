@@ -195,7 +195,7 @@ async function main() {
     }
 
     try {
-      await page.waitForFunction(() => document.body.innerHTML.includes('"SNlM0e":"'), { timeout: 10000 });
+      await page.waitForFunction(() => document.documentElement.innerHTML.includes('"SNlM0e":"'), { timeout: 3000 });
     } catch (e) {
       console.log("⚠️ Timeout waiting for SNlM0e token, will attempt to extract anyway.");
     }
