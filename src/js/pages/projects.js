@@ -66,6 +66,7 @@
       // Fetch stats in background
       this.fetchGitHubStars();
       this.fetchWindhawkUsers();
+      this.fetchPortfolioStats();
 
       this.attachEventListeners();
       this.attachFilterListeners();
@@ -733,6 +734,43 @@
         } catch (e) {
           console.warn('[Projects] Failed to save Windhawk cache:', e);
         }
+      }
+    }
+
+    async fetchPortfolioStats() {
+      try {
+        const response = await fetch(window.location.origin + '/api/portfolio-stats');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.extensions) {
+            let cacheUpdated = false;
+            data.extensions.forEach(ext => {
+              const project = this.projects.find(p => p.id === ext.id);
+              if (project) {
+                const weekly = ext.metrics.totalWeeklyUsers;
+                const daily = ext.metrics.totalDailyActiveUsers;
+                if (weekly > 0 || daily > 0) {
+                  project.stats = { 
+                    ...project.stats, 
+                    weeklyUsers: weekly > 0 ? weekly : undefined,
+                    dailyUsers: daily > 0 ? daily : undefined
+                  };
+                  this.updateCardStats(project.id, project.stats);
+                  cacheUpdated = true;
+                }
+              }
+            });
+            if (cacheUpdated) {
+              try {
+                sessionStorage.setItem('portfolio_projects', JSON.stringify(this.projects));
+              } catch (e) {
+                // Ignore quota errors
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[Projects] Failed to fetch portfolio stats:', e);
       }
     }
 
