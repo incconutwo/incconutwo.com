@@ -27,6 +27,38 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Strips transient IP-bound cookies (SIDCC, PSIDCC, SIDTS, SIDRTS) from the cookie string.
+ * These cookies are cryptographically tied to the IP that issued them.
+ * Sending them from a different IP (like GitHub Actions) triggers Google's anti-hijacking
+ * system and immediately revokes the session.
+ * Only the stable master cookies (SID, HSID, SSID, SAPISID, __Secure-1PSID, etc.)
+ * are safe to use across different IPs and have 2-year TTLs.
+ */
+function filterMasterCookies(cookieStr) {
+  const TRANSIENT_COOKIE_PREFIXES = [
+    'SIDCC',
+    '__Secure-1PSIDCC',
+    '__Secure-3PSIDCC',
+    '__Secure-1PSIDTS',
+    '__Secure-1PSIDRTS',
+    '__Secure-3PSIDTS',
+    '__Secure-3PSIDRTS',
+    'OTZ',
+    'NID',               // NID is a tracking cookie, not auth
+    'enabledapps',
+  ];
+
+  return cookieStr
+    .split(';')
+    .map(c => c.trim())
+    .filter(c => {
+      const name = c.split('=')[0].trim();
+      return !TRANSIENT_COOKIE_PREFIXES.some(prefix => name === prefix || name.startsWith(prefix));
+    })
+    .join('; ');
+}
+
 function parseBatchExecute(responseText) {
   const clean = responseText.replace(/^\)]}'\s*/, '');
   const results = [];
@@ -47,6 +79,35 @@ function parseBatchExecute(responseText) {
     } catch (err) {}
   }
   return results;
+}
+
+function mergeCookies(existingCookiesStr, setCookieHeaders) {
+  if (!setCookieHeaders || setCookieHeaders.length === 0) return existingCookiesStr;
+
+  const cookieMap = new Map();
+  // Parse existing cookies
+  existingCookiesStr.split(';').forEach(c => {
+    const parts = c.split('=');
+    if (parts.length >= 2) {
+      const name = parts[0].trim();
+      const value = parts.slice(1).join('=').trim();
+      cookieMap.set(name, value);
+    }
+  });
+
+  // Parse and merge Set-Cookie headers
+  setCookieHeaders.forEach(header => {
+    // The actual cookie is everything before the first semicolon
+    const cookiePart = header.split(';')[0];
+    const parts = cookiePart.split('=');
+    if (parts.length >= 2) {
+      const name = parts[0].trim();
+      const value = parts.slice(1).join('=').trim();
+      cookieMap.set(name, value);
+    }
+  });
+
+  return Array.from(cookieMap.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
 }
 
 function aggregateAnalytics(parsedResults) {
@@ -177,12 +238,16 @@ async function main() {
     process.exit(1);
   }
 
+  const safeCookiesStr = storedCookiesStr;
+  const masterCookieCount = safeCookiesStr.split(';').filter(c => c.trim()).length;
+  console.log(`🔐 Using ${masterCookieCount} cookies.`);
+
   try {
     console.log("Fetching CWS Dev Console session token...");
     const res = await fetch('https://chrome.google.com/webstore/devconsole', {
       headers: {
         ...DEFAULT_HEADERS,
-        'Cookie': storedCookiesStr
+        'Cookie': safeCookiesStr
       }
     });
 
@@ -212,11 +277,12 @@ async function main() {
     const startDays = endDays - rangeDays;
 
     let hasError = false;
+    let currentCookiesStr = safeCookiesStr;
+    let cookiesWereUpdated = false;
 
-    // Fetch extensions with a subtle 150ms delay for human-like request pacing
     for (let i = 0; i < EXTENSIONS.length; i++) {
       const ext = EXTENSIONS[i];
-      if (i > 0) await delay(150);
+      if (i > 0) await delay(500);
 
       console.log(`\nFetching stats for ${ext.id} (${ext.chromeId})...`);
       
@@ -245,7 +311,7 @@ async function main() {
         method: 'POST',
         headers: {
           ...DEFAULT_HEADERS,
-          'Cookie': storedCookiesStr,
+          'Cookie': currentCookiesStr,
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
           'Origin': 'https://chrome.google.com',
           'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
@@ -260,6 +326,13 @@ async function main() {
       }
 
       const responseText = await apiRes.text();
+
+      const setCookies = apiRes.headers.getSetCookie ? apiRes.headers.getSetCookie() : [];
+      if (setCookies.length > 0) {
+        currentCookiesStr = mergeCookies(currentCookiesStr, setCookies);
+        cookiesWereUpdated = true;
+      }
+
       const parsedData = parseBatchExecute(responseText);
       
       if (parsedData.length === 0) {
@@ -284,8 +357,12 @@ async function main() {
       }
     }
 
-    const durationSeconds = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`\n✅ Collection complete in ${durationSeconds}s. Preserving master authentication cookie.`);
+    if (cookiesWereUpdated && redis) {
+      console.log("🔄 Saving refreshed cookies back to Redis to maintain session...");
+      await redis.set('cws_cookie', encrypt(currentCookiesStr));
+    }
+
+    console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s. Preserving master authentication cookie.`);
     
     if (hasError) {
       console.error('❌ One or more extensions failed to fetch stats.');
