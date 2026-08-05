@@ -6,10 +6,13 @@ import { Redis } from '@upstash/redis';
 // Note: updateEnvFile has been removed. Writing to .env during runtime
 // causes Vite's dev server to infinite-loop because it watches .env for changes.
 
-const redis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+const upstashUrl = import.meta.env.UPSTASH_REDIS_REST_URL || (typeof process !== 'undefined' ? process.env.UPSTASH_REDIS_REST_URL : null);
+const upstashToken = import.meta.env.UPSTASH_REDIS_REST_TOKEN || (typeof process !== 'undefined' ? process.env.UPSTASH_REDIS_REST_TOKEN : null);
+
+const redis = (upstashUrl && upstashToken)
   ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      url: upstashUrl,
+      token: upstashToken,
     })
   : null;
 
