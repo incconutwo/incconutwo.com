@@ -206,9 +206,9 @@ export async function getAmoAnalytics({ cookie, csrf, extensionSlug, rangeDays =
 
 export class UnifiedExtensionAnalyticsEngine {
   constructor(config = {}) {
-    this.cwsCookie = (config.cwsCookie || process.env.CWS_COOKIE || '').replace(/^["']|["']$/g, '');
-    this.amoCookie = (config.amoCookie || process.env.AMO_COOKIE || '').replace(/^["']|["']$/g, '');
-    this.amoCsrf = (config.amoCsrf || process.env.AMO_CSRF || '').replace(/^["']|["']$/g, '');
+    this.cwsCookie = (config.cwsCookie || '').replace(/^["']|["']$/g, '');
+    this.amoCookie = (config.amoCookie || '').replace(/^["']|["']$/g, '');
+    this.amoCsrf = (config.amoCsrf || '').replace(/^["']|["']$/g, '');
     this.cacheTtlSeconds = config.cacheTtlSeconds || 6 * 60 * 60; // 6 hours
   }
 

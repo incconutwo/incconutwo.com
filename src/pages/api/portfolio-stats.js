@@ -9,14 +9,6 @@ export async function GET({ request }) {
     'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=10800' // Edge CDN cache 6 hours
   };
 
-  // Optional: Check if triggered by Vercel Cron securely
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = import.meta.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    // We don't block normal browser requests, but if they are trying to hit the endpoint
-    // specifically with a wrong token, we might ignore. 
-    // In our case, this endpoint is public anyway, so it's safe for anyone to trigger.
-  }
 
   try {
     const engine = new UnifiedExtensionAnalyticsEngine({

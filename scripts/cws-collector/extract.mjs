@@ -16,12 +16,15 @@ const EXTENSIONS = [
 ];
 
 const DEFAULT_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Sec-CH-UA': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-  'Sec-CH-UA-Mobile': '?0',
-  'Sec-CH-UA-Platform': '"Windows"'
+  'User-Agent': process.env.CWS_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Accept-Language': 'en-US,en;q=0.9'
 };
+
+if (process.env.CWS_DISABLE_SEC_CH_UA !== 'true') {
+  DEFAULT_HEADERS['Sec-CH-UA'] = process.env.CWS_SEC_CH_UA || '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"';
+  DEFAULT_HEADERS['Sec-CH-UA-Mobile'] = process.env.CWS_SEC_CH_UA_MOBILE || '?0';
+  DEFAULT_HEADERS['Sec-CH-UA-Platform'] = process.env.CWS_SEC_CH_UA_PLATFORM || '"Windows"';
+}
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
