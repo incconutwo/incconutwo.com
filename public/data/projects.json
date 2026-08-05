@@ -66,7 +66,7 @@
     "id": "twitter-flags",
     "featured": true,
     "title": "X/Twitter Country Flags & Blocker",
-    "shortDescription": "One of my biggest project yet, with about 1400 weekly users and 1083 daily.",
+    "shortDescription": "A browser extension that adds country flags next to X/Twitter usernames and features a location-based blocker.",
     "longDescription": "This extension adds a country flag emoji next to usernames on your timeline, letting you instantly see the account's location context. It also features a powerful \"Block by Country\" mode to automatically hide tweets from specific regions.",
     "links": [
       {
