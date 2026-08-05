@@ -214,3 +214,34 @@ body {
   bottom: 0;
   left: 0;
 }
+
+/* Standard responsive flex row that stacks on mobile */
+.flex-row-responsive {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--element-gap, 2rem);
+  flex-direction: row;
+}
+
+@media (max-width: 768px) {
+  .flex-row-responsive {
+    flex-direction: column-reverse;
+    text-align: center;
+    align-items: center;
+  }
+}
+
+/* Flex item that ensures text doesn't get artificially squished */
+.flex-fluid-text {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Stable wrapper to isolate animations from layout constraints */
+.animation-wrapper {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+}

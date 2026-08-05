@@ -161,48 +161,4 @@ body.loaded #preloader {
     transform: perspective(500px) rotateX(60deg) scale(1.15);
   }
 }
-
-/* Projects Title & Stats Layout */
-.projects-title-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 3rem;
-  margin-bottom: 2rem;
-  flex-direction: row;
-}
-
-/* ADD THESE NEW RULES: */
-.projects-title-wrapper p {
-  max-width: 100%;
-  min-width: 0;
-  /* Critical: lets flex items shrink below min-content */
-  width: 100%;
-}
-
-.projects-title-wrapper a {
-  display: inline-block;
-  max-width: 100%;
-}
-
-.projects-title-wrapper img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-@media (max-width: 1024px) {
-  .projects-title-wrapper {
-    gap: 2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .projects-title-wrapper {
-    flex-direction: column-reverse;
-    gap: 1.5rem;
-    align-items: center;
-    text-align: center;
-  }
-}
+

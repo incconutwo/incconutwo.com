@@ -10,6 +10,7 @@ const projects = defineCollection({
     shortDescription: z.string(),
     longDescription: z.string().optional(),
     group: z.string().default('Other'),
+    hideStars: z.boolean().optional(),
     links: z.array(
       z.object({
         label: z.string(),
@@ -19,7 +20,12 @@ const projects = defineCollection({
     ).default([]),
     stats: z.object({
       weeklyUsers: z.number().optional(),
-      dailyUsers: z.number().optional()
+      dailyUsers: z.number().optional(),
+      users: z.number().optional(),
+      stars: z.number().optional(),
+      rating: z.number().optional(),
+      ratingUsers: z.number().optional(),
+      usersText: z.string().optional()
     }).nullable().optional(),
     image: z.string().nullable().optional(),
     screenshots: z.array(z.string()).default([])

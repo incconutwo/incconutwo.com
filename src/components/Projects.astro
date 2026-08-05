@@ -121,3 +121,72 @@ const isFeatured = mode === 'featured';
     </div>
   </div>
 </section>
+
+<style>
+  /* Scoped layout rules specific to Projects.astro */
+  .projects-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3rem;
+    margin-bottom: 2rem;
+    flex-direction: row;
+  }
+
+  .projects-title-wrapper p {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .projects-title-wrapper a {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .projects-title-wrapper img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 1024px) {
+    .projects-title-wrapper {
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .projects-title-wrapper {
+      flex-direction: column-reverse;
+      gap: 1.5rem;
+      align-items: center;
+      text-align: center;
+    }
+  }
+
+  .projects-title {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-extrabold);
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.2);
+    margin-bottom: var(--space-4);
+    max-width: 100%;
+  }
+
+  .projects-title .text-accent {
+    color: #fff;
+    display: block;
+    transform: translateX(40px);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    .projects-title .text-accent {
+      transform: translateX(0);
+    }
+  }
+</style>
