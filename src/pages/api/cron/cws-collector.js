@@ -205,10 +205,19 @@ function calculatePeriodStats(dailyRecords) {
 }
 
 export async function GET({ request }) {
-  // Check CRON_SECRET if configured by Vercel
-  const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
+
+  if (cronSecret) {
+    const url = new URL(request.url);
+    const queryKey = url.searchParams.get('key') || url.searchParams.get('secret');
+    const authHeader = request.headers.get('authorization');
+
+    const isHeaderValid = authHeader === `Bearer ${cronSecret}`;
+    const isQueryValid = queryKey === cronSecret;
+
+    if (!isHeaderValid && !isQueryValid) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 401 });
+    }
   }
 
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL || import.meta.env.UPSTASH_REDIS_REST_URL;
