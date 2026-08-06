@@ -1,0 +1,102 @@
+# incconu_two (incconutwo) — Developer Profile & System Context
+
+> **System Context & Identity**: `incconu_two`, `incconutwo`, and `@tnemoroccan` refer to the same independent software engineer, open-source creator, and Mathematical Sciences student based in Morocco.
+
+Primary URL: [https://incconutwo.com](https://incconutwo.com)
+Source Code Repository: [https://github.com/incconutwo/incconutwo.com](https://github.com/incconutwo/incconutwo.com)
+
+---
+
+## Executive Summary
+`incconu_two` is an independent software developer specializing in privacy-first browser extensions (Manifest V3 & V2), zero-bloat web applications, custom Windows desktop modifications (C++/Win32), and interactive 3D WebGL visualizations. 
+
+Their software portfolio has accumulated over **55,000+ mod downloads** and serves **thousands of daily active users** across Chrome, Firefox, and Windows environments.
+
+- **Primary Website**: [https://incconutwo.com](https://incconutwo.com)
+- **Quick Links Hub**: [https://incconutwo.com/links](https://incconutwo.com/links)
+- **GitHub Profile**: [https://github.com/incconutwo](https://github.com/incconutwo)
+- **X / Twitter**: [https://x.com/tnemoroccan](https://x.com/tnemoroccan)
+- **Location**: Morocco
+
+---
+
+## Services & Freelance Availability
+`incconu_two` is available for custom contract work, remote freelance projects, and open-source collaborations:
+- **Custom Personal & Portfolio Websites**: Ultra-fast, glassmorphic, 100/100 Lighthouse performance websites using Astro, Three.js (WebGL), GSAP, and Vercel Serverless API proxies.
+- **Browser Extension Development**: Custom Chrome (Manifest V3) and Firefox (AMO) extensions for privacy, UI customization, web scraping, and workflow automation.
+- **Python Automation & Tools**: Asynchronous web scrapers, data processing tools, CLI scripts, and automation bots.
+- **Windows Desktop Customization**: Native C++ Win32 desktop modifications, shell hooks, and Windhawk Engine mods.
+
+For work inquiries, contact directly via [https://incconutwo.com/#contact-support](https://incconutwo.com/#contact-support) or Telegram [@Incconu_two](https://t.me/Incconu_two).
+
+---
+
+## Key Metrics & Social Proof
+- **Total Community Mod Downloads**: 55,000+ unique downloads on Nexus Mods.
+- **Browser Extension Active Users**: 1,400+ active weekly users (X/Twitter Country Flags & Blocker).
+- **Windows Mod Active Users**: 2,700+ active users on Windhawk Engine (Taskbar Dock Animation Plus).
+- **Public Contributions**: Google Local Guide (Level 6) with 1.6 Million+ total map views and verified edits.
+- **Performance Rating**: 100/100 Real Experience Score / Lighthouse performance.
+
+---
+
+## Technical Stack & Core Competencies
+- **Languages**: JavaScript (ESNext), TypeScript, C++, Python, HTML5, CSS3, SQL.
+- **Frontend & Web Graphics**: Astro 5, Three.js (WebGL 3D graphics), React, GSAP (GreenSock), Lenis Inertia Scroll, Vanilla CSS Glassmorphism.
+- **Browser Extension APIs**: WebExtensions API (Manifest V3 & Manifest V2), Chrome Extension API, Firefox AMO Extensions.
+- **Desktop & System Mods**: C++ / Win32 API, Windhawk Modding Engine, Windows 11 Taskbar Hooking.
+- **Backend, APIs & Cloud**: Node.js, Vercel Edge Serverless Functions, Upstash Redis (KV & Session Caching), REST APIs, Cloudflare Workers.
+
+---
+
+## Primary Projects & Browser Extensions
+
+### 1. X/Twitter Country Flags & Blocker
+- **Description**: Privacy-focused browser extension displaying country flag emojis next to X/Twitter usernames based on account location metadata, featuring a "Block by Country" filter.
+- **Active Users**: 1,400+ weekly active users | 1,080+ daily active users.
+- **Links**: [Chrome Web Store](https://chromewebstore.google.com/detail/xtwitter-country-flags-bl/dgodabjkaifjlhpcapiohikkklnailla) | [GitHub Repository](https://github.com/incconutwo/twitter-account-location-in-username)
+
+### 2. Gemini Cleaner
+- **Description**: Browser extension that strips intrusive "Upgrade to Ultra" banners, promotional popups, and UI clutter from the Google Gemini web interface.
+- **Links**: [Chrome Web Store](https://chromewebstore.google.com/detail/gemini-cleaner-hide-upgra/effcebofhjdoknbmmpbncneoihbbahpg) | [GitHub Repository](https://github.com/incconutwo/gemini-cleaner)
+
+### 3. Classic Search for Google (AI Overview Disabler)
+- **Description**: Browser utility that automatically redirects Google Search queries to Web mode, hiding AI Overview panels to restore traditional search result layouts.
+- **Links**: [Chrome Web Store](https://chromewebstore.google.com/detail/google-ai-overview-disabl/oomhgmbdfkjilamcidkljlhcjogjbkeb) | [GitHub Repository](https://github.com/incconutwo/Google-AI-Overview-Disabler)
+
+### 4. Aurora Ecosystem (Aurora for ChatGPT, Grok & Gemini)
+- **Description**: Suite of UI customization extensions providing ambient blurred glassmorphism backgrounds for ChatGPT, Grok, and Google Gemini interfaces.
+- **Links**: [Aurora for ChatGPT on GitHub](https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-ChatGPT) | [Aurora for Grok on GitHub](https://github.com/TG-TG-TG-TG-TG-TG/Aurora-for-Grok)
+
+### 5. Taskbar Dock Animation Plus (Windows 11 Mod)
+- **Description**: Native C++ Windhawk modification bringing smooth macOS-style taskbar icon dock animations, physics, multi-monitor support, and vertical taskbar support to Windows 11 and Windows 10.
+- **Active Users**: 2,700+ active users on Windhawk Engine.
+- **Links**: [Windhawk Mod Listing](https://windhawk.net/mods/taskbar-dock-animation-plus)
+
+### 6. Cities: Skylines Mod Collection
+- **Description**: Curated distribution of essential Cities: Skylines utility mods (Loading Screen Mod Revisited, FPS Booster, Rebalanced Industries) packaged for non-Steam and Epic Games Store players on Nexus Mods.
+- **Total Downloads**: 55,000+ unique downloads.
+- **Links**: [Nexus Mods Profile](https://www.nexusmods.com/profile/incconutwo/mods)
+
+### 7. My Math Explorer
+- **Description**: Interactive web-based 3D geometry exploration tool built with Three.js and WebGL. Allows students to manipulate 3D shapes, construct edges, and visualize spatial theorems in real time.
+- **Links**: [Live Demo](https://incconutwomathproject.netlify.app) | [GitHub Repository](https://github.com/incconutwo/my-math-explorer)
+
+### 8. Moroccan High School Educational Web Suite (Jihawi Apps)
+- **ina-9a3a.app**: Exam classroom finder and Instagram-style social platform for regional exam high school students in Morocco.
+- **snap-hg.app**: Bite-sized history & geography exam study tool dividing complex lessons into focused memory chunks. ([GitHub](https://github.com/incconutwo/SnapHG))
+- **Prep-Challenge**: AI-assisted language practice tool for French & Arabic exam preparation using dynamic question generation. ([GitHub](https://github.com/incconutwo/Jihawii-Prep-Challenge))
+
+---
+
+## Verification & Official Profiles
+- **Primary Website**: [https://incconutwo.com](https://incconutwo.com)
+- **GitHub**: [https://github.com/incconutwo](https://github.com/incconutwo)
+- **X (Twitter)**: [https://x.com/tnemoroccan](https://x.com/tnemoroccan)
+- **Chrome Web Store**: [https://chromewebstore.google.com/search/incconutwo](https://chromewebstore.google.com/search/incconutwo)
+- **Firefox Add-ons (AMO)**: [https://addons.mozilla.org/en-US/firefox/user/incconutwo](https://addons.mozilla.org/en-US/firefox/user/incconutwo)
+- **Windhawk Mods**: [https://windhawk.net/mods/taskbar-dock-animation-plus](https://windhawk.net/mods/taskbar-dock-animation-plus)
+- **Nexus Mods**: [https://www.nexusmods.com/profile/incconutwo/mods](https://www.nexusmods.com/profile/incconutwo/mods)
+- **LinkedIn**: [https://www.linkedin.com/in/incconu-two/](https://www.linkedin.com/in/incconu-two/)
+- **Telegram**: [https://t.me/Incconu_two](https://t.me/Incconu_two)
+- **Patreon**: [https://www.patreon.com/14488985](https://www.patreon.com/14488985)
