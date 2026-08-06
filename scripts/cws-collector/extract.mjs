@@ -43,10 +43,6 @@ function filterMasterCookies(cookieStr) {
     'SIDCC',
     '__Secure-1PSIDCC',
     '__Secure-3PSIDCC',
-    '__Secure-1PSIDTS',
-    '__Secure-1PSIDRTS',
-    '__Secure-3PSIDTS',
-    '__Secure-3PSIDRTS',
     'OTZ',
     'NID',               // NID is a tracking cookie, not auth
     'enabledapps',
@@ -228,12 +224,16 @@ async function main() {
   console.log("Starting Native CWS Collector (Zero-Playwright)...");
   
   let storedCookiesStr = null;
-  if (process.env.CWS_COOKIE) {
-    storedCookiesStr = process.env.CWS_COOKIE.replace(/^["']|["']$/g, '');
-  }
-  if (!storedCookiesStr && redis) {
+  
+  // 1. Try to get the actively refreshed cookie from Redis first
+  if (redis) {
     const rawVal = await redis.get('cws_cookie');
     storedCookiesStr = rawVal ? decrypt(rawVal) : null;
+  }
+
+  // 2. Fallback to the static ENV variable if Redis is empty (e.g. first run)
+  if (!storedCookiesStr && process.env.CWS_COOKIE) {
+    storedCookiesStr = process.env.CWS_COOKIE.replace(/^["']|["']$/g, '');
   }
 
   if (!storedCookiesStr) {
@@ -241,7 +241,7 @@ async function main() {
     process.exit(1);
   }
 
-  const safeCookiesStr = storedCookiesStr;
+  const safeCookiesStr = filterMasterCookies(storedCookiesStr);
   const masterCookieCount = safeCookiesStr.split(';').filter(c => c.trim()).length;
   console.log(`🔐 Using ${masterCookieCount} cookies.`);
 
@@ -362,7 +362,7 @@ async function main() {
 
     if (cookiesWereUpdated && redis) {
       console.log("🔄 Saving refreshed cookies back to Redis to maintain session...");
-      await redis.set('cws_cookie', encrypt(currentCookiesStr));
+      await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
     }
 
     console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s. Preserving master authentication cookie.`);
