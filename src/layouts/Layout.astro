@@ -18,6 +18,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- 1. Official Dark Reader Lock Tag -->
+  <meta name="darkreader-lock" />
+  
+  <!-- 2. Browser Native Dark Scheme Declaration -->
+  <meta name="color-scheme" content="dark" />
+  
   <ClientRouter />
 
   <!-- Favicon & Theme Color -->
