@@ -1,7 +1,15 @@
 /**
  * ============================================
- * LIQUID GRADIENT BACKGROUND
- * WebGL Effect using Three.js
+ * LIQUID GRADIENT BACKGROUND (WebGL / Three.js)
+ * 
+ * Based on the original "Interactive Liquid Gradient" concept by Cameron Knight (Beings)
+ * CodePen: https://codepen.io/cameronknight/pen/ogxWmBP
+ * 
+ * Extended & Adapted by incconu_two:
+ * - Dynamic Spotify album art RGB color palette extraction via canvas sampling
+ * - Smooth GSAP uniform transitions between track state updates
+ * - IntersectionObserver & Tab Visibility API rendering pauses
+ * - Mobile DPI capping and high-performance touch throttling
  * ============================================
  */
 

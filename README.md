@@ -103,3 +103,12 @@ npm run build
 ## <img src="./public/assets/icons/readme/file.svg" width="24" height="24" align="center" alt="License" /> License
 
 Distributed under the MIT License. See `LICENSE` for more details.
+
+---
+
+## <img src="./public/assets/icons/readme/sparkles.svg" width="24" height="24" align="center" alt="Credits" /> Credits & Acknowledgements
+
+- **WebGL Shader Base:** [Cameron Knight (Beings)](https://codepen.io/cameronknight/pen/ogxWmBP) for the original Three.js Interactive Liquid Gradient concept & `TouchTexture` implementation.
+- **Smooth Scrolling:** [Lenis](https://lenis.darkroom.engineering/) by Darkroom.
+- **Animations:** [GSAP (GreenSock)](https://gsap.com/).
+- **Icons:** [Lucide Icons](https://lucide.dev/).
