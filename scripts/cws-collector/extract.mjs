@@ -39,21 +39,34 @@ function delay(ms) {
  * are safe to use across different IPs and have 2-year TTLs.
  */
 function filterMasterCookies(cookieStr) {
-  const TRANSIENT_COOKIE_PREFIXES = [
-    'SIDCC',
-    '__Secure-1PSIDCC',
-    '__Secure-3PSIDCC',
-    'OTZ',
-    'NID',               // NID is a tracking cookie, not auth
-    'enabledapps',
-  ];
+  const MASTER_COOKIES = new Set([
+    'SID',
+    'HSID',
+    'SSID',
+    'APISID',
+    'SAPISID',
+    '__Secure-1PSID',
+    '__Secure-3PSID',
+    '__Secure-1PAPISID',
+    '__Secure-3PAPISID',
+    'OSID',
+    '__Secure-OSID',
+    'AEC',
+    '__Secure-1PSIDTS',
+    '__Secure-1PSIDRTS',
+    '__Secure-3PSIDTS',
+    '__Secure-3PSIDRTS',
+    'S',
+    'NID',
+    '__Secure-STRP'
+  ]);
 
   return cookieStr
     .split(';')
     .map(c => c.trim())
     .filter(c => {
       const name = c.split('=')[0].trim();
-      return !TRANSIENT_COOKIE_PREFIXES.some(prefix => name === prefix || name.startsWith(prefix));
+      return MASTER_COOKIES.has(name);
     })
     .join('; ');
 }
@@ -360,12 +373,7 @@ async function main() {
       }
     }
 
-    if (cookiesWereUpdated && redis) {
-      console.log("🔄 Saving refreshed cookies back to Redis to maintain session...");
-      await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
-    }
-
-    console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s. Preserving master authentication cookie.`);
+    console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s. Master cookie untouched to prevent IP-hopping bans.`);
     
     if (hasError) {
       console.error('❌ One or more extensions failed to fetch stats.');

@@ -27,21 +27,34 @@ function delay(ms) {
 }
 
 function filterMasterCookies(cookieStr) {
-  const TRANSIENT_COOKIE_PREFIXES = [
-    'SIDCC',
-    '__Secure-1PSIDCC',
-    '__Secure-3PSIDCC',
-    'OTZ',
+  const MASTER_COOKIES = new Set([
+    'SID',
+    'HSID',
+    'SSID',
+    'APISID',
+    'SAPISID',
+    '__Secure-1PSID',
+    '__Secure-3PSID',
+    '__Secure-1PAPISID',
+    '__Secure-3PAPISID',
+    'OSID',
+    '__Secure-OSID',
+    'AEC',
+    '__Secure-1PSIDTS',
+    '__Secure-1PSIDRTS',
+    '__Secure-3PSIDTS',
+    '__Secure-3PSIDRTS',
+    'S',
     'NID',
-    'enabledapps',
-  ];
+    '__Secure-STRP'
+  ]);
 
   return cookieStr
     .split(';')
     .map(c => c.trim())
     .filter(c => {
       const name = c.split('=')[0].trim();
-      return !TRANSIENT_COOKIE_PREFIXES.some(prefix => name === prefix || name.startsWith(prefix));
+      return MASTER_COOKIES.has(name);
     })
     .join('; ');
 }
@@ -275,7 +288,6 @@ export async function GET({ request }) {
     const startDays = endDays - rangeDays;
 
     let currentCookiesStr = safeCookiesStr;
-    let cookiesWereUpdated = false;
     const processedStats = [];
 
     for (let i = 0; i < EXTENSIONS.length; i++) {
@@ -318,11 +330,6 @@ export async function GET({ request }) {
       if (!apiRes.ok) continue;
 
       const responseText = await apiRes.text();
-      const setCookies = apiRes.headers.getSetCookie ? apiRes.headers.getSetCookie() : [];
-      if (setCookies.length > 0) {
-        currentCookiesStr = mergeCookies(currentCookiesStr, setCookies);
-        cookiesWereUpdated = true;
-      }
 
       const parsedData = parseBatchExecute(responseText);
       if (parsedData.length === 0) continue;
@@ -335,10 +342,6 @@ export async function GET({ request }) {
         await redis.set(`cws_stats_${ext.id}`, storedPayload);
       }
       processedStats.push(ext.id);
-    }
-
-    if (cookiesWereUpdated && redis) {
-      await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
     }
 
     return new Response(JSON.stringify({ success: true, processed: processedStats }), {
