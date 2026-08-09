@@ -16,7 +16,7 @@ const EXTENSIONS = [
   { id: 'ai-overview-disabler', chromeId: 'oomhgmbdfkjilamcidkljlhcjogjbkeb' }
 ];
 
-const CHROME_MAJOR = process.env.CWS_CHROME_MAJOR || '140';
+const CHROME_MAJOR = process.env.CWS_CHROME_MAJOR || '150';
 const DEFAULT_HEADERS = {
     'User-Agent': process.env.CWS_USER_AGENT ||
         `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_MAJOR}.0.0.0 Safari/537.36`,

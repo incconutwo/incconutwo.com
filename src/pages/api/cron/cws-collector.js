@@ -26,7 +26,7 @@ const EXTENSIONS = [
 // Bumped from 122 (early 2024) — an ancient UA next to fresh session cookies
 // is another soft anomaly signal. Keep CWS_USER_AGENT / CWS_SEC_CH_UA env
 // overrides consistent with this version if you set them.
-const CHROME_MAJOR = process.env.CWS_CHROME_MAJOR || '140';
+const CHROME_MAJOR = process.env.CWS_CHROME_MAJOR || '150';
 const DEFAULT_HEADERS = {
     'User-Agent': process.env.CWS_USER_AGENT ||
         `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_MAJOR}.0.0.0 Safari/537.36`,
