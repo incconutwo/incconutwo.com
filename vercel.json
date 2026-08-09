@@ -1,11 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "src/pages/api/cron/cws-collector.js": {
-      "regions": ["iad1"],
-      "maxDuration": 60
-    }
-  },
   "crons": [
     {
       "path": "/api/cron/cws-collector",
