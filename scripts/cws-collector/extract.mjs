@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { createHash } from 'node:crypto';
 import { encrypt, decrypt } from '../../src/utils/crypto.js';
 
 const redis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
@@ -15,19 +16,42 @@ const EXTENSIONS = [
   { id: 'ai-overview-disabler', chromeId: 'oomhgmbdfkjilamcidkljlhcjogjbkeb' }
 ];
 
+const CHROME_MAJOR = process.env.CWS_CHROME_MAJOR || '140';
 const DEFAULT_HEADERS = {
-  'User-Agent': process.env.CWS_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-  'Accept-Language': 'en-US,en;q=0.9'
+    'User-Agent': process.env.CWS_USER_AGENT ||
+        `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_MAJOR}.0.0.0 Safari/537.36`,
+    'Accept-Language': 'en-US,en;q=0.9'
 };
-
 if (process.env.CWS_DISABLE_SEC_CH_UA !== 'true') {
-  DEFAULT_HEADERS['Sec-CH-UA'] = process.env.CWS_SEC_CH_UA || '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"';
-  DEFAULT_HEADERS['Sec-CH-UA-Mobile'] = process.env.CWS_SEC_CH_UA_MOBILE || '?0';
-  DEFAULT_HEADERS['Sec-CH-UA-Platform'] = process.env.CWS_SEC_CH_UA_PLATFORM || '"Windows"';
+    DEFAULT_HEADERS['Sec-CH-UA'] = process.env.CWS_SEC_CH_UA ||
+        `"Chromium";v="${CHROME_MAJOR}", "Not(A:Brand";v="24", "Google Chrome";v="${CHROME_MAJOR}"`;
+    DEFAULT_HEADERS['Sec-CH-UA-Mobile'] = '?0';
+    DEFAULT_HEADERS['Sec-CH-UA-Platform'] = '"Windows"';
 }
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function collectSetCookies(headers) {
+    if (!headers) return [];
+    if (typeof headers.getSetCookie === 'function') return headers.getSetCookie();
+    const single = headers.get('set-cookie');
+    return single ? [single] : [];
+}
+
+async function sendPhoneAlert(title, message) {
+    const topic = process.env.NTFY_TOPIC;
+    if (!topic) return;
+    try {
+        await fetch(`https://ntfy.sh/${topic}`, {
+            method: 'POST',
+            body: message.slice(0, 500),
+            headers: { 'Title': title, 'Priority': 'high', 'Tags': 'rotating_light,cookie' }
+        });
+    } catch (e) {
+        console.error('ntfy alert failed:', e.message);
+    }
 }
 
 /**
@@ -52,10 +76,6 @@ function filterMasterCookies(cookieStr) {
     'OSID',
     '__Secure-OSID',
     'AEC',
-    '__Secure-1PSIDTS',
-    '__Secure-1PSIDRTS',
-    '__Secure-3PSIDTS',
-    '__Secure-3PSIDRTS',
     'S',
     'NID',
     '__Secure-STRP'
@@ -236,6 +256,15 @@ async function main() {
   const startTime = Date.now();
   console.log("Starting Native CWS Collector (Zero-Playwright)...");
   
+  if (redis && process.env.CWS_WATCHDOG !== 'false') {
+      const meta = await redis.get('cws_cookie_meta');
+      const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
+      if (parsed?.lastSuccess && Date.now() - new Date(parsed.lastSuccess).getTime() < 20 * 3600 * 1000) {
+          console.log('✅ Primary Vercel collector is healthy — watchdog skipping.');
+          process.exit(0);
+      }
+  }
+
   let storedCookiesStr = null;
   
   // 1. Try to get the actively refreshed cookie from Redis first
@@ -258,6 +287,17 @@ async function main() {
   const masterCookieCount = safeCookiesStr.split(';').filter(c => c.trim()).length;
   console.log(`🔐 Using ${masterCookieCount} cookies.`);
 
+  // Latch parity: never re-present a cookie the primary already flagged dead
+  if (redis) {
+      try {
+          const deadHash = await redis.get('cws_cookie_dead_hash');
+          if (deadHash && createHash('sha256').update(storedCookiesStr).digest('hex') === deadHash) {
+              console.log('⏭️ Cookie is latched dead by the primary collector — skipping.');
+              process.exit(0);
+          }
+      } catch (e) { }
+  }
+
   try {
     console.log("Fetching CWS Dev Console session token...");
     const res = await fetch('https://chrome.google.com/webstore/devconsole', {
@@ -269,6 +309,15 @@ async function main() {
 
     if (res.url.includes('accounts.google.com')) {
       console.error("❌ Cookie is invalid or expired. Google redirected to login.");
+      if (redis) {
+          try {
+              await redis.set('cws_cookie_dead_hash', createHash('sha256').update(storedCookiesStr).digest('hex'));
+          } catch (e) { }
+      }
+      await sendPhoneAlert(
+          '🚨 CWS Cookie Invalidated (watchdog)',
+          'Watchdog run: the CWS cookie was rejected by Google. Export a fresh cookie and update CWS_COOKIE — collection auto-resumes.'
+      );
       process.exit(1);
     }
 
@@ -278,6 +327,15 @@ async function main() {
 
     if (!atMatch) {
       console.error("❌ Could not extract SNlM0e token. CWS Cookie may have expired.");
+      if (redis) {
+          try {
+              await redis.set('cws_cookie_dead_hash', createHash('sha256').update(storedCookiesStr).digest('hex'));
+          } catch (e) { }
+      }
+      await sendPhoneAlert(
+          '🚨 CWS Cookie Invalidated (watchdog)',
+          'Watchdog run: SNlM0e token missing. Cookie may be expired or page structure changed.'
+      );
       process.exit(1);
     }
 
@@ -293,8 +351,8 @@ async function main() {
     const startDays = endDays - rangeDays;
 
     let hasError = false;
-    let currentCookiesStr = safeCookiesStr;
-    let cookiesWereUpdated = false;
+    let currentCookiesStr = mergeCookies(safeCookiesStr, collectSetCookies(res.headers));
+    let cookiesWereUpdated = currentCookiesStr !== safeCookiesStr;
 
     for (let i = 0; i < EXTENSIONS.length; i++) {
       const ext = EXTENSIONS[i];
@@ -373,7 +431,16 @@ async function main() {
       }
     }
 
-    console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s. Master cookie untouched to prevent IP-hopping bans.`);
+    if (redis && cookiesWereUpdated) {
+        try {
+            await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
+            console.log('🔁 Rotated master cookies persisted back to Redis.');
+        } catch (e) {
+            console.error('❌ Failed to persist rotated cookies:', e.message);
+        }
+    }
+
+    console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s.`);
     
     if (hasError) {
       console.error('❌ One or more extensions failed to fetch stats.');

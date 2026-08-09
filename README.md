@@ -62,8 +62,7 @@ NTFY_TOPIC=your_ntfy_topic_name
 
 ### 🔑 Telemetry & Analytics Pipeline (Optional)
 This portfolio features an autonomous CWS & AMO extension analytics collector (`scripts/cws-collector/`):
-- **Upstash Redis:** Caches 90-day time-series data and rotated session cookies.
-- **GitHub Actions Workflow (`.github/workflows/cws-analytics.yml`):** Runs Playwright every 2 hours to update user counts.
+- **CWS Analytics Pipeline:** Vercel cron runs daily at 06:30 UTC to collect extension analytics and persist rotated cookies. A GitHub Actions watchdog runs weekly (Mondays 12:00 UTC) as a fallback, skipping if Vercel has run within the last 20 hours.
 
 Add these secrets to GitHub Repository Settings / Vercel Environment Variables:
 - `UPSTASH_REDIS_REST_URL`

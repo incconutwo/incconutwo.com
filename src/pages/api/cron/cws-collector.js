@@ -1,86 +1,102 @@
-/* src/pages/api/cron/cws-collector.js */
+/* src/pages/api/cron/cws-collector.js
+ *
+ * Autonomous CWS analytics collector — "set and forget" edition.
+ *
+ *  1. Mirrors a real browser: adopts every Set-Cookie rotation Google sends
+ *     and persists the refreshed (TS-stripped) cookie back to Redis, encrypted.
+ *  2. Dead-cookie latch: once a cookie fails validation its hash is latched;
+ *     future runs skip instantly instead of generating more anti-hijack signal.
+ *     The latch auto-clears the moment a NEW cookie hash appears (Redis or ENV).
+ *  3. ntfy phone alert on death, so a revocation is noticed within one cycle.
+ */
 import { Redis } from '@upstash/redis';
+import { createHash } from 'node:crypto';
 import { encrypt, decrypt } from '../../../utils/crypto.js';
 
 export const prerender = false;
+export const maxDuration = 60;
 
 const EXTENSIONS = [
-  { id: 'twitter-flags', chromeId: 'dgodabjkaifjlhpcapiohikkklnailla' },
-  { id: 'gemini-cleaner', chromeId: 'effcebofhjdoknbmmpbncneoihbbahpg' },
-  { id: 'aurora-gemini', chromeId: 'gbmlailhpaofpghhgmicmhpjhiihpifk' },
-  { id: 'ai-overview-disabler', chromeId: 'oomhgmbdfkjilamcidkljlhcjogjbkeb' }
+    { id: 'twitter-flags', chromeId: 'dgodabjkaifjlhpcapiohikkklnailla' },
+    { id: 'gemini-cleaner', chromeId: 'effcebofhjdoknbmmpbncneoihbbahpg' },
+    { id: 'aurora-gemini', chromeId: 'gbmlailhpaofpghhgmicmhpjhiihpifk' },
+    { id: 'ai-overview-disabler', chromeId: 'oomhgmbdfkjilamcidkljlhcjogjbkeb' }
 ];
 
+// Bumped from 122 (early 2024) — an ancient UA next to fresh session cookies
+// is another soft anomaly signal. Keep CWS_USER_AGENT / CWS_SEC_CH_UA env
+// overrides consistent with this version if you set them.
+const CHROME_MAJOR = process.env.CWS_CHROME_MAJOR || '140';
 const DEFAULT_HEADERS = {
-  'User-Agent': process.env.CWS_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-  'Accept-Language': 'en-US,en;q=0.9'
+    'User-Agent': process.env.CWS_USER_AGENT ||
+        `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_MAJOR}.0.0.0 Safari/537.36`,
+    'Accept-Language': 'en-US,en;q=0.9'
 };
-
 if (process.env.CWS_DISABLE_SEC_CH_UA !== 'true') {
-  DEFAULT_HEADERS['Sec-CH-UA'] = process.env.CWS_SEC_CH_UA || '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"';
-  DEFAULT_HEADERS['Sec-CH-UA-Mobile'] = process.env.CWS_SEC_CH_UA_MOBILE || '?0';
-  DEFAULT_HEADERS['Sec-CH-UA-Platform'] = process.env.CWS_SEC_CH_UA_PLATFORM || '"Windows"';
+    DEFAULT_HEADERS['Sec-CH-UA'] = process.env.CWS_SEC_CH_UA ||
+        `"Chromium";v="${CHROME_MAJOR}", "Not(A:Brand";v="24", "Google Chrome";v="${CHROME_MAJOR}"`;
+    DEFAULT_HEADERS['Sec-CH-UA-Mobile'] = '?0';
+    DEFAULT_HEADERS['Sec-CH-UA-Platform'] = '"Windows"';
 }
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function sha256(str) {
+    return createHash('sha256').update(str).digest('hex');
 }
 
-function filterMasterCookies(cookieStr) {
-  const MASTER_COOKIES = new Set([
-    'SID',
-    'HSID',
-    'SSID',
-    'APISID',
-    'SAPISID',
-    '__Secure-1PSID',
-    '__Secure-3PSID',
-    '__Secure-1PAPISID',
-    '__Secure-3PAPISID',
-    'OSID',
-    '__Secure-OSID',
-    'AEC',
-    '__Secure-1PSIDTS',
-    '__Secure-1PSIDRTS',
-    '__Secure-3PSIDTS',
-    '__Secure-3PSIDRTS',
-    'S',
-    'NID',
-    '__Secure-STRP'
-  ]);
-
-  return cookieStr
-    .split(';')
-    .map(c => c.trim())
-    .filter(c => {
-      const name = c.split('=')[0].trim();
-      return MASTER_COOKIES.has(name);
-    })
-    .join('; ');
+function jsonResponse(body, status = 200) {
+    return new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' }
+    });
 }
 
-function parseBatchExecute(responseText) {
-  const clean = responseText.replace(/^\)]}'\s*/, '');
-  const results = [];
-  const lines = clean.split('\n');
-  for (let line of lines) {
-    line = line.trim();
-    if (!line.startsWith('[[')) continue;
+async function sendPhoneAlert(title, message) {
+    const topic = import.meta.env.NTFY_TOPIC || process.env.NTFY_TOPIC;
+    if (!topic) return;
     try {
-      const chunk = JSON.parse(line);
-      if (Array.isArray(chunk)) {
-        for (const item of chunk) {
-          if (Array.isArray(item) && item[0] === 'wrb.fr' && item[1] === 'WlSRsc') {
-            const innerJsonStr = item[2];
-            if (innerJsonStr) results.push(JSON.parse(innerJsonStr));
-          }
-        }
-      }
-    } catch (err) {}
-  }
-  return results;
+        await fetch(`https://ntfy.sh/${topic}`, {
+            method: 'POST',
+            body: message.slice(0, 500),
+            headers: {
+                'Title': title,
+                'Priority': 'high',
+                'Tags': 'rotating_light,cookie'
+            }
+        });
+    } catch (e) {
+        console.error('[CWS Cron] ntfy alert failed:', e.message);
+    }
 }
 
+function collectSetCookies(headers) {
+    if (!headers) return [];
+    if (typeof headers.getSetCookie === 'function') return headers.getSetCookie();
+    const single = headers.get('set-cookie');
+    return single ? [single] : [];
+}
+
+/**
+ * FIXED whitelist: the IP-bound timestamp cookies (__Secure-1PSIDTS,
+ * __Secure-3PSIDTS, __Secure-1PSIDRTS, __Secure-3PSIDRTS) are now EXCLUDED.
+ * The old whitelist kept them despite the comment saying to strip them —
+ * carrying them across IPs is a primary revocation trigger.
+ */
+function filterMasterCookies(cookieStr) {
+    const MASTER_COOKIES = new Set([
+        'SID', 'HSID', 'SSID', 'APISID', 'SAPISID',
+        '__Secure-1PSID', '__Secure-3PSID',
+        '__Secure-1PAPISID', '__Secure-3PAPISID',
+        'OSID', '__Secure-OSID', 'AEC',
+        'S', 'NID', '__Secure-STRP'
+    ]);
+    return cookieStr
+        .split(';')
+        .map(c => c.trim())
+        .filter(c => MASTER_COOKIES.has(c.split('=')[0].trim()))
+        .join('; ');
+}
+
+// mergeCookies: IDENTICAL to your current implementation — carry over as-is.
 function mergeCookies(existingCookiesStr, setCookieHeaders) {
   if (!setCookieHeaders || setCookieHeaders.length === 0) return existingCookiesStr;
 
@@ -107,6 +123,30 @@ function mergeCookies(existingCookiesStr, setCookieHeaders) {
   return Array.from(cookieMap.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
 }
 
+// parseBatchExecute: IDENTICAL — carry over as-is.
+function parseBatchExecute(responseText) {
+  const clean = responseText.replace(/^\)]}'\s*/, '');
+  const results = [];
+  const lines = clean.split('\n');
+  for (let line of lines) {
+    line = line.trim();
+    if (!line.startsWith('[[')) continue;
+    try {
+      const chunk = JSON.parse(line);
+      if (Array.isArray(chunk)) {
+        for (const item of chunk) {
+          if (Array.isArray(item) && item[0] === 'wrb.fr' && item[1] === 'WlSRsc') {
+            const innerJsonStr = item[2];
+            if (innerJsonStr) results.push(JSON.parse(innerJsonStr));
+          }
+        }
+      }
+    } catch (err) {}
+  }
+  return results;
+}
+
+// aggregateAnalytics:  IDENTICAL — carry over as-is.
 function aggregateAnalytics(parsedResults) {
   const dailyData = {};
   const metricKeyMap = {
@@ -162,6 +202,7 @@ function aggregateAnalytics(parsedResults) {
   return Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date));
 }
 
+// calculatePeriodStats: IDENTICAL — carry over as-is.
 function calculatePeriodStats(dailyRecords) {
   if (!dailyRecords || dailyRecords.length === 0) return { daily: [], weekly: [], summary: {} };
   const weeklySeries = [];
@@ -218,138 +259,228 @@ function calculatePeriodStats(dailyRecords) {
 }
 
 export async function GET({ request }) {
-  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
+    const startTime = Date.now();
 
-  if (cronSecret) {
-    const url = new URL(request.url);
-    const queryKey = url.searchParams.get('key') || url.searchParams.get('secret');
-    const authHeader = request.headers.get('authorization');
-
-    const isHeaderValid = authHeader === `Bearer ${cronSecret}`;
-    const isQueryValid = queryKey === cronSecret;
-
-    if (!isHeaderValid && !isQueryValid) {
-      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 401 });
-    }
-  }
-
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL || import.meta.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.UPSTASH_REDIS_REST_TOKEN;
-  
-  const redis = (redisUrl && redisToken) ? new Redis({ url: redisUrl, token: redisToken }) : null;
-
-  let storedCookiesStr = null;
-  
-  // 1. Try Redis first
-  if (redis) {
-    const rawVal = await redis.get('cws_cookie');
-    storedCookiesStr = rawVal ? decrypt(rawVal) : null;
-  }
-
-  // 2. Fallback to ENV
-  const envCookie = process.env.CWS_COOKIE || import.meta.env.CWS_COOKIE;
-  if (!storedCookiesStr && envCookie) {
-    storedCookiesStr = envCookie.replace(/^["']|["']$/g, '');
-  }
-
-  if (!storedCookiesStr) {
-    return new Response(JSON.stringify({ success: false, error: 'No CWS cookie available' }), { status: 500 });
-  }
-
-  const safeCookiesStr = filterMasterCookies(storedCookiesStr);
-
-  try {
-    const res = await fetch('https://chrome.google.com/webstore/devconsole', {
-      headers: {
-        ...DEFAULT_HEADERS,
-        'Cookie': safeCookiesStr
-      }
-    });
-
-    if (res.url.includes('accounts.google.com')) {
-      return new Response(JSON.stringify({ success: false, error: 'Cookie expired/invalid' }), { status: 401 });
+    // ---------- 1. Auth ----------
+    const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
+    if (cronSecret) {
+        const url = new URL(request.url);
+        const queryKey = url.searchParams.get('key') || url.searchParams.get('secret');
+        const authHeader = request.headers.get('authorization');
+        if (authHeader !== `Bearer ${cronSecret}` && queryKey !== cronSecret) {
+            return jsonResponse({ success: false, error: 'Unauthorized' }, 401);
+        }
     }
 
-    const html = await res.text();
-    const atMatch = html.match(/"SNlM0e":"([^"]+)"/);
-    const consoleMatch = html.match(/\/webstore\/devconsole\/([a-f0-9\-]+)/i);
+    // ---------- 2. Redis ----------
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL || import.meta.env.UPSTASH_REDIS_REST_URL;
+    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.UPSTASH_REDIS_REST_TOKEN;
+    const redis = (redisUrl && redisToken) ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
-    if (!atMatch) {
-      return new Response(JSON.stringify({ success: false, error: 'SNlM0e token missing' }), { status: 401 });
+    // ---------- 3. Candidate chain: Redis → ENV ----------
+    const candidates = [];
+    if (redis) {
+        try {
+            const rawVal = await redis.get('cws_cookie');
+            const decrypted = rawVal ? decrypt(rawVal) : null;
+            if (decrypted) candidates.push({ str: decrypted, source: 'redis' });
+        } catch (e) {
+            console.warn('[CWS Cron] Redis cookie read failed:', e.message);
+        }
+    }
+    const envCookie = (process.env.CWS_COOKIE || import.meta.env.CWS_COOKIE || '')
+        .replace(/^["']|["']$/g, '');
+    if (envCookie && !candidates.some(c => c.str === envCookie)) {
+        candidates.push({ str: envCookie, source: 'env' });
+    }
+    if (candidates.length === 0) {
+        return jsonResponse({ success: false, error: 'No CWS cookie available (Redis empty, ENV empty)' }, 500);
     }
 
-    const atToken = atMatch[1];
-    const devConsoleId = consoleMatch ? consoleMatch[1] : 'fbe2f16e-d60c-40e4-9887-a0774eff9cc6';
+    // ---------- 4. Dead-cookie latch ----------
+    // If this exact cookie already failed validation, do NOT hit Google again.
+    // Each retry from a fresh Vercel IP reinforces the hijack signal.
+    // Pasting a fresh cookie (new hash) auto-clears the latch next run.
+    let deadHash = null;
+    if (redis) {
+        try { deadHash = await redis.get('cws_cookie_dead_hash'); } catch (e) { }
+    }
+    const live = candidates.filter(c => sha256(c.str) !== deadHash);
+    if (live.length === 0) {
+        return jsonResponse({
+            success: false,
+            error: 'Cookie is latched as dead. Update CWS_COOKIE in Redis or ENV to auto-resume — no redeploy needed.'
+        }, 401);
+    }
 
+    // ---------- 5. Bootstrap: validate + extract at token ----------
+    let currentCookiesStr = null;
+    let atToken = null;
+    let devConsoleId = 'fbe2f16e-d60c-40e4-9887-a0774eff9cc6';
+    let usedSource = null;
+    let lastFailure = null;
+
+    for (const candidate of live) {
+        const safeCookiesStr = filterMasterCookies(candidate.str);
+        let res;
+        try {
+            res = await fetch('https://chrome.google.com/webstore/devconsole', {
+                headers: { ...DEFAULT_HEADERS, 'Cookie': safeCookiesStr }
+            });
+        } catch (e) {
+            console.error(`[CWS Cron] Network error during bootstrap (${candidate.source}):`, e.message);
+            continue;
+        }
+
+        if (res.url.includes('accounts.google.com')) {
+            console.error(`[CWS Cron] ${candidate.source} cookie rejected by Google (login redirect).`);
+            if (redis) {
+                try { await redis.set('cws_cookie_dead_hash', sha256(candidate.str)); } catch (e) { }
+            }
+            lastFailure = `${candidate.source} cookie rejected by Google (login redirect)`;
+            continue;
+        }
+
+        // CRITICAL FIX: adopt rotations from the bootstrap response too —
+        // this page load is where Google most often refreshes cookies.
+        currentCookiesStr = mergeCookies(safeCookiesStr, collectSetCookies(res.headers));
+
+        const html = await res.text();
+        const atMatch = html.match(/"SNlM0e":"([^"]+)"/);
+        const consoleMatch = html.match(/\/webstore\/devconsole\/([a-f0-9\-]+)/i);
+        if (!atMatch) {
+            console.error(`[CWS Cron] Session loaded but SNlM0e missing (${candidate.source}). Treating as dead.`);
+            if (redis) {
+                try { await redis.set('cws_cookie_dead_hash', sha256(candidate.str)); } catch (e) { }
+            }
+            lastFailure = `${candidate.source} session loaded but SNlM0e missing`;
+            continue;
+        }
+        atToken = atMatch[1];
+        if (consoleMatch) devConsoleId = consoleMatch[1];
+        usedSource = candidate.source;
+        break;
+    }
+
+    if (!atToken) {
+        await sendPhoneAlert(
+            '🚨 CWS Cookie Invalidated',
+            `All cookie candidates failed (${lastFailure || 'unknown reason'}). Export a fresh cookie from the dev console and update CWS_COOKIE — collection auto-resumes.`
+        );
+        return jsonResponse({
+            success: false,
+            error: 'All cookie candidates failed validation.'
+        }, 401);
+    }
+
+    // ---------- 6. Fetch all extensions sequentially ----------
+    // Sequential execution with delay mirrors a real browser better.
+    // Vercel Hobby now allows up to 60s maxDuration.
     const rangeDays = 90;
-    const endDateMs = Date.now();
     const ONE_DAY = 24 * 60 * 60 * 1000;
-    const endDays = Math.floor(endDateMs / ONE_DAY);
+    const endDays = Math.floor(Date.now() / ONE_DAY);
     const startDays = endDays - rangeDays;
 
-    let currentCookiesStr = safeCookiesStr;
     const processedStats = [];
+    let rotationApplied = false;
 
     for (let i = 0; i < EXTENSIONS.length; i++) {
-      const ext = EXTENSIONS[i];
-      if (i > 0) await delay(300);
+        const ext = EXTENSIONS[i];
+        if (i > 0) await new Promise(r => setTimeout(r, 500)); // 500ms delay between fetches
 
-      const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
-      const payload = [
-        [
-          ['WlSRsc', JSON.stringify([baseArgs]), null, "2"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 6]]), null, "4"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 5]]), null, "6"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 1]]), null, "8"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 3]]), null, "10"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 2]]), null, "12"]
-        ]
-      ];
+        const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
+        const payload = [
+            [
+                ['WlSRsc', JSON.stringify([baseArgs]), null, "2"],
+                ['WlSRsc', JSON.stringify([[...baseArgs, 6]]), null, "4"],
+                ['WlSRsc', JSON.stringify([[...baseArgs, 5]]), null, "6"],
+                ['WlSRsc', JSON.stringify([[...baseArgs, 1]]), null, "8"],
+                ['WlSRsc', JSON.stringify([[...baseArgs, 3]]), null, "10"],
+                ['WlSRsc', JSON.stringify([[...baseArgs, 2]]), null, "12"]
+            ]
+        ];
+        const formBody = new URLSearchParams();
+        formBody.append('f.req', JSON.stringify(payload));
+        formBody.append('at', atToken);
+        const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
+            `?rpcids=WlSRsc` +
+            `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
+            `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
 
-      const formBody = new URLSearchParams();
-      formBody.append('f.req', JSON.stringify(payload));
-      formBody.append('at', atToken);
+        let apiRes;
+        try {
+            apiRes = await fetch(googleUrl, {
+                method: 'POST',
+                headers: {
+                    ...DEFAULT_HEADERS,
+                    'Cookie': currentCookiesStr,
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'Origin': 'https://chrome.google.com',
+                    'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
+                },
+                body: formBody.toString()
+            });
+        } catch (e) {
+            console.warn(`[CWS Cron] Network error fetching ${ext.id}:`, e.message);
+            continue;
+        }
 
-      const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
-        `?rpcids=WlSRsc` +
-        `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
-        `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
+        if (!apiRes.ok) {
+            console.warn(`[CWS Cron] HTTP ${apiRes.status} for ${ext.id}`);
+            continue;
+        }
 
-      const apiRes = await fetch(googleUrl, {
-        method: 'POST',
-        headers: {
-          ...DEFAULT_HEADERS,
-          'Cookie': currentCookiesStr,
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          'Origin': 'https://chrome.google.com',
-          'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
-        },
-        body: formBody.toString()
-      });
+        const rotated = collectSetCookies(apiRes.headers);
+        if (rotated.length > 0) {
+            currentCookiesStr = mergeCookies(currentCookiesStr, rotated);
+            rotationApplied = true;
+        }
 
-      if (!apiRes.ok) continue;
+        const responseText = await apiRes.text();
+        const parsedData = parseBatchExecute(responseText);
+        if (parsedData.length === 0) {
+            console.warn(`[CWS Cron] No data parsed for ${ext.id}`);
+            continue;
+        }
 
-      const responseText = await apiRes.text();
-
-      const parsedData = parseBatchExecute(responseText);
-      if (parsedData.length === 0) continue;
-
-      const dailyRecords = aggregateAnalytics(parsedData);
-      const periodStats = calculatePeriodStats(dailyRecords);
-      const storedPayload = { ...periodStats, updatedAt: new Date().toISOString() };
-
-      if (redis) {
-        await redis.set(`cws_stats_${ext.id}`, storedPayload);
-      }
-      processedStats.push(ext.id);
+        const periodStats = calculatePeriodStats(aggregateAnalytics(parsedData));
+        if (redis) {
+            await redis.set(`cws_stats_${ext.id}`, { ...periodStats, updatedAt: new Date().toISOString() });
+        }
+        processedStats.push(ext.id);
     }
 
-    return new Response(JSON.stringify({ success: true, processed: processedStats }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    if (processedStats.length === 0) {
+        await sendPhoneAlert(
+            '⚠️ CWS Collector: zero data',
+            'Session bootstrapped but every analytics fetch failed. Cookie may be mid-revocation — export a fresh one.'
+        );
+        return jsonResponse({ success: false, error: 'Session valid but all extension fetches failed' }, 500);
+    }
 
-  } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500 });
-  }
+    // ---------- 7. CRITICAL FIX: persist the rotated cookie back to Redis ----------
+    // Store it TS-stripped so cross-run storage never carries IP-bound cookies.
+    if (redis) {
+        try {
+            await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
+            await redis.set('cws_cookie_meta', JSON.stringify({
+                lastSuccess: new Date().toISOString(),
+                source: usedSource,
+                rotationApplied,
+                durationMs: Date.now() - startTime
+            }));
+            await redis.del('cws_cookie_dead_hash'); // clean slate after a healthy run
+        } catch (e) {
+            console.error('[CWS Cron] Failed to persist rotated cookie:', e.message);
+        }
+    }
+
+    return jsonResponse({
+        success: true,
+        processed: processedStats,
+        failed: EXTENSIONS.length - processedStats.length,
+        cookieSource: usedSource,
+        rotationApplied,
+        durationMs: Date.now() - startTime
+    });
 }

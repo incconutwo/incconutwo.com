@@ -1,7 +1,14 @@
 name: CWS Analytics Collector
 
 on:
+  schedule:
+    - cron: '0 12 * * 1'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force run even if Vercel primary is healthy'
+        type: boolean
+        default: false
 
 jobs:
   extract:
@@ -30,4 +37,6 @@ jobs:
           UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           CWS_COOKIE: ${{ secrets.CWS_COOKIE }}
           COOKIE_ENCRYPTION_KEY: ${{ secrets.COOKIE_ENCRYPTION_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          CWS_WATCHDOG: ${{ inputs.force && 'false' || 'true' }}
         run: node extract.mjs
