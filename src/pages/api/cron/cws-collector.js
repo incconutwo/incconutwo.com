@@ -90,7 +90,8 @@ function filterMasterCookies(cookieStr) {
         'S', 'NID', '__Secure-STRP',
         'SIDCC', '__Secure-1PSIDCC', '__Secure-3PSIDCC',
         '__Secure-1PSIDTS', '__Secure-1PSIDRTS',
-        '__Secure-3PSIDTS', '__Secure-3PSIDRTS'
+        '__Secure-3PSIDTS', '__Secure-3PSIDRTS',
+        'OTZ', 'enabledapps.uploader'
     ]);
     return cookieStr
         .split(';')
