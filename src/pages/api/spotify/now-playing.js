@@ -102,7 +102,7 @@ export async function GET() {
           track: recentTrack.name,
           artist: recentTrack.artists.map(a => a.name).join(', '),
           album: recentTrack.album.name,
-          albumArt: recentTrack.album.images?.[0]?.url || null,
+          albumArt: recentTrack.album.images?.[1]?.url || recentTrack.album.images?.[0]?.url || recentTrack.album.images?.[2]?.url || null,
           spotifyUrl: recentTrack.external_urls?.spotify || null
         };
 
@@ -119,7 +119,7 @@ export async function GET() {
         track: item.name,
         artist: item.artists.map(a => a.name).join(', '),
         album: item.album.name,
-        albumArt: item.album.images?.[0]?.url || null,
+        albumArt: item.album.images?.[1]?.url || item.album.images?.[0]?.url || item.album.images?.[2]?.url || null,
         spotifyUrl: item.external_urls?.spotify || null,
         progress: currentData.progress_ms || 0,
         duration: item.duration_ms || 1

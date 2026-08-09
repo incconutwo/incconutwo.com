@@ -76,10 +76,10 @@ function collectSetCookies(headers) {
 }
 
 /**
- * FIXED whitelist: the IP-bound timestamp cookies (__Secure-1PSIDTS,
- * __Secure-3PSIDTS, __Secure-1PSIDRTS, __Secure-3PSIDRTS) are now EXCLUDED.
- * The old whitelist kept them despite the comment saying to strip them —
- * carrying them across IPs is a primary revocation trigger.
+ * Strips obsolete cookies but RETAINS Google's required Timestamp (TS) and 
+ * Crypto-Cookies (CC). Historically we stripped these for IP-safety, but 
+ * Google now strictly enforces their presence for Dev Console access. 
+ * We now rely on continuous Redis persistence to keep them refreshed.
  */
 function filterMasterCookies(cookieStr) {
     const MASTER_COOKIES = new Set([
@@ -387,94 +387,96 @@ export async function GET({ request }) {
     const processedStats = [];
     let rotationApplied = false;
 
-    for (let i = 0; i < EXTENSIONS.length; i++) {
-        const ext = EXTENSIONS[i];
-        if (i > 0) await new Promise(r => setTimeout(r, 500)); // 500ms delay between fetches
+    try {
+        for (let i = 0; i < EXTENSIONS.length; i++) {
+            const ext = EXTENSIONS[i];
+            if (i > 0) await new Promise(r => setTimeout(r, 500)); // 500ms delay between fetches
 
-        const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
-        const payload = [
-            [
-                ['WlSRsc', JSON.stringify([baseArgs]), null, "2"],
-                ['WlSRsc', JSON.stringify([[...baseArgs, 6]]), null, "4"],
-                ['WlSRsc', JSON.stringify([[...baseArgs, 5]]), null, "6"],
-                ['WlSRsc', JSON.stringify([[...baseArgs, 1]]), null, "8"],
-                ['WlSRsc', JSON.stringify([[...baseArgs, 3]]), null, "10"],
-                ['WlSRsc', JSON.stringify([[...baseArgs, 2]]), null, "12"]
-            ]
-        ];
-        const formBody = new URLSearchParams();
-        formBody.append('f.req', JSON.stringify(payload));
-        formBody.append('at', atToken);
-        const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
-            `?rpcids=WlSRsc` +
-            `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
-            `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
+            const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
+            const payload = [
+                [
+                    ['WlSRsc', JSON.stringify([baseArgs]), null, "2"],
+                    ['WlSRsc', JSON.stringify([[...baseArgs, 6]]), null, "4"],
+                    ['WlSRsc', JSON.stringify([[...baseArgs, 5]]), null, "6"],
+                    ['WlSRsc', JSON.stringify([[...baseArgs, 1]]), null, "8"],
+                    ['WlSRsc', JSON.stringify([[...baseArgs, 3]]), null, "10"],
+                    ['WlSRsc', JSON.stringify([[...baseArgs, 2]]), null, "12"]
+                ]
+            ];
+            const formBody = new URLSearchParams();
+            formBody.append('f.req', JSON.stringify(payload));
+            formBody.append('at', atToken);
+            const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
+                `?rpcids=WlSRsc` +
+                `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
+                `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
 
-        let apiRes;
-        try {
-            apiRes = await fetch(googleUrl, {
-                method: 'POST',
-                headers: {
-                    ...DEFAULT_HEADERS,
-                    'Cookie': currentCookiesStr,
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                    'Origin': 'https://chrome.google.com',
-                    'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
-                },
-                body: formBody.toString()
-            });
-        } catch (e) {
-            console.warn(`[CWS Cron] Network error fetching ${ext.id}:`, e.message);
-            continue;
+            let apiRes;
+            try {
+                apiRes = await fetch(googleUrl, {
+                    method: 'POST',
+                    headers: {
+                        ...DEFAULT_HEADERS,
+                        'Cookie': currentCookiesStr,
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        'Origin': 'https://chrome.google.com',
+                        'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
+                    },
+                    body: formBody.toString()
+                });
+            } catch (e) {
+                console.warn(`[CWS Cron] Network error fetching ${ext.id}:`, e.message);
+                continue;
+            }
+
+            if (!apiRes.ok) {
+                console.warn(`[CWS Cron] HTTP ${apiRes.status} for ${ext.id}`);
+                continue;
+            }
+
+            const rotated = collectSetCookies(apiRes.headers);
+            if (rotated.length > 0) {
+                currentCookiesStr = mergeCookies(currentCookiesStr, rotated);
+                rotationApplied = true;
+            }
+
+            const responseText = await apiRes.text();
+            const parsedData = parseBatchExecute(responseText);
+            if (parsedData.length === 0) {
+                console.warn(`[CWS Cron] No data parsed for ${ext.id}`);
+                continue;
+            }
+
+            const periodStats = calculatePeriodStats(aggregateAnalytics(parsedData));
+            if (redis) {
+                await redis.set(`cws_stats_${ext.id}`, { ...periodStats, updatedAt: new Date().toISOString() });
+            }
+            processedStats.push(ext.id);
         }
 
-        if (!apiRes.ok) {
-            console.warn(`[CWS Cron] HTTP ${apiRes.status} for ${ext.id}`);
-            continue;
+        if (processedStats.length === 0) {
+            await sendPhoneAlert(
+                '⚠️ CWS Collector: zero data',
+                'Session bootstrapped but every analytics fetch failed. Cookie may be mid-revocation — export a fresh one.'
+            );
+            return jsonResponse({ success: false, error: 'Session valid but all extension fetches failed' }, 500);
         }
-
-        const rotated = collectSetCookies(apiRes.headers);
-        if (rotated.length > 0) {
-            currentCookiesStr = mergeCookies(currentCookiesStr, rotated);
-            rotationApplied = true;
-        }
-
-        const responseText = await apiRes.text();
-        const parsedData = parseBatchExecute(responseText);
-        if (parsedData.length === 0) {
-            console.warn(`[CWS Cron] No data parsed for ${ext.id}`);
-            continue;
-        }
-
-        const periodStats = calculatePeriodStats(aggregateAnalytics(parsedData));
-        if (redis) {
-            await redis.set(`cws_stats_${ext.id}`, { ...periodStats, updatedAt: new Date().toISOString() });
-        }
-        processedStats.push(ext.id);
-    }
-
-    if (processedStats.length === 0) {
-        await sendPhoneAlert(
-            '⚠️ CWS Collector: zero data',
-            'Session bootstrapped but every analytics fetch failed. Cookie may be mid-revocation — export a fresh one.'
-        );
-        return jsonResponse({ success: false, error: 'Session valid but all extension fetches failed' }, 500);
-    }
-
-    // ---------- 7. CRITICAL FIX: persist the rotated cookie back to Redis ----------
-    // Store it TS-stripped so cross-run storage never carries IP-bound cookies.
-    if (redis) {
-        try {
-            await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
-            await redis.set('cws_cookie_meta', JSON.stringify({
-                lastSuccess: new Date().toISOString(),
-                source: usedSource,
-                rotationApplied,
-                durationMs: Date.now() - startTime
-            }));
-            await redis.del('cws_cookie_dead_hash'); // clean slate after a healthy run
-        } catch (e) {
-            console.error('[CWS Cron] Failed to persist rotated cookie:', e.message);
+    } finally {
+        // ---------- 7. CRITICAL FIX: persist the rotated cookie back to Redis ----------
+        // Executes ALWAYS if bootstrap succeeded, preventing rotation loss on failures.
+        if (redis && currentCookiesStr) {
+            try {
+                await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
+                await redis.set('cws_cookie_meta', JSON.stringify({
+                    lastSuccess: new Date().toISOString(),
+                    source: usedSource,
+                    rotationApplied,
+                    durationMs: Date.now() - startTime
+                }));
+                await redis.del('cws_cookie_dead_hash'); // clean slate after a healthy run
+            } catch (e) {
+                console.error('[CWS Cron] Failed to persist rotated cookie:', e.message);
+            }
         }
     }
 

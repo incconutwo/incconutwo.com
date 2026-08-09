@@ -55,12 +55,10 @@ async function sendPhoneAlert(title, message) {
 }
 
 /**
- * Strips transient IP-bound cookies (SIDCC, PSIDCC, SIDTS, SIDRTS) from the cookie string.
- * These cookies are cryptographically tied to the IP that issued them.
- * Sending them from a different IP (like GitHub Actions) triggers Google's anti-hijacking
- * system and immediately revokes the session.
- * Only the stable master cookies (SID, HSID, SSID, SAPISID, __Secure-1PSID, etc.)
- * are safe to use across different IPs and have 2-year TTLs.
+ * Strips obsolete cookies but RETAINS Google's required Timestamp (TS) and 
+ * Crypto-Cookies (CC). Historically we stripped these for IP-safety, but 
+ * Google now strictly enforces their presence for Dev Console access. 
+ * We now rely on continuous Redis persistence to keep them refreshed.
  */
 function filterMasterCookies(cookieStr) {
     const MASTER_COOKIES = new Set([
@@ -347,90 +345,92 @@ async function main() {
     let currentCookiesStr = mergeCookies(safeCookiesStr, collectSetCookies(res.headers));
     let cookiesWereUpdated = currentCookiesStr !== safeCookiesStr;
 
-    for (let i = 0; i < EXTENSIONS.length; i++) {
-      const ext = EXTENSIONS[i];
-      if (i > 0) await delay(500);
+    try {
+      for (let i = 0; i < EXTENSIONS.length; i++) {
+        const ext = EXTENSIONS[i];
+        if (i > 0) await delay(500);
 
-      console.log(`\nFetching stats for ${ext.id} (${ext.chromeId})...`);
-      
-      const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
-      const payload = [
-        [
-          ['WlSRsc', JSON.stringify([baseArgs]), null, "2"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 6]]), null, "4"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 5]]), null, "6"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 1]]), null, "8"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 3]]), null, "10"],
-          ['WlSRsc', JSON.stringify([[...baseArgs, 2]]), null, "12"]
-        ]
-      ];
+        console.log(`\nFetching stats for ${ext.id} (${ext.chromeId})...`);
+        
+        const baseArgs = [[null, [startDays, endDays]], ext.chromeId, 4];
+        const payload = [
+          [
+            ['WlSRsc', JSON.stringify([baseArgs]), null, "2"],
+            ['WlSRsc', JSON.stringify([[...baseArgs, 6]]), null, "4"],
+            ['WlSRsc', JSON.stringify([[...baseArgs, 5]]), null, "6"],
+            ['WlSRsc', JSON.stringify([[...baseArgs, 1]]), null, "8"],
+            ['WlSRsc', JSON.stringify([[...baseArgs, 3]]), null, "10"],
+            ['WlSRsc', JSON.stringify([[...baseArgs, 2]]), null, "12"]
+          ]
+        ];
 
-      const formBody = new URLSearchParams();
-      formBody.append('f.req', JSON.stringify(payload));
-      formBody.append('at', atToken);
+        const formBody = new URLSearchParams();
+        formBody.append('f.req', JSON.stringify(payload));
+        formBody.append('at', atToken);
 
-      const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
-        `?rpcids=WlSRsc` +
-        `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
-        `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
+        const googleUrl = 'https://chrome.google.com/_/SnapcatUi/data/batchexecute' +
+          `?rpcids=WlSRsc` +
+          `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
+          `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
 
-      const apiRes = await fetch(googleUrl, {
-        method: 'POST',
-        headers: {
-          ...DEFAULT_HEADERS,
-          'Cookie': currentCookiesStr,
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          'Origin': 'https://chrome.google.com',
-          'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
-        },
-        body: formBody.toString()
-      });
+        const apiRes = await fetch(googleUrl, {
+          method: 'POST',
+          headers: {
+            ...DEFAULT_HEADERS,
+            'Cookie': currentCookiesStr,
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'Origin': 'https://chrome.google.com',
+            'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
+          },
+          body: formBody.toString()
+        });
 
-      if (!apiRes.ok) {
-        console.error(`❌ API returned status ${apiRes.status}`);
-        hasError = true;
-        continue;
-      }
-
-      const responseText = await apiRes.text();
-
-      const setCookies = apiRes.headers.getSetCookie ? apiRes.headers.getSetCookie() : [];
-      if (setCookies.length > 0) {
-        currentCookiesStr = mergeCookies(currentCookiesStr, setCookies);
-        cookiesWereUpdated = true;
-      }
-
-      const parsedData = parseBatchExecute(responseText);
-      
-      if (parsedData.length === 0) {
-        console.error(`⚠️ No data parsed for ${ext.id}.`);
-        hasError = true;
-        continue;
-      }
-
-      const dailyRecords = aggregateAnalytics(parsedData);
-      const periodStats = calculatePeriodStats(dailyRecords);
-      
-      const storedPayload = {
-         ...periodStats,
-         updatedAt: new Date().toISOString()
-      };
-
-      if (redis) {
-        await redis.set(`cws_stats_${ext.id}`, storedPayload);
-        console.log(`✅ Saved stats to Redis for ${ext.id}`);
-      } else {
-        console.log(`✅ Fetched stats for ${ext.id} (Redis disabled):`, JSON.stringify(storedPayload).substring(0, 80) + '...');
-      }
-    }
-
-    if (redis && cookiesWereUpdated) {
-        try {
-            await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
-            console.log('🔁 Rotated master cookies persisted back to Redis.');
-        } catch (e) {
-            console.error('❌ Failed to persist rotated cookies:', e.message);
+        if (!apiRes.ok) {
+          console.error(`❌ API returned status ${apiRes.status}`);
+          hasError = true;
+          continue;
         }
+
+        const responseText = await apiRes.text();
+
+        const setCookies = apiRes.headers.getSetCookie ? apiRes.headers.getSetCookie() : [];
+        if (setCookies.length > 0) {
+          currentCookiesStr = mergeCookies(currentCookiesStr, setCookies);
+          cookiesWereUpdated = true;
+        }
+
+        const parsedData = parseBatchExecute(responseText);
+        
+        if (parsedData.length === 0) {
+          console.error(`⚠️ No data parsed for ${ext.id}.`);
+          hasError = true;
+          continue;
+        }
+
+        const dailyRecords = aggregateAnalytics(parsedData);
+        const periodStats = calculatePeriodStats(dailyRecords);
+        
+        const storedPayload = {
+           ...periodStats,
+           updatedAt: new Date().toISOString()
+        };
+
+        if (redis) {
+          await redis.set(`cws_stats_${ext.id}`, storedPayload);
+          console.log(`✅ Saved stats to Redis for ${ext.id}`);
+        } else {
+          console.log(`✅ Fetched stats for ${ext.id} (Redis disabled):`, JSON.stringify(storedPayload).substring(0, 80) + '...');
+        }
+      }
+    } finally {
+      if (redis && cookiesWereUpdated && currentCookiesStr) {
+          try {
+              await redis.set('cws_cookie', encrypt(filterMasterCookies(currentCookiesStr)));
+              console.log('🔁 Rotated master cookies persisted back to Redis.');
+          } catch (e) {
+              console.error('❌ Failed to persist rotated cookies:', e.message);
+          }
+      }
     }
 
     console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s.`);

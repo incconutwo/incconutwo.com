@@ -79,7 +79,7 @@ export async function GET() {
     const tracks = items.map(item => ({
       name: item.name,
       artist: item.artists.map(a => a.name).join(', '),
-      albumArt: item.album.images?.[0]?.url || item.album.images?.[1]?.url || null,
+      albumArt: item.album.images?.[2]?.url || item.album.images?.[1]?.url || item.album.images?.[0]?.url || null,
       url: item.external_urls?.spotify || null
     }));
 

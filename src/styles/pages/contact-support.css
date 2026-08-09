@@ -24,13 +24,13 @@
 
 .contact-support-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-8);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .contact-support-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
 }
@@ -41,6 +41,14 @@
   flex-direction: column;
   justify-content: flex-start;
   height: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Card Subsection Titles: prevent horizontal overflow */
+.contact-support-layout .subsection-title .text-accent {
+  transform: none !important;
+  white-space: normal;
 }
 
 .contact-text,
@@ -70,6 +78,8 @@
   font-size: 1.1rem;
   font-weight: 500;
   transition: color 0.2s ease, transform 0.2s ease;
+  flex-wrap: wrap;
+  word-break: break-word;
 }
 
 .contact-link-item:hover {
@@ -120,6 +130,7 @@
   gap: var(--space-3);
   font-size: 1.1rem;
   color: var(--color-text-primary);
+  min-width: 0;
 }
 
 .support-icon {
@@ -130,6 +141,8 @@
 
 .support-text {
   line-height: 1.4;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .contact-support-dedication {
