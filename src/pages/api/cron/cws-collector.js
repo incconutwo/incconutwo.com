@@ -87,7 +87,10 @@ function filterMasterCookies(cookieStr) {
         '__Secure-1PSID', '__Secure-3PSID',
         '__Secure-1PAPISID', '__Secure-3PAPISID',
         'OSID', '__Secure-OSID', 'AEC',
-        'S', 'NID', '__Secure-STRP'
+        'S', 'NID', '__Secure-STRP',
+        'SIDCC', '__Secure-1PSIDCC', '__Secure-3PSIDCC',
+        '__Secure-1PSIDTS', '__Secure-1PSIDRTS',
+        '__Secure-3PSIDTS', '__Secure-3PSIDRTS'
     ]);
     return cookieStr
         .split(';')
