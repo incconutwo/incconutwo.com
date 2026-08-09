@@ -248,11 +248,15 @@ async function main() {
   console.log("Starting Native CWS Collector (Zero-Playwright)...");
   
   if (redis && process.env.CWS_WATCHDOG !== 'false') {
-      const meta = await redis.get('cws_cookie_meta');
-      const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
-      if (parsed?.lastSuccess && Date.now() - new Date(parsed.lastSuccess).getTime() < 20 * 3600 * 1000) {
-          console.log('✅ Primary Vercel collector is healthy — watchdog skipping.');
-          process.exit(0);
+      try {
+          const meta = await redis.get('cws_cookie_meta');
+          const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
+          if (parsed?.lastSuccess && Date.now() - new Date(parsed.lastSuccess).getTime() < 20 * 3600 * 1000) {
+              console.log('✅ Primary Vercel collector is healthy — watchdog skipping.');
+              process.exit(0);
+          }
+      } catch (e) {
+          console.warn('⚠️ Failed to read cws_cookie_meta, proceeding with collection:', e.message);
       }
   }
 
@@ -260,8 +264,12 @@ async function main() {
   
   // 1. Try to get the actively refreshed cookie from Redis first
   if (redis) {
-    const rawVal = await redis.get('cws_cookie');
-    storedCookiesStr = rawVal ? decrypt(rawVal) : null;
+    try {
+      const rawVal = await redis.get('cws_cookie');
+      storedCookiesStr = rawVal ? decrypt(rawVal) : null;
+    } catch (e) {
+      console.warn('⚠️ Failed to read cws_cookie from Redis:', e.message);
+    }
   }
 
   // 2. Fallback to the static ENV variable if Redis is empty (e.g. first run)
@@ -295,7 +303,8 @@ async function main() {
       headers: {
         ...DEFAULT_HEADERS,
         'Cookie': safeCookiesStr
-      }
+      },
+      signal: AbortSignal.timeout(15000)
     });
 
     if (res.url.includes('accounts.google.com')) {
@@ -373,17 +382,29 @@ async function main() {
           `&source-path=%2Fwebstore%2Fdevconsole%2F${devConsoleId}%2F${ext.chromeId}%2Fanalytics%2Fusers` +
           `&hl=en&soc-app=630&soc-platform=1&soc-device=1&rt=c`;
 
-        const apiRes = await fetch(googleUrl, {
-          method: 'POST',
-          headers: {
-            ...DEFAULT_HEADERS,
-            'Cookie': currentCookiesStr,
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            'Origin': 'https://chrome.google.com',
-            'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
-          },
-          body: formBody.toString()
-        });
+        let apiRes;
+        try {
+          apiRes = await fetch(googleUrl, {
+            method: 'POST',
+            headers: {
+              ...DEFAULT_HEADERS,
+              'Cookie': currentCookiesStr,
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+              'Origin': 'https://chrome.google.com',
+              'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
+            },
+            body: formBody.toString(),
+            signal: AbortSignal.timeout(15000)
+          });
+        } catch (e) {
+          if (e.name === 'TimeoutError') {
+              console.error(`❌ Extension fetch timed out after 15s (${ext.id})`);
+          } else {
+              console.error(`❌ Network error fetching ${ext.id}:`, e.message);
+          }
+          hasError = true;
+          continue;
+        }
 
         if (!apiRes.ok) {
           console.error(`❌ API returned status ${apiRes.status}`);
@@ -393,7 +414,7 @@ async function main() {
 
         const responseText = await apiRes.text();
 
-        const setCookies = apiRes.headers.getSetCookie ? apiRes.headers.getSetCookie() : [];
+        const setCookies = collectSetCookies(apiRes.headers);
         if (setCookies.length > 0) {
           currentCookiesStr = mergeCookies(currentCookiesStr, setCookies);
           cookiesWereUpdated = true;
@@ -433,10 +454,27 @@ async function main() {
       }
     }
 
+    if (redis && !hasError) {
+      try {
+        await redis.set('cws_cookie_meta', JSON.stringify({
+          lastSuccess: new Date().toISOString(),
+          source: 'watchdog',
+          rotationApplied: cookiesWereUpdated,
+          durationMs: Date.now() - startTime
+        }));
+      } catch (e) {
+        console.warn('⚠️ Failed to write watchdog meta:', e.message);
+      }
+    }
+
     console.log(`\n✅ Collection complete in ${((Date.now() - startTime) / 1000).toFixed(2)}s.`);
     
     if (hasError) {
       console.error('❌ One or more extensions failed to fetch stats.');
+      await sendPhoneAlert(
+        '⚠️ CWS Watchdog: partial failure',
+        `Watchdog completed with errors. ${EXTENSIONS.length} extensions attempted, some failed. Check GitHub Actions logs.`
+      );
       process.exit(1);
     }
 

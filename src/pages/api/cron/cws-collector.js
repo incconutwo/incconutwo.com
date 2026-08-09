@@ -51,7 +51,7 @@ function jsonResponse(body, status = 200) {
 }
 
 async function sendPhoneAlert(title, message) {
-    const topic = import.meta.env.NTFY_TOPIC || process.env.NTFY_TOPIC;
+    const topic = process.env.NTFY_TOPIC || import.meta.env.NTFY_TOPIC;
     if (!topic) return;
     try {
         await fetch(`https://ntfy.sh/${topic}`, {
@@ -328,10 +328,15 @@ export async function GET({ request }) {
         let res;
         try {
             res = await fetch('https://chrome.google.com/webstore/devconsole', {
-                headers: { ...DEFAULT_HEADERS, 'Cookie': safeCookiesStr }
+                headers: { ...DEFAULT_HEADERS, 'Cookie': safeCookiesStr },
+                signal: AbortSignal.timeout(15000)
             });
         } catch (e) {
-            console.error(`[CWS Cron] Network error during bootstrap (${candidate.source}):`, e.message);
+            if (e.name === 'TimeoutError') {
+                console.warn(`[CWS Cron] Bootstrap request timed out after 15s (${candidate.source})`);
+            } else {
+                console.error(`[CWS Cron] Network error during bootstrap (${candidate.source}):`, e.message);
+            }
             continue;
         }
 
@@ -422,10 +427,15 @@ export async function GET({ request }) {
                         'Origin': 'https://chrome.google.com',
                         'Referer': `https://chrome.google.com/webstore/devconsole/${devConsoleId}/${ext.chromeId}/analytics/users`
                     },
-                    body: formBody.toString()
+                    body: formBody.toString(),
+                    signal: AbortSignal.timeout(15000)
                 });
             } catch (e) {
-                console.warn(`[CWS Cron] Network error fetching ${ext.id}:`, e.message);
+                if (e.name === 'TimeoutError') {
+                    console.warn(`[CWS Cron] Extension fetch timed out after 15s (${ext.id})`);
+                } else {
+                    console.warn(`[CWS Cron] Network error fetching ${ext.id}:`, e.message);
+                }
                 continue;
             }
 
